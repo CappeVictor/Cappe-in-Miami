@@ -112,7 +112,7 @@ Abra seu navegador de preferência e navegue até o endereço local corresponden
 ---
 
 ## ✒️ Autores e Créditos
-* **[Seu Nome ou Nome da Equipe]** - *Programação de Sistemas, Design de Fases, Arquitetura e Engenharia do Jogo*.
+* **[Victor Cappellesso e Davi Gehart]** - *Programação de Sistemas, Design de Fases, Arquitetura e Engenharia do Jogo*.
 * **Dennaton Games & Devolver Digital** - *Criadores originais da franquia Hotline Miami, cuja direção de arte, trilha sonora e estilo de jogabilidade serviram como base para este projeto acadêmico/fã*.
 
 ---
