@@ -2,114 +2,120 @@
 
 ![Banner do Jogo](https://placeholder.com)
 
-> **Uma releitura e expansão fan-made inspirada no universo tático e brutal de Hotline Miami, estrelada por capivaras e outros animais nativos.**
+> **Uma releitura e expansão tática top-down inspirada no universo violento e frenético de Hotline Miami, reimaginada com capivaras e animais da fauna sul-americana no submundo do crime.**
 
 ---
 
 ## 📝 Sobre o Jogo
-**Cappe in Miami** é um jogo tático de ação top-down em ritmo acelerado, desenvolvido utilizando tecnologias web modernas (**HTML5, Canvas e JavaScript nativo**).
+**Cappe in Miami** é um jogo de ação tática acelerada construído inteiramente sobre tecnologias web nativas (**HTML5, Canvas 2D e JavaScript ES6 puro**). 
 
-O jogo se passa em uma Miami alternativa e antropomórfica, onde o jogador assume o papel de uma capivara assassina que deve limpar andares inteiros repletos de gângsteres e seguranças fortemente armados, utilizando reflexos rápidos, furtividade e uma variedade de armas brancas e de fogo.
+No controle de **Cappe**, uma capivara altamente treinada e letal, o jogador deve se infiltrar em complexos criminosos fortemente protegidos, utilizando reflexos rápidos, precisão cirúrgica e um arsenal variado de armas brancas e de fogo para eliminar ameaças em cenários que testam tanto o planejamento estratégico quanto a velocidade mecânica.
 
 ### ✨ Funcionalidades Principais
-* **Combate One-Hit-Kill:** Assim como na sua maior inspiração, tanto você quanto seus inimigos morrem com apenas um único golpe ou tiro certeiro.
-* **Inteligência Artificial Dinâmica:** Inimigos patrulham, investigam barulhos de tiros, entram em estado de alerta e perseguem o jogador ao avistá-lo.
-* **Visão Dinâmica (Fog of War):** Linhas de visão realistas onde paredes bloqueiam o que o jogador e os inimigos conseguem enxergar.
-* **Variedade de Cenários:** Mapas que simulam boates (Clubs), hospitais, delegacias e complexos de luxo.
+* **Letalidade Extrema (One-Hit-Kill):** Erros são punidos instantaneamente; tanto o jogador quanto a grande maioria dos oponentes caem com um único golpe ou tiro certeiro.
+* **Sistema Avançado de Visão e Oclusão (Raycasting):** Linhas de visão dinâmicas realistas em tempo real, onde paredes, portas e estruturas bloqueiam e moldam os campos de visão de aliados e inimigos (Fog of War).
+* **Inteligência Artificial de Patrulha e Alerta:** Inimigos possuem rotas de patrulhamento estritas, reagem a estímulos sonoros (como tiros ou quebra de vidros) e entram em modo de perseguição agressiva ao detectar o intruso.
+* **Mecânicas de Arremesso e Desarmamento:** Ficou sem munição? Arremesse sua arma atual contra um oponente para nocauteá-lo temporariamente e roubar o equipamento dele antes que ele se levante.
+* **Variedade de Ambientes:** Avanço modular por fases simulando Boates (*Clubs*), complexos de escritórios, Hospitais, Delegacias e mansões de luxo.
 
 ---
 
-## 👥 Personagens e Máscaras
+## 👥 Personagens e Facções
 
-O jogo utiliza um sistema de animais antropomórficos, representados por assets gráficos dedicados na engine:
+O universo de *Cappe in Miami* é habitado por animais antropomórficos com sprites customizados e funções bem definidas no ecossistema da gameplay:
 
 ### 🗡️ Protagonista (Jogador)
-* **Cappe (A Capivara):** O executor silencioso controlado pelo jogador, capaz de se disfarçar e utilizar diferentes táticas de infiltração.
+* **Cappe (A Capivara):** O executor definitivo. Silencioso, ágil e adaptável a qualquer arma disponível no chão.
 
-### 🎭 Sistema de Animais / Aliados (Assets)
-* **Sapo 🐸 / Elefante 🐘 / Porco 🐷 / Cavalo 🐴 / Galo 🐓 / Macaco 🐒 / Coelho 🐰 / Coruja 🦉 / Lobo 🐺 / Leão 🦁 / Tigre 🐯:** Elementos que compõem o universo visual de máscaras e modificadores clássicos da franquia.
+### 🎭 Operativos e Máscaras (Assets Culto)
+O ecossistema gráfico conta com representações de animais icônicos que alteram a percepção estética e contextual das missões:
+* **Lobo 🐺 / Leão 🦁 / Tigre 🐯 / Coelho 🐰 / Coruja 🦉 / Macaco 🐒 / Galo ⚗️ / Cavalo 🐴 / Porco 🐷 / Elefante 🐘 / Sapo 🐸**
 
-### 👑 Inimigos e Facções (Enemies)
-* **Gângsteres Comuns (Club Walkers):** Patrulham os salões com tacos e armas leves.
-* **Seguranças Armados (M16 / Uzi Patrols):** Atiram assim que detectam a presença do jogador no recinto.
-* **Equipes da SWAT:** Unidades táticas pesadas acionadas em estágios avançados do jogo.
-* **Chefes (Bosses):** Alvos principais localizados no último andar de complexos específicos, possuindo barras de vida ou padrões de ataque únicos (ex: *Boss Car*, *Boss Fountain*).
+### 👑 Inimigos e Ameaças (Enemies)
+* **Club Walkers (Gângsteres de Boate):** Patrulham armados com bastões e armas de curto alcance. Movimentam-se de forma previsível até serem alertados.
+* **Uzi / M16 Patrols (Patrulhas Armadas):** Inimigos perigosos de longo alcance que disparam rajadas assim que o jogador entra em seu campo de visão.
+* **SWAT / Bodyguards (Unidades Pesadas):** Oponentes blindados que exigem aproximação furtiva ou reações ainda mais rápidas para serem neutralizados.
+* **Chefes de Fase (Stage Bosses):** Alvos de alto valor com arenas e comportamentos únicos de combate, incluindo veículos de fuga e mecânicas integradas ao cenário (*Boss Car 2*, *Boss Fountain*).
 
 ---
 
 ## 🖥️ Requisitos do Sistema
 
-Por ser um jogo construído inteiramente sobre tecnologias web nativas, ele roda direto no navegador de forma extremamente leve.
+Por ser um projeto puramente baseado em Canvas do navegador, o jogo é extremamente leve e altamente acessível.
 
 | Componente | Requisitos Mínimos | Requisitos Recomendados |
 | :--- | :--- | :--- |
-| **Sistema Operacional** | Windows 7 / macOS 10.12 / Linux | Windows 10/11 / macOS mais recente |
-| **Processador** | Intel Core i3 ou equivalente | Intel Core i5 / AMD Ryzen 3 ou superior |
+| **Sistema Operacional** | Windows 7 / macOS 10.12 / Linux | Windows 10/11 / macOS recente |
+| **Processador** | Intel Core i3 Dual-Core de 2.0 GHz | Intel Core i5 Quad-Core ou superior |
 | **Memória RAM** | 4 GB RAM | 8 GB RAM |
-| **Navegador** | Google Chrome, Firefox ou Edge atualizado | Google Chrome ou Firefox (com aceleração de hardware) |
-| **Armazenamento** | 50 MB de espaço disponível | 50 MB de espaço disponível (SSD) |
+| **Navegador** | Google Chrome ou Firefox atualizados | Google Chrome, Opera ou Firefox com aceleração de hardware ativa |
+| **Armazenamento** | 50 MB de espaço livre | 50 MB de espaço disponível (SSD) |
 
 ---
 
-## ⚙️ Como Executar o Projeto (Para Desenvolvedores)
+## ⚙️ Arquitetura de Código (Módulos JavaScript)
 
-Se você deseja abrir o projeto localmente para jogar ou modificar o código-fonte, siga os passos abaixo:
+O projeto adota uma arquitetura limpa, modular e orientada a eventos para garantir máxima performance de renderização no Canvas:
 
-### Pré-requisitos
-* Um navegador web moderno com suporte a HTML5 Canvas.
-* Uma extensão de servidor local (como *Live Server* no VS Code) ou Python instalado para evitar problemas de CORS com arquivos locais.
-
-### Passo a Passo
-1. Clone este repositório para a sua máquina local:
-   ```bash
-   git clone https://github.com
-   ```
-2. Navegue até a pasta do projeto:
-   ```bash
-   cd Cappe-in-Miami
-   ```
-3. Inicie um servidor local. Se tiver o Python instalado, execute:
-   ```bash
-   python -m http.server 8000
-   ```
-4. Abra o seu navegador e acesse: `http://localhost:8000/index.html`.
+* **`index.html` / `expansion.css`:** O ponto de entrada da aplicação. Configura o contêiner do Canvas e gerencia a interface responsiva de menus usando estilos modernos.
+* **`js/maps.js`:** Banco de dados geométrico do jogo. Contém a definição das matrizes estruturais de paredes, posicionamento de portas e coordenadas de spawn de itens/inimigos para cada andar.
+* **`js/exp-core.js`:** O cérebro do jogo. Controla o Game Loop principal, regulando as taxas de atualização lógica (`update`) e desenho na tela (`render`) com suporte a sincronização via `requestAnimationFrame`.
+* **`js/exp-world.js`:** Motor de física e colisão. Gerencia caixas de colisão delimitadoras (*Bounding Boxes*), o sistema de raycasting de visão e resolve as interações físicas entre o jogador e as paredes.
+* **`js/exp-content.js` & `js/collision_sizes.js`:** Dicionários de configuração de dados. Armazenam as dimensões exatas de colisão de objetos estáticos (camas, mesas, sofás hospitalares) e folhas de sprites (*Spritesheets*).
+* **`js/exp-fx.js`:** Motor de efeitos visuais. Gerencia poças de sangue procedurais, partículas de cartuchos deflagrados, flashes de disparos (*muzzle flashes*) e tremores de tela (*screen shake*).
+* **`js/exp-modes.js` & `js/exp-ui.js`:** Máquina de estados do jogo. Controla as transições entre os estados de Menu, Gameplay, Pausa, Game Over e Vitória, além de desenhar o HUD dinâmico na tela.
+* **`js/exp-debug.js`:** Ferramentas de desenvolvimento. Permite a renderização visual das linhas de visão e caixas de colisão em tempo real para fins de balanceamento de fases.
 
 ---
 
-## 🕹️ Como Jogar (Controles Básicos)
+## 🕹️ Controles do Jogo
 
-### Teclado e Mouse
-* `W, A, S, D`: Movimentação da Capivara.
-* `Mouse (Mirar)`: Direciona o olhar e a mira do personagem.
-* `Clique Esquerdo`: Atacar / Atirar.
-* `Clique Direito`: Arremessar arma atual / Pegar arma do chão.
-* `Espaço`: Execuções no chão (Inimigos caídos).
-* `Shift`: Estender a visão (Olhar mais longe).
+### Teclado e Mouse (Padrão)
+* **`W, A, S, D`**: Movimentação do personagem pelo mapa.
+* **`Movimento do Mouse`**: Mira e rotaciona o campo de visão em 360 graus.
+* **`Clique Esquerdo (LMB)`**: Ataque físico (com arma branca) ou disparo de arma de fogo.
+* **`Clique Direito (RMB)`**: Arremessa a arma atual na direção do ponteiro / Coleta uma nova arma do chão.
+* **`Barra de Espaço`**: Execução rápida no chão (quando um inimigo estiver caído ou nocauteado).
+* **`Shift (Segurar)`**: Desloca a câmera na direção do mouse para estender o campo de visão panorâmico.
+* **`R`**: Reinício instantâneo da fase (Rápido Respawn).
+* **`ESC`**: Pausa o jogo e exibe o painel de opções.
 
 ---
 
-## 🛠️ Arquitetura e Tecnologias Utilizadas
+## 🚀 Como Executar o Projeto Localmente
 
-O jogo foi estruturado de forma modular dividida em submódulos JavaScript para melhor manutenção:
+Devido às restrições de segurança de navegadores modernos (CORS) ao carregar scripts e assets locais via protocolo `file://`, é altamente recomendado rodar o jogo através de um servidor local simples.
 
-* **HTML5 Canvas:** Renderização 2D em tempo real para gráficos baseados em sprites em alta performance.
-* **JavaScript Nativo (ES6):**
-  * `index.html` / `maps.js`: Inicialização e definição da estrutura de matriz dos mapas.
-  * `exp-core.js`: O núcleo da engine do jogo, controlando o loop principal (update/render).
-  * `exp-world.js`: Gerenciamento do estado global, física do mundo e colisões de cenário.
-  * `exp-content.js` / `collision_sizes.js`: Configurações de tamanho e caixas de colisão de objetos e sprites.
-  * `exp-fx.js`: Controle de partículas, sangue e efeitos visuais na tela.
-  * `exp-modes.js` / `exp-ui.js`: Máquinas de estado para menus, telas de vitória/derrota e interface do usuário.
-  * `exp-debug.js`: Ferramentas auxiliares de renderização de caixas de colisão para testes.
-* **CSS Customizado (`expansion.css`):** Estilização responsiva da janela do jogo e sobreposições de menu.
+### Passo 1: Clonar o Repositório
+```bash
+git clone https://github.com
+cd Cappe-in-Miami
+```
+
+### Passo 2: Iniciar um Servidor Local
+Escolha um dos métodos abaixo dependendo do ambiente instalado em sua máquina:
+
+* **Utilizando Python (3.x):**
+  ```bash
+  python -m http.server 8000
+  ```
+* **Utilizando Node.js (via http-server):**
+  ```bash
+  npx http-server -p 8000
+  ```
+* **Utilizando Visual Studio Code:**
+  Instale a extensão **Live Server**, abra a pasta do projeto e clique no botão **"Go Live"** no canto inferior direito do editor.
+
+### Passo 3: Jogar
+Abra seu navegador de preferência e navegue até o endereço local correspondente (geralmente `http://localhost:8000`).
 
 ---
 
 ## ✒️ Autores e Créditos
-* **[Seu Nome ou Nome da Equipe]** - *Desenvolvimento Geral, Engenharia de Software e Game Design*.
-* **Dennaton Games** - *Inspirado no design original e universo de Hotline Miami*.
+* **[Seu Nome ou Nome da Equipe]** - *Programação de Sistemas, Design de Fases, Arquitetura e Engenharia do Jogo*.
+* **Dennaton Games & Devolver Digital** - *Criadores originais da franquia Hotline Miami, cuja direção de arte, trilha sonora e estilo de jogabilidade serviram como base para este projeto acadêmico/fã*.
 
 ---
 
 ## 📄 Licença
-Este projeto é uma obra de fãs (Fan-made) para fins de portfólio e estudo de desenvolvimento de jogos em HTML5. Todos os direitos de propriedade intelectual da marca Hotline Miami pertencem à Dennaton Games e Devolver Digital.
+Este é um projeto sem fins lucrativos desenvolvido estritamente para propósitos de estudo, portfólio e entretenimento de fãs. Todos os direitos associados à franquia original pertencem aos seus respectivos criadores legais.
