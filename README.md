@@ -8,7 +8,7 @@
 
 ---
 
-## 🧠 História e Lore (O Enredo Completo)
+## 🧠 História
 
 ### Miami, 1989.
 Sob o brilho violento das lâmpadas de neon, do vapor denso que corta os becos escuros e do som sintético e acelerado das pistas de dança, esconde-se uma metrópole apodrecida. A Máfia Russa e as gangues locais dividem o controle das ruas, a polícia fecha os olhos por maços de dólares sujos e a vida humana vale menos que uma dose de cocaína barata.
