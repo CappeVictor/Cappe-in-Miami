@@ -1,11 +1,5 @@
 # 🎮 Cappe in Miami
 
-![Banner do Jogo](https://placeholder.com)
-
-> **Uma releitura e expansão tática top-down inspirada no universo violento e frenético de Hotline Miami, reimaginada com capivaras e animais da fauna sul-americana no submundo do crime.**
-
----
-
 ## 📝 Sobre o Jogo
 **Cappe in Miami** é um jogo de ação tática acelerada construído inteiramente sobre tecnologias web nativas (**HTML5, Canvas 2D e JavaScript ES6 puro**). 
 
