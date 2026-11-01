@@ -1,96 +1,115 @@
-# CAPPE IN MIAMI
-### Uma cidade, várias máscaras e nenhum inocente.
+# 🎮 Cappe in Miami
+
+![Banner do Jogo](https://placeholder.com)
+
+> **Uma releitura e expansão fan-made inspirada no universo tático e brutal de Hotline Miami, estrelada por capivaras e outros animais nativos.**
 
 ---
 
-## 🎛️ Sobre o Jogo
-**CAPPE IN MIAMI** é um jogo de ação tática *top-down* de alta octanagem, ambientado em uma versão distópica e retro-futurista de 1989. O título combina mecânicas de morte instantânea, planejamento rápido de movimentos, combate visceral com armas de fogo e brancas, e uma forte estética Vaporwave/Synthwave baseada nas icônicas engines de 8-bits e 16-bits da época.
+## 📝 Sobre o Jogo
+**Cappe in Miami** é um jogo tático de ação top-down em ritmo acelerado, desenvolvido utilizando tecnologias web modernas (**HTML5, Canvas e JavaScript nativo**).
+
+O jogo se passa em uma Miami alternativa e antropomórfica, onde o jogador assume o papel de uma capivara assassina que deve limpar andares inteiros repletos de gângsteres e seguranças fortemente armados, utilizando reflexos rápidos, furtividade e uma variedade de armas brancas e de fogo.
+
+### ✨ Funcionalidades Principais
+* **Combate One-Hit-Kill:** Assim como na sua maior inspiração, tanto você quanto seus inimigos morrem com apenas um único golpe ou tiro certeiro.
+* **Inteligência Artificial Dinâmica:** Inimigos patrulham, investigam barulhos de tiros, entram em estado de alerta e perseguem o jogador ao avistá-lo.
+* **Visão Dinâmica (Fog of War):** Linhas de visão realistas onde paredes bloqueiam o que o jogador e os inimigos conseguem enxergar.
+* **Variedade de Cenários:** Mapas que simulam boates (Clubs), hospitais, delegacias e complexos de luxo.
 
 ---
 
-## 🧠 História
+## 👥 Personagens e Máscaras
 
-### Miami, 1989.
-Sob o brilho violento das lâmpadas de neon, do vapor denso que corta os becos escuros e do som sintético e acelerado das pistas de dança, esconde-se uma metrópole apodrecida. A Máfia Russa e as gangues locais dividem o controle das ruas, a polícia fecha os olhos por maços de dólares sujos e a vida humana vale menos que uma dose de cocaína barata.
+O jogo utiliza um sistema de animais antropomórficos, representados por assets gráficos dedicados na engine:
 
-No epicentro desse pesadelo psicodélico está **Cappe**, um homem fragmentado, assombrado por traumas que a sua própria mente tentou apagar para protegê-lo. Cappe vive isolado em um apartamento decadente, tentando juntar os pedaços de um passado militar ou governamental que foi cirurgicamente esquecido.
+### 🗡️ Protagonista (Jogador)
+* **Cappe (A Capivara):** O executor silencioso controlado pelo jogador, capaz de se disfarçar e utilizar diferentes táticas de infiltração.
 
-### O Despertar do Telefone
-A rotina de torpor de Cappe é estraçalhada quando sua secretária eletrônica passa a gravar mensagens cifradas e perturbadoras. Disfarçadas como "pedidos de pizza", "entregas de lavanderia" ou "manutenção de condomínio", a voz distorcida do outro lado da linha fornece apenas três dados: um endereço, um horário e uma instrução implícita.
+### 🎭 Sistema de Animais / Aliados (Assets)
+* **Sapo 🐸 / Elefante 🐘 / Porco 🐷 / Cavalo 🐴 / Galo 🐓 / Macaco 🐒 / Coelho 🐰 / Coruja 🦉 / Lobo 🐺 / Leão 🦁 / Tigre 🐯:** Elementos que compõem o universo visual de máscaras e modificadores clássicos da franquia.
 
-A missão nunca muda: **Entre. Mate todos. Não deixe testemunhas. Saia.**
-
-Sem perguntas. Sem hesitação. Apenas a linha discada, o estalo do telefone no gancho e o rastro de sangue. Cappe se descobre uma máquina de matar implacável, operando em um transe de violência pura do qual ele não consegue — ou não quer — escapar.
-
-### O Mistério por Trás das Ligações
-À medida que os tapetes de Miami vão sendo manchados de vermelho, Cappe percebe que a contagem de corpos obedece a uma lógica geopolítica e criminosa secreta. Os alvos não são bandidos comuns; são peças-chave de um sindicato clandestino conhecido como *Os Operadores*, que controla o narcotráfico, a lavagem de dinheiro e o suborno de juízes e senadores da Flórida.
-
-Mas o horror real reside nos detalhes: a voz misteriosa do telefone parece conhecer os segredos mais profundos e sombrios do passado de Cappe — gatilhos mentais que despertam habilidades letais esquecidas. Junto com os telefonemas, caixas de papelão misteriosas começam a surgir na sua porta, contendo máscaras de borracha de animais. Elas não servem apenas para esconder seu rosto da polícia; elas despertam instintos assassinos latentes, alterando sua percepção da realidade e fragmentando ainda mais a sua sanidade.
-
-### A Revelação e o Confronto Final
-Na reta final, Cappe descobre que a voz no telefone não é um inimigo externo, mas sim um antigo comandante de um programa militar experimental de controle mental do qual ele fez parte — e que as máscaras são âncoras psicológicas usadas para ativá-lo como um assassino adormecido. Os alvos eliminados eram os antigos financiadores do projeto que tentaram queimar os arquivos e apagar as pontas soltas.
-
-Cappe é forçado a tomar uma decisão: continuar sendo um peão descartável no tabuleiro de xadrez de um fantasma do passado ou usar o próprio rastro de sangue para caçar a origem das chamadas telefônicas e arrancar a verdade das entranhas de Miami. A verdade tem um preço alto, e é pago em sangue. No final, as máscaras vão cair, mas a pele por baixo delas já terá sido consumida pela violência.
-
-**Você não sabe quem está dando as ordens. Só sabe que o telefone está tocando de novo.**
+### 👑 Inimigos e Facções (Enemies)
+* **Gângsteres Comuns (Club Walkers):** Patrulham os salões com tacos e armas leves.
+* **Seguranças Armados (M16 / Uzi Patrols):** Atiram assim que detectam a presença do jogador no recinto.
+* **Equipes da SWAT:** Unidades táticas pesadas acionadas em estágios avançados do jogo.
+* **Chefes (Bosses):** Alvos principais localizados no último andar de complexos específicos, possuindo barras de vida ou padrões de ataque únicos (ex: *Boss Car*, *Boss Fountain*).
 
 ---
 
-## 🎭 Sistema de Máscaras (Personagens)
-As máscaras que Cappe veste antes de arrombar as portas alteram os atributos do motor do jogo em tempo real através do arquivo `js/exp-modes.js`:
+## 🖥️ Requisitos do Sistema
 
-*   🦊 **RICHARD (Sapo):** O equilíbrio frio. Atributos, velocidade e física padrão de combate. Ideal para jogadores que preferem a jogabilidade clássica.
-*   🐯 **TONY (Tigre):** A fúria brutal. Aumenta a velocidade de movimento em +20% e transforma o ataque físico em morte instantânea ('melee instant kill'), porém bloqueia completamente a habilidade de coletar ou disparar armas de fogo.
-*   🐺 **DENNIS (Lobo):** O predador cirúrgico. Spawna na fase equipado com uma faca e aumenta o raio de atração para coletar armas caídas no chão em +50%.
-*   🦉 **RASMUS (Coruja):** A paranoia hiper-vigilante. Ativa um filtro ultravioleta neon no Canvas que renderiza um contorno roxo brilhante ao redor de passagens secretas, pontos cegos e itens críticos.
+Por ser um jogo construído inteiramente sobre tecnologias web nativas, ele roda direto no navegador de forma extremamente leve.
 
----
-
-## 🏢 Progressão de Fases e Cenários
-O jogo se expande através de uma árvore de progressão de níveis baseada em matrizes sólidas de blocos (`Grid-Tiles`) configuradas no arquivo `js/maps.js`:
-
-1.  **Fase 1 - "O Hospital" (The Neon Ward):** Corredores estreitos e salas pequenas em tons clínicos de branco e ciano. Foco absoluto em combate corpo a corpo, emboscadas atrás das portas e desvio rápido de cantos cegos.
-2.  **Fase 2 - "O Clube Synthwave" (Overdrive Discotheque):** Um grande salão central com uma pista de dança pulsante. Alta densidade de divisórias de vidros interativos, exigindo precisão para não ser visto pelos capangas através da vidraça.
-3.  **Fase 3 - "A Sede da Máfia" (The Golden Dragon):** O reduto final do sindicato. Layout complexo com rotas de patrulha cruzadas, inimigos altamente armados com fuzis automáticos e gatilhos de alerta acústico instantâneo.
+| Componente | Requisitos Mínimos | Requisitos Recomendados |
+| :--- | :--- | :--- |
+| **Sistema Operacional** | Windows 7 / macOS 10.12 / Linux | Windows 10/11 / macOS mais recente |
+| **Processador** | Intel Core i3 ou equivalente | Intel Core i5 / AMD Ryzen 3 ou superior |
+| **Memória RAM** | 4 GB RAM | 8 GB RAM |
+| **Navegador** | Google Chrome, Firefox ou Edge atualizado | Google Chrome ou Firefox (com aceleração de hardware) |
+| **Armazenamento** | 50 MB de espaço disponível | 50 MB de espaço disponível (SSD) |
 
 ---
 
-## 🕹️ Mecânicas de Gameplay Avançadas
-*   **Morte Instantânea:** Um único tiro ou golpe físico, tanto seu quanto dos inimigos, causa a morte imediata e reseta o cenário, forçando o aprendizado por tentativa e erro.
-*   **Raycasting de Visão Real:** Os inimigos calculam linhas de visão diretas baseadas na geometria do mapa. Paredes sólidas cortam a visão, mas os novos blocos de vidro mantêm a linha ativa.
-*   **Alerta Acústico Dinâmico:** Disparar uma arma de fogo gera um ruído que viaja pelo mapa. Qualquer inimigo no raio do som abandonará sua patrulha para caçar a origem do barulho.
-*   **Física de Deslizamento de Eixo:** Movimentação diagonal normalizada que impede o personagem de travar ao raspar nas quinas das paredes, mantendo o ritmo frenético.
+## ⚙️ Como Executar o Projeto (Para Desenvolvedores)
 
----
+Se você deseja abrir o projeto localmente para jogar ou modificar o código-fonte, siga os passos abaixo:
 
-## 🔧 Instruções de Instalação e Execução (O Jogo Extraído Melhora!)
+### Pré-requisitos
+* Um navegador web moderno com suporte a HTML5 Canvas.
+* Uma extensão de servidor local (como *Live Server* no VS Code) ou Python instalado para evitar problemas de CORS com arquivos locais.
 
-> ⚠️ **IMPORTANTE:** Para que o motor de jogo funcione com performance máxima, carregue todos os scripts corretamente e execute os efeitos visuais sem travamentos, **você deve obrigatoriamente extrair o arquivo compactado**. O jogo executado de dentro de uma pasta temporária ou diretamente do arquivo `.zip` sofrerá bugs de carregamento de caminhos locais e lentidão de FPS.
-
-### Passo a Passo para Instalação:
-1. Baixe o pacote comprimido do projeto (`Cappe-in-Miami-v4-original.zip`).
-2. Clique com o botão direito sobre o arquivo `.zip` e selecione **"Extrair Aqui"** ou **"Extrair para Cappe-in-Miami/"** utilizando um software como WinRAR, 7-Zip ou o descompactador nativo do seu sistema operacional.
-3. Certifique-se de que a árvore de diretórios mantenha a estrutura modular correta após a extração física:
-   ```text
-   📂 Cappe-in-Miami/
-   ├── 📄 index.html
-   ├── 📄 README.md
-   ├── 📂 css/
-   │   └── 📄 expansion.css
-   ├── 📂 js/
-   │   ├── 📄 maps.js
-   │   ├── 📄 exp-core.js
-   │   ├── 📄 exp-world.js
-   │   ├── 📄 exp-modes.js
-   │   ├── 📄 exp-fx.js
-   │   └── 📄 collision_sizes.js
-   └── 📂 assets/
-       └── 📂 sprites/
-           └── (Todos os arquivos de imagem .png organizados)
+### Passo a Passo
+1. Clone este repositório para a sua máquina local:
+   ```bash
+   git clone https://github.com
    ```
-4. Navegue até a pasta extraída e dê dois cliques no arquivo principal **`index.html`** para executá-lo instantaneamente em seu navegador web de preferência (Chrome, Edge, Firefox, Opera ou Safari). 
-
-*Nota: O jogo roda 100% no cliente de forma nativa e otimizada por conta da separação de scripts em arquivos locais após a extração, sem a necessidade de instalar servidores node.js, python ou dependências externas.*
+2. Navegue até a pasta do projeto:
+   ```bash
+   cd Cappe-in-Miami
+   ```
+3. Inicie um servidor local. Se tiver o Python instalado, execute:
+   ```bash
+   python -m http.server 8000
+   ```
+4. Abra o seu navegador e acesse: `http://localhost:8000/index.html`.
 
 ---
-*CAPPE IN MIAMI — A cidade nunca dorme. E os segredos nunca ficam enterrados.*
+
+## 🕹️ Como Jogar (Controles Básicos)
+
+### Teclado e Mouse
+* `W, A, S, D`: Movimentação da Capivara.
+* `Mouse (Mirar)`: Direciona o olhar e a mira do personagem.
+* `Clique Esquerdo`: Atacar / Atirar.
+* `Clique Direito`: Arremessar arma atual / Pegar arma do chão.
+* `Espaço`: Execuções no chão (Inimigos caídos).
+* `Shift`: Estender a visão (Olhar mais longe).
+
+---
+
+## 🛠️ Arquitetura e Tecnologias Utilizadas
+
+O jogo foi estruturado de forma modular dividida em submódulos JavaScript para melhor manutenção:
+
+* **HTML5 Canvas:** Renderização 2D em tempo real para gráficos baseados em sprites em alta performance.
+* **JavaScript Nativo (ES6):**
+  * `index.html` / `maps.js`: Inicialização e definição da estrutura de matriz dos mapas.
+  * `exp-core.js`: O núcleo da engine do jogo, controlando o loop principal (update/render).
+  * `exp-world.js`: Gerenciamento do estado global, física do mundo e colisões de cenário.
+  * `exp-content.js` / `collision_sizes.js`: Configurações de tamanho e caixas de colisão de objetos e sprites.
+  * `exp-fx.js`: Controle de partículas, sangue e efeitos visuais na tela.
+  * `exp-modes.js` / `exp-ui.js`: Máquinas de estado para menus, telas de vitória/derrota e interface do usuário.
+  * `exp-debug.js`: Ferramentas auxiliares de renderização de caixas de colisão para testes.
+* **CSS Customizado (`expansion.css`):** Estilização responsiva da janela do jogo e sobreposições de menu.
+
+---
+
+## ✒️ Autores e Créditos
+* **[Seu Nome ou Nome da Equipe]** - *Desenvolvimento Geral, Engenharia de Software e Game Design*.
+* **Dennaton Games** - *Inspirado no design original e universo de Hotline Miami*.
+
+---
+
+## 📄 Licença
+Este projeto é uma obra de fãs (Fan-made) para fins de portfólio e estudo de desenvolvimento de jogos em HTML5. Todos os direitos de propriedade intelectual da marca Hotline Miami pertencem à Dennaton Games e Devolver Digital.
