@@ -1,6 +1,18 @@
-# Cappe-in-Miami — v51.0 (spawns cooperativos e estabilidade)
+# Cappe-in-Miami — v52.0 (skins cosméticas e arte de armas)
 
 Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
+
+Na tela de escolha de máscara, selecione uma skin cosmética. Ela altera apenas as cores do traje e é salva em `settings.skin`, preservando saves v2 e os atributos dos personagens. As armas receberam contorno, brilhos e detalhes de material; no cooperativo local, P2 também exibe a arma compartilhada.
+
+## Entrega v52.0 — 05/11/2026
+
+- Adicionadas quatro skins cosméticas selecionáveis com prévias visuais e persistidas no formato de save v2, sem alterar atributos, máscaras ou desbloqueios.
+- Paleta de skin aplicada ao personagem procedural e detalhes de cor aplicados quando o spritesheet está carregado.
+- Fallback de animação do jogador reutiliza sprites quantizados em cache em vez de recriar o Canvas quadro a quadro.
+- Ícones de armas recebem contorno, reflexos, juntas e detalhes específicos por categoria; a arma aparece para ambos jogadores locais.
+- Corrigido bug reproduzido no navegador: portas fechadas isolavam todas as salas dos pontos de spawn da fase 1, zeravam inimigos e concluíam a sala imediatamente. O corredor alcançável agora recebe spawns, e zero inimigos não conclui a sala.
+- Corrigido spawn bloqueado no mapa fixo boate-b; os 17 mapas fixos agora ajustam a coordenada inicial para uma posição livre quando necessário.
+- 54/54 regressões automatizadas passaram. Chromium confirmou a fase 1 em jogo com 8 inimigos e quatro previews visíveis. Movimento, disparo e pausa foram exercitados; a campanha completa ainda não foi jogada.
 
 O relay online agora interpola posição e direção do outro avatar para reduzir saltos entre atualizações. As salas mostram quantos jogadores estão em partida e explicam que ambos precisam escolher o mesmo modo/mapa. Mapas, combate e progresso continuam locais.
 

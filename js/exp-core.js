@@ -15,8 +15,24 @@
     records: {},          // por modo: { best, wave, time, rooms }
     ranking: {},          // por modo: top 10
     ach: {}, unl: [], bosses: {}, weaponsUsed: {}, masksUsed: {}, flags: {}, daily: {},
-    settings: { musVol: .8, sfxVol: .8 }
+    settings: { musVol: .8, sfxVol: .8, skin: 'classic' }
   });
+
+  // Skins são exclusivamente cosméticas; personagens/máscaras continuam controlando atributos.
+  const SKINS = [
+    { id: 'classic', name: 'Clássico', color: '#1f5d5a', detail: '#c0263a', palette: { suit: '#1f5d5a', suitD: '#123a38', suitL: '#3a8c85', tie: '#c0263a', tieD: '#7a1624' } },
+    { id: 'sunset', name: 'Sunset', color: '#a64436', detail: '#ffd166', palette: { suit: '#a64436', suitD: '#672b29', suitL: '#dc7650', tie: '#ffd166', tieD: '#bd7437' } },
+    { id: 'midnight', name: 'Meia-noite', color: '#343d70', detail: '#a78bfa', palette: { suit: '#343d70', suitD: '#202748', suitL: '#5866a6', tie: '#a78bfa', tieD: '#7256b4' } },
+    { id: 'jade', name: 'Jade', color: '#287348', detail: '#f3d46b', palette: { suit: '#287348', suitD: '#17452f', suitL: '#49a86c', tie: '#f3d46b', tieD: '#b99a42' } }
+  ];
+  EXP.SKINS = SKINS;
+  EXP.curSkin = () => SKINS.find(s => s.id === EXP.save().settings.skin) || SKINS[0];
+  EXP.setSkin = id => {
+    if (!SKINS.some(s => s.id === id)) return false;
+    const settings = EXP.save().settings;
+    if (settings.skin === id) return true;
+    settings.skin = id; EXP.touch(); return true;
+  };
 
   // mescla recursiva: campos novos de versões futuras nunca quebram um save antigo
   function merge(base, src) {
@@ -48,7 +64,9 @@
     if (o.perks && Object.values(o.perks).some(v => !Number.isInteger(v) || v < 0)) return false;
     if (o.records && Object.values(o.records).some(v => !isObject(v))) return false;
     if (o.ranking && Object.values(o.ranking).some(v => !Array.isArray(v) || v.some(e => !isObject(e) || !Number.isFinite(e.score)))) return false;
-    if (o.settings) for (const k of ['musVol', 'sfxVol']) if (k in o.settings && (!Number.isFinite(o.settings[k]) || o.settings[k] < 0 || o.settings[k] > 1)) return false;
+    if (o.settings) {
+      for (const k of ['musVol', 'sfxVol']) if (k in o.settings && (!Number.isFinite(o.settings[k]) || o.settings[k] < 0 || o.settings[k] > 1)) return false;
+    }
     return true;
   }
 

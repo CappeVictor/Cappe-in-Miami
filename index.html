@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cappe-in-Miami</title>
+  <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" media="print" onload="this.media='all'">
@@ -203,7 +204,7 @@ button { touch-action: manipulation; }
     <canvas id="c" width="960" height="600" aria-label="Área do jogo"></canvas>
 
     <section id="menu" class="overlay">
-      <p class="tag">Miami, 1989 · v51</p>
+      <p class="tag">Miami, 1989 · v52</p>
       <h1>Cappe-in-Miami</h1>
       <p class="bemvindo">Seja bem-vindo!</p>
       <p class="credito">Feito por <strong>Victor Cappellesso</strong> e <strong>Davi Gehart</strong></p>
@@ -892,6 +893,18 @@ function unstick(e) {   // tira o inimigo de dentro de móvel/parede, para a pos
     if (!hitWall(x, y, e.r) && !(x < 0 || y < 0 || x > WW || y > WH)) { e.x = x; e.y = y; return; }
   }
 }
+function safeSpawnPos(x, y, r = 13, areas = rooms) {
+  const source = [x, y], p = { x, y, r };
+  unstick(p);
+  if (hitWall(p.x, p.y, r)) {
+    const candidates = areas.filter(a => a.w > 60 && a.h > 60).flatMap(a => [
+      [a.x + a.w / 2, a.y + a.h / 2], [a.x + a.w * .25, a.y + a.h * .25], [a.x + a.w * .75, a.y + a.h * .75]
+    ]).sort((a, b) => hyp(a[0] - source[0], a[1] - source[1]) - hyp(b[0] - source[0], b[1] - source[1]));
+    const safe = candidates.find(([px, py]) => !hitWall(px, py, r));
+    if (safe) { p.x = safe[0]; p.y = safe[1]; }
+  }
+  return [p.x, p.y];
+}
 function move(e, dx, dy) {
   if (!hitWall(e.x + dx, e.y, e.r)) e.x += dx;
   if (!hitWall(e.x, e.y + dy, e.r)) e.y += dy;
@@ -1071,7 +1084,8 @@ function buildFixed(m, n) {
   }
   const [ex, ey, ew, eh] = m.saida, w2 = Math.max(70, ew * s), h2 = Math.max(70, eh * s);
   exitR = [X(ex) - w2 / 2, Y(ey) - h2 / 2, w2, h2]; startPos = [X(m.ini[0]), Y(m.ini[1])];
-  refreshSol(); rooms.hall = null; paintMap(n);
+  refreshSol(); startPos = safeSpawnPos(startPos[0], startPos[1]);
+  rooms.hall = null; paintMap(n);
 }
 function buildLevel(n) { const m = mapFor(n); if (m) buildFixed(m, n); else buildMap(n); }
 
@@ -1347,10 +1361,12 @@ function buildFloor(n, idx) {
   predio[idx].transp = out; transp = out; andar = idx;
   saveFloor();
 }
-function allClear() { return enemies.length === 0 && predio.every((f, i) => i === andar || f.enemies.length === 0); }
+function allClear() { return levelStats.total > 0 && enemies.length === 0 && predio.every((f, i) => i === andar || f.enemies.length === 0); }
 function spawnFloor(n, k) {   // inimigos e armas do andar que está carregado agora
   const focus = focusActor(), reach = reachMap(focus.x, focus.y), spots = rooms.slice();
-  if (lvl >= 2 && rooms.hall) spots.push(rooms.hall);
+  // Portas fechadas podem deixar o corredor central como única área alcançável no início.
+  // Incluí-lo desde a fase 1 impede uma sala vazia e uma conclusão automática indevida.
+  if (rooms.hall) spots.push(rooms.hall);
   for (let tries = 0; enemies.length < n && tries < 3000; tries++) {
     const r = spots[Math.floor(Math.random() * spots.length)];
     const x = r.x + 20 + Math.random() * (r.w - 40), y = r.y + 20 + Math.random() * (r.h - 40);
@@ -2274,6 +2290,7 @@ function tx(s, x, y, c, font, al = 'left') {
 }
 function wicon(g, w) {
   if (w === 'punho') return;
+  g.save(); g.shadowColor = 'rgba(0,0,0,.62)'; g.shadowBlur = 2; g.shadowOffsetX = 1; g.shadowOffsetY = 2;
   if (w === 'taco') { g.fillStyle = '#9b6424'; g.fillRect(5, -2, 39, 5); g.fillStyle = '#e0aa4f'; g.fillRect(35, -4, 9, 8); g.fillStyle = '#493018'; g.fillRect(7, -2, 7, 5); }
   else if (w === 'faca') { g.fillStyle = '#d8e4ef'; g.beginPath(); g.moveTo(9, -3); g.lineTo(35, 0); g.lineTo(9, 3); g.lineTo(20, 0); g.fill(); g.fillStyle = '#201723'; g.fillRect(2, -2, 9, 4); g.fillStyle = '#ffd23f'; g.fillRect(9, -4, 2, 8); }
   else if (w === 'smg') { g.fillStyle = '#20242b'; g.fillRect(4, -4, 29, 7); g.fillStyle = '#59616d'; g.fillRect(10, -5, 11, 2); g.fillStyle = '#353943'; g.fillRect(13, 3, 6, 11); g.fillStyle = '#111'; g.fillRect(29, -2, 11, 3); }
@@ -2286,6 +2303,23 @@ function wicon(g, w) {
   else if (w === 'pe_de_cabra') { g.fillStyle = '#9aa0a8'; g.fillRect(5, -2, 39, 4); g.beginPath(); g.moveTo(42, -2); g.lineTo(51, -8); g.lineTo(49, -1); g.lineTo(44, 2); g.fill(); }
   else if (w === 'martelo') { g.fillStyle = '#7a4d28'; g.fillRect(5, -2, 30, 4); g.fillStyle='#aeb7c2'; g.fillRect(30,-8,13,16); g.fillStyle='#59616d'; g.fillRect(33,-10,8,3); }
   else { g.fillStyle = '#111'; g.fillRect(4, -3, 20, 6); }
+  weaponFinish(g, w);
+  g.restore();
+}
+// Contorno, brilho superior e juntas dão leitura de volume sem acrescentar imagens por quadro.
+function weaponFinish(g, w) {
+  g.save(); g.lineWidth = 1; g.lineCap = 'round';
+  g.strokeStyle = 'rgba(0,0,0,.72)'; g.beginPath(); g.moveTo(4, 3); g.lineTo(4, -3); g.lineTo(24, -4); g.stroke();
+  g.strokeStyle = 'rgba(255,255,255,.48)'; g.beginPath(); g.moveTo(7, -3); g.lineTo(w === 'rifle' || w === 'sniper' ? 54 : 31, -3); g.stroke();
+  g.fillStyle = 'rgba(18,22,29,.85)';
+  if (['pistola', 'pistola_aut', 'revolver', 'magnum'].includes(w)) { g.fillRect(15, 5, 1, 5); g.fillRect(18, 5, 1, 5); }
+  if (['smg', 'uzi', 'lmg', 'carabina'].includes(w)) { g.fillRect(12, -1, 1, 2); g.fillRect(16, -1, 1, 2); }
+  if (w === 'revolver' || w === 'magnum') { g.strokeStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.arc(12, 0, 3, 0, 6.28); g.stroke(); }
+  if (['escopeta', 'pump', 'dupla', 'rifle', 'sniper', 'carabina', 'lmg'].includes(w)) {
+    g.fillStyle = '#171b22'; g.beginPath(); g.arc(w === 'dupla' ? 40 : 48, 0, 2.2, 0, 6.28); g.fill();
+    g.strokeStyle = 'rgba(230,240,250,.7)'; g.beginPath(); g.arc(w === 'dupla' ? 40 : 48, 0, 1.2, 0, 6.28); g.stroke();
+  }
+  g.restore();
 }
 // ---------- sprite do personagem: pixel art original, top-down, 24x24 px ----------
 // paleta própria: terno verde-petróleo, camisa clara, gravata vermelha, contorno escuro
@@ -2301,11 +2335,19 @@ const DOORT = new Image(); DOORT.src = 'assets/doors.png';
 const ready = (im) => im.complete && im.naturalWidth > 0;
 // recorte de uma célula do tileset (cache, 1 canvas por célula)
 const cellCache = {};
+const playerFrameCache = new Map();
 function cell(im, key, sx, sy, w, h) {
   if (!cellCache[key]) { const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(im, sx, sy, w, h, 0, 0, w, h); cellCache[key] = c; }
   return cellCache[key];
 }
-function buildPlayerFrame(state, f, atk) {
+function buildPlayerFrame(state, f, atk, skin) {
+  const outfit = skin || (window.EXP && EXP.curSkin ? EXP.curSkin() : null);
+  const colors = outfit ? outfit.palette : PAL;
+  const phase = state === 'idle' ? 0 : ((Math.round((((f % 6.283) + 6.283) % 6.283) / 6.283 * 8) % 8) || 0);
+  const attackFrame = state === 'attack' ? Math.max(0, Math.min(3, Math.round((atk || 0) * 3))) : 0;
+  const cacheKey = (outfit ? outfit.id : 'default') + ':' + state + ':' + phase + ':' + attackFrame;
+  if (playerFrameCache.has(cacheKey)) return playerFrameCache.get(cacheKey);
+  f = phase * 6.283 / 8; atk = attackFrame / 3;
   const N = 24, C = 11.5, g = Array.from({ length: N }, () => Array(N).fill(null));
   const put = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < N && y < N) g[y][x] = c; };
   const inE = (x, y, cx, cy, rx, ry) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
@@ -2321,22 +2363,22 @@ function buildPlayerFrame(state, f, atk) {
   const armCx = (side) => side < 0 ? [C - 1 + armL * .4 + lean, C - 8] : [C - 1 + armR * .4 + lean + (state === 'attack' ? 4 + hit * 4 : 0), C + 8 - (state === 'attack' ? 2 * hit : 0)];
   for (const side of [-1, 1]) {
     const [ax, ay] = armCx(side);
-    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (inE(x, y, ax, ay, state === 'attack' && side > 0 ? 4.2 : 3.4, 2.3)) put(x, y, PAL.suitD);
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (inE(x, y, ax, ay, state === 'attack' && side > 0 ? 4.2 : 3.4, 2.3)) put(x, y, colors.suitD);
     const hx = ax + (side > 0 && state === 'attack' ? 4 : 2.6), hy = ay;
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (inE(x, y, hx, hy, 1.7, 1.7)) put(x, y, PAL.skin);
   }
   // torso: terno com sombra à esquerda e luz no ombro de cima
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (inE(x, y, C - 1.5 + lean, C, 6.2, 8.2)) {
     const hiL = inE(x, y, C - 2.5, C - 3, 3, 3), shD = x < C - 3.5;
-    put(x, y, hiL ? PAL.suitL : shD ? PAL.suitD : PAL.suit);
+    put(x, y, hiL ? colors.suitL : shD ? colors.suitD : colors.suit);
   }
   // camisa clara e gravata no peito (lado da frente, direita)
   for (let y = C - 3; y <= C + 3; y++) for (let x = C + 2; x <= C + 4; x++) put(x, y, x === C + 4 ? PAL.shirtD : PAL.shirt);
-  for (let y = C - 1; y <= C + 3; y++) put(C + 3, y, PAL.tie);  // gravata
-  for (let y = C; y <= C + 3; y++) put(C + 4, y, PAL.tieD);
+  for (let y = C - 1; y <= C + 3; y++) put(C + 3, y, colors.tie);  // gravata
+  for (let y = C; y <= C + 3; y++) put(C + 4, y, colors.tieD);
   // lapelas escuras
-  for (let y = C - 5; y <= C - 3; y++) put(C + 5, y, PAL.suitD);
-  for (let y = C + 3; y <= C + 5; y++) put(C + 5, y, PAL.suitD);
+  for (let y = C - 5; y <= C - 3; y++) put(C + 5, y, colors.suitD);
+  for (let y = C + 3; y <= C + 5; y++) put(C + 5, y, colors.suitD);
   // cabeça: pele com cabelo escuro penteado para trás
   const hcx = C + 6 + lean;
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (inE(x, y, hcx, C, 3.7, 3.9)) put(x, y, PAL.skin);
@@ -2350,6 +2392,8 @@ function buildPlayerFrame(state, f, atk) {
   for (const [x, y] of out) g[y][x] = PAL.K;
   const cv = document.createElement('canvas'); cv.width = N; cv.height = N; const c = cv.getContext('2d');
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (g[y][x]) { c.fillStyle = g[y][x]; c.fillRect(x, y, 1, 1); }
+  if (playerFrameCache.size >= 128) playerFrameCache.clear();
+  playerFrameCache.set(cacheKey, cv);
   return cv;
 }
 function drawOnePlayer(pl, isP2) {
@@ -2368,7 +2412,7 @@ function drawOnePlayer(pl, isP2) {
     ctx.fillStyle = isP2 ? 'rgba(255,46,147,.14)' : 'rgba(25,240,230,.14)';
     ctx.beginPath(); ctx.ellipse(0, 0, 16, 16, 0, 0, 6.28); ctx.fill();
   }
-  if (!isP2 && cw !== 'punho') wicon(ctx, cw);
+  if (cw !== 'punho') wicon(ctx, cw);
   ctx.imageSmoothingEnabled = true;
   if (PSHEET.complete && PSHEET.naturalWidth > 0) {
     const cyc = ((pl.anim % 6.283) + 6.283) % 6.283, col = Math.floor(cyc / 6.283 * 4) % 4;
@@ -2377,6 +2421,12 @@ function drawOnePlayer(pl, isP2) {
     ctx.drawImage(PSHEET, cell[0] * 24, cell[1] * 24, 24, 24, -11.5, -11.5, 24, 24);
   } else {
     ctx.drawImage(buildPlayerFrame(state, pl.anim, pl.atk > 0 ? pl.atk / .2 : 0), -11.5, -11.5);
+  }
+  // Identificador cosmético da skin também aparece quando o spritesheet animado está carregado.
+  const skin = window.EXP && EXP.curSkin ? EXP.curSkin() : null;
+  if (skin && PSHEET.complete && PSHEET.naturalWidth > 0) {
+    ctx.globalAlpha = .78; ctx.fillStyle = skin.color; ctx.fillRect(-4, -2, 6, 7);
+    ctx.fillStyle = skin.detail; ctx.fillRect(1, -2, 2, 7); ctx.globalAlpha = 1;
   }
   // tag P1 / P2
   ctx.rotate(-pl.a);

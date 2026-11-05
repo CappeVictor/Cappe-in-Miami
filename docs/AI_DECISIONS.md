@@ -1,4 +1,10 @@
 # Decisões técnicas
+## D014 — v52.0 — Skin como preferência cosmética separada
+Guardar o identificador cosmético em `settings.skin` do save v2 e fornecer default via merge, preservando todo progresso. Não reaproveitar `settings.char`, pois personagens atuais definem atributos e máscaras. Não criar desbloqueios ou economia para skins nesta entrega.
+
+## D015 — v52.0 — Evitar conclusão vazia e spawn fixo em sólido
+Portas fechadas podem isolar as salas internas do spawn inicial, então o corredor gerado é candidato a spawn desde a fase 1. A sala só pode ser marcada limpa se teve inimigos. Mapas fixos validam e ajustam coordenadas de jogador em geometria livre, sem alterar dados/assets originais.
+
 ## D013 — v42.0 — Telemetria simples e expiração do avatar remoto
 Medir o tempo HTTP das atualizações enviadas e chamá-lo de resposta aproximada, sem apresentá-lo como ping puro. Se o avatar remoto não receber snapshot por 5 s, removê-lo da cena; não persistir estado de sala. Isso melhora feedback e evita exibir uma posição antiga indefinidamente sem sugerir sincronização autoritativa.
 

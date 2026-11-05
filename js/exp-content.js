@@ -146,7 +146,7 @@
   // ícones das armas novas (mesmo sistema de desenho do jogo: origem na empunhadura, eixo +x)
   const _wicon = wicon;
   wicon = function (g, w) {
-    switch (w) {
+    const draw = () => { switch (w) {
       case 'pistola_aut': g.fillStyle = '#2b2b33'; g.fillRect(4, -3, 22, 6); g.fillStyle = '#19f0e6'; g.fillRect(20, -1, 6, 2); g.fillStyle = '#555'; g.fillRect(8, 2, 5, 8); return;
       case 'magnum': g.fillStyle = '#d7dbe6'; g.fillRect(4, -3, 26, 6); g.fillStyle = '#7a4d28'; g.fillRect(2, 2, 7, 9); g.fillStyle = '#999'; g.fillRect(12, -5, 8, 4); return;
       case 'pump': g.fillStyle = '#4a2c14'; g.fillRect(2, -3, 14, 6); g.fillStyle = '#6a6a74'; g.fillRect(14, -2, 30, 4); g.fillStyle = '#3a2410'; g.fillRect(24, -4, 10, 8); return;
@@ -159,7 +159,9 @@
       case 'garrafa': g.fillStyle = '#2f9e5a'; g.fillRect(6, -3, 16, 6); g.fillRect(22, -1.5, 12, 3); g.fillStyle = '#bff5d2'; g.fillRect(8, -2, 5, 2); return;
       case 'extintor': g.fillStyle = '#d02020'; g.fillRect(4, -5, 26, 10); g.fillStyle = '#222'; g.fillRect(30, -2, 8, 4); g.fillStyle = '#eee'; g.fillRect(12, -5, 3, 10); return;
     }
-    _wicon(g, w);
+    _wicon(g, w); };
+    g.save(); g.shadowColor = 'rgba(0,0,0,.62)'; g.shadowBlur = 2; g.shadowOffsetX = 1; g.shadowOffsetY = 2;
+    draw(); if (EXP.newWeapons.includes(w)) weaponFinish(g, w); g.restore();
   };
 
   // ================= CHEFES (dados) =================

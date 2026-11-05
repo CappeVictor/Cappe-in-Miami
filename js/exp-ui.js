@@ -146,6 +146,31 @@
   const _showMasks = showMasks; showMasks = function () { _showMasks(); refreshChar(); };
   refreshChar();
 
+  // Skins visuais independentes das máscaras e dos atributos do personagem.
+  const skinRow = document.createElement('div'); skinRow.id = 'skinRow'; skinRow.className = 'menu-row';
+  skinRow.innerHTML = '<b style="width:100%">Skin do personagem</b><div class="tabs" id="skinTabs" role="group" aria-label="Escolha uma skin"></div><p class="dica" id="skinInfo" style="width:100%;margin:.1rem 0">Cosmético; não altera atributos nem desbloqueios.</p>';
+  charRow.after(skinRow);
+  const stabs = $('skinTabs');
+  EXP.SKINS.forEach(s => {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.id = s.id;
+    b.setAttribute('aria-label', 'Skin ' + s.name);
+    b.innerHTML = '<canvas width="32" height="32" aria-hidden="true"></canvas><span>' + esc(s.name) + '</span>';
+    b.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;width:118px;height:72px;min-height:72px;padding:.25rem!important';
+    const preview = b.querySelector('canvas'), previewCtx = preview.getContext('2d');
+    preview.style.cssText = 'display:block;flex:0 0 32px;width:32px;height:32px;border:1px solid ' + s.detail + ';background:#171923;image-rendering:pixelated';
+    previewCtx.imageSmoothingEnabled = false; previewCtx.drawImage(buildPlayerFrame('idle', 0, 0, s), 0, 0, 32, 32);
+    b.onclick = () => { EXP.setSkin(s.id); refreshSkin(); };
+    stabs.appendChild(b);
+  });
+  function refreshSkin() {
+    const cur = EXP.curSkin(); [...stabs.children].forEach(b => {
+      const on = b.dataset.id === cur.id; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+    });
+    $('skinInfo').textContent = 'Visual: ' + cur.name + ' · cosmético; atributos, máscaras e progresso não mudam.';
+  }
+  const _showMasksSkin = showMasks; showMasks = function () { _showMasksSkin(); refreshSkin(); };
+  refreshSkin();
+
   // ---------- grade de máscaras ----------
   EXP.cols = 10; EXP.rebuildMaskGrid(); EXP.recheck();
 })();

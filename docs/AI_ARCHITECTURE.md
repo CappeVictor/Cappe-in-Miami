@@ -1,4 +1,10 @@
-# Arquitetura real — v51.0
+# Arquitetura real — v52.0
+
+`js/exp-core.js` fornece o catálogo cosmético `EXP.SKINS`, `EXP.curSkin()` e `EXP.setSkin(id)`. A preferência ocupa somente `settings.skin` no save v2; saves antigos recebem `classic` pelo merge de defaults. A máscara/personagem e sua aplicação de atributos continuam independentes. `js/exp-ui.js` mostra seleção por botões acessíveis na tela de máscaras. O renderer utiliza a paleta no sprite procedural e acentos no spritesheet, sem carregar recursos adicionais.
+
+O fallback procedural do jogador quantiza fases de animação e armazena até 128 canvases por combinação de skin/estado/fase; spritesheet existente continua sendo preferido. Isso evita reconstruir a grade de pixels a cada quadro quando uma imagem falha ao carregar.
+
+`weaponFinish` em `index.html` aplica detalhes de contorno, reflexo e partes funcionais às silhuetas Canvas existentes. O wrapper para armas adicionais chama o mesmo acabamento. O inventário segue compartilhado no coop local e `drawOnePlayer` desenha essa arma para P1 e P2.
 
 O loop mantém `rawDt` para medir atraso real e usa `dt` limitado apenas para a simulação. Depois de 120 amostras lentas, `EXP.perfTier` reduz efeitos decorativos; a configuração persistida continua intacta. Partículas e elementos ambientais consultam esse tier.
 
@@ -42,6 +48,8 @@ As janelas geradas ficam em `breakables`, com caixas marcadas com `g` no mesmo s
 `activeTarget` seleciona entre os jogadores vivos o ator mais próximo do inimigo. `focusActor` compartilha essa decisão com spawns de inimigos, armas, barris e suprimentos. A base, `exp-brain.js` e as classes de IA usam esses alvos para visão, perseguição e mira, evitando que o cooperativo continue mirando ou criando entidades em torno de um jogador morto.
 
 `addDoor` é usado por `wallH`, `wallV` e `buildFixed`; portanto toda abertura criada por dados de mapa também recebe objeto de porta, caixa de colisão e dimensões próprias para renderização.
+
+`spawnFloor` inclui o corredor central mesmo na primeira fase porque salas separadas por portas fechadas ainda não pertencem à região navegável do spawn. `allClear` exige `levelStats.total > 0`, impedindo que uma falha de spawn seja interpretada como vitória. `buildFixed` normaliza o spawn com `safeSpawnPos`, que tenta desobstrução próxima e, se preciso, pontos internos de salas.
 
 ## Inicialização
 HTML cria window.EXP com hooks vazios → dados base → maps.js → collision_sizes.js → script principal (define funções, carrega imagens, eventos, agenda requestAnimationFrame) → core → content → world → brain → modes → fx → music → ui → dicionários extra → i18n → acess → debug → shop → multi → online → registro do service worker no load. O servidor usa somente APIs nativas do Node.

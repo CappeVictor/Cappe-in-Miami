@@ -1,4 +1,7 @@
 # Performance — linha de base parcial
+## v52.0 — sem medição de FPS
+O acabamento das armas acrescenta poucas operações Canvas por arma desenhada e não introduz imagens, dependências nem partículas. O sprite procedural do personagem agora mantém no máximo 128 entradas visuais quantizadas, evitando reconstruir centenas de pixels em cada quadro no fallback; não há medição de FPS nesta sessão. Conferir custo/leitura em hardware modesto.
+
 Data: 04/11/2026. Meta: 60 FPS estáveis / 16,67 ms; 120 FPS é secundário. Hardware de referência informado pelo proprietário: Nitro V15, i9-13900H, RTX 4060, 16 GB. O ambiente de medição abaixo não representa automaticamente esse hardware nem um navegador.
 
 ## v40.0 — sem benchmark de desempenho nesta iteração

@@ -1,4 +1,13 @@
 # Changelog técnico
+## v52.0 — 05/11/2026
+- Quatro skins cosméticas selecionáveis são persistidas em `settings.skin` no save v2; seleção independente de personagem/máscara, sem atributos ou desbloqueios alterados.
+- A paleta cosmética colore o sprite procedural e fornece acentos visuais no spritesheet existente, sem assets externos.
+- Ícones de armas receberam contorno, reflexo, juntas e detalhes próprios para armas curtas, longas e revólveres; arma compartilhada agora também é desenhada para P2.
+- Fallback procedural de personagem reutiliza até 128 sprites em cache por estado/fase/skin, reduzindo novas alocações Canvas quando o spritesheet não carrega.
+- Corrigido bug reproduzido no navegador: portas fechadas isolavam as salas dos pontos de spawn da fase 1; com zero inimigos, a sala terminava sozinha. Corredor central participa dos spawns e `allClear` exige contagem inicial positiva.
+- Corrigido spawn dentro de parede no mapa fixo boate-b. Todos os 17 mapas fixos foram montados em Chromium e os spawns resultantes passaram em `hitWall`.
+- 54/54 regressões automatizadas passaram. Chromium confirmou estado `play`, nível 1 e 8 inimigos; campanha completa e multiplayer real seguem sem teste manual.
+
 ## v51.0 — 05/11/2026
 - Spawns de inimigos e pickups em modos cooperativos agora usam o jogador vivo como referência de distância e navegação; P2 não fica sem reforços por causa da posição de P1 morto.
 - Regressão adicionada para impedir regressão desse comportamento.

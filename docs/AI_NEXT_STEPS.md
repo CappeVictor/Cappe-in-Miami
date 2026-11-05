@@ -1,8 +1,8 @@
-# Próximas ações — v51.0
-1. Validar visualmente a partida solo depois de usar multiplayer e testar o caminho inverso.
-2. Validar criação/entrada/saída, cópia de código, latência exibida e reconexão entre dois navegadores.
-3. Medir FPS, CPU e memória em presets gráficos, chuva, névoa, apagão e combate intenso.
-4. Investigar custo de IA/colisão se quedas persistirem mesmo com efeitos reduzidos.
-5. Planejar protocolo autoritativo para mapa, combate, objetivos e progresso online.
-6. Auditar rotas e saídas alcançáveis nos mapas/campanhas.
+# Próximas ações — v52.0
+1. Validar visualmente skins e armas com spritesheet em navegador real; verificar contraste em combate.
+2. Jogar uma fase inicial, intermediária e final; testar menu, pausa, morte, vitória e transições.
+3. Validar criação/entrada/saída e reconexão online em dois navegadores.
+4. Medir FPS, CPU e memória em presets gráficos, clima e combate intenso.
+5. Investigar custo de IA/colisão se quedas persistirem mesmo com efeitos reduzidos.
+6. Planejar protocolo autoritativo para mapa, combate, objetivos e progresso online.
 7. Validar assets ausentes, acessibilidade e instalação real do service worker.

@@ -21,6 +21,12 @@ function environment(initial = {}, failKey = '') {
   return { ctx, storage, exp: ctx.EXP };
 }
 const sample = (level = 4) => ({ v: 2, level, xp: 23, stats: { kills: 77 }, settings: { musVol: .4 }, unl: ['test-mask'] });
+function declaration(source, signature) {
+  const start=source.indexOf(signature);if(start<0)throw Error(`declaração ausente: ${signature}`);
+  const open=source.indexOf('{',start);let depth=0;
+  for(let i=open;i<source.length;i++){if(source[i]==='{')depth++;else if(source[i]==='}'&&!--depth)return source.slice(start,i+1);}
+  throw Error(`declaração incompleta: ${signature}`);
+}
 const results = [];
 async function test(name, fn) {
   try { await fn(); results.push({ name, status: 'PASS' }); }
@@ -79,7 +85,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v51.0');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v52.0');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/server/server.js')).status,404);
     const badType=await apiRequest(server,'POST','/api/rooms','{}',{'content-type':'text/plain'});assert.equal(badType.status,415);
@@ -186,6 +192,51 @@ async function run() {
     const { exp } = environment({ [KEY]: JSON.stringify(sample()) });
     assert.equal(exp.save().stats.kills,77); assert.equal(exp.save().stats.deaths,0); assert.equal(exp.save().level,4);
     assert.equal(exp.save().unl[0],'test-mask');
+  });
+  await test('Skins cosméticas selecionam e persistem sem alterar progresso', () => {
+    const {ctx,exp,storage}=environment();
+    assert.equal(exp.curSkin().id,'classic');assert.equal(exp.setSkin('sunset'),true);assert.equal(exp.curSkin().id,'sunset');
+    assert.equal(exp.setSkin('skin-inexistente'),false);assert.equal(exp.curSkin().id,'sunset');
+    exp.flush(true);const saved=JSON.parse(storage.get(KEY));assert.equal(saved.settings.skin,'sunset');assert.equal(saved.level,1);
+    const restored=environment({[KEY]:storage.get(KEY)}).exp;assert.equal(restored.curSkin().id,'sunset');
+    const partial=environment({[KEY]:JSON.stringify(sample(7))}).exp;assert.equal(partial.save().level,7);assert.equal(partial.curSkin().id,'classic');
+  });
+  await test('Renderer aplica paletas cosméticas e desenha arma também para P2', () => {
+    const html=read('index.html'),core=read('js/exp-core.js'),content=read('js/exp-content.js');
+    const skinEnv=environment().exp,pal=html.match(/const PAL = \{[\s\S]*?\};/)?.[0];assert.ok(pal);
+    const frameFn=declaration(html,'function buildPlayerFrame(');
+    const pixels=()=>{const c={width:0,height:0,paint:[],getContext(){let fillStyle='';return {set fillStyle(v){fillStyle=v},get fillStyle(){return fillStyle},fillRect(x,y){c.paint.push([x,y,fillStyle])}}}};return c;};
+    const drawCtx={document:{createElement:()=>pixels()},window:{EXP:skinEnv},EXP:skinEnv,playerFrameCache:new Map()};vm.createContext(drawCtx);
+    vm.runInContext(pal+';'+frameFn,drawCtx);
+    const result=vm.runInContext("(()=>{const a=buildPlayerFrame('walk',1,.5,EXP.SKINS[0]);const b=buildPlayerFrame('walk',1.01,.5,EXP.SKINS[0]);const c=buildPlayerFrame('walk',1,.5,EXP.SKINS[1]);return [a,b,c]})()",drawCtx);
+    assert.equal(result[0],result[1],'fase equivalente reutiliza sprite em cache');assert.notEqual(result[0],result[2]);
+    assert.ok(result[0].paint.some(p=>p[2]!==result[2].paint.find(q=>q[0]===p[0]&&q[1]===p[1])?.[2]),'paletas produzem pixels de traje diferentes');
+    const weaponCalls=[],drawStub=new Proxy({}, {get:(o,k)=>o[k]||(()=>{}),set:(o,k,v)=>(o[k]=v,true)});
+    const drawOne=declaration(html,'function drawOnePlayer('),drawPlayerCtx={Math,CFG:{shadows:false,glow:false},hyp:Math.hypot,ctx:drawStub,cw:'pistola',wicon:(g,w)=>weaponCalls.push(w),PSHEET:{complete:false,naturalWidth:0},buildPlayerFrame:()=>({}),window:{EXP:skinEnv},EXP:skinEnv};
+    vm.createContext(drawPlayerCtx);vm.runInContext(drawOne,drawPlayerCtx);
+    vm.runInContext("drawOnePlayer({x:10,y:10,a:0,dead:false,anim:0,atk:0},false);drawOnePlayer({x:20,y:10,a:0,dead:false,anim:0,atk:0},true)",drawPlayerCtx);
+    assert.deepEqual(weaponCalls,['pistola','pistola'],'P1 e P2 desenham a arma equipada');
+    assert.match(html,/function weaponFinish\(g, w\)/);
+    assert.match(content,/draw\(\); if \(EXP\.newWeapons\.includes\(w\)\) weaponFinish\(g, w\)/);
+    assert.match(html,/g\.shadowColor = 'rgba\(0,0,0,\.62\)'/);assert.match(content,/g\.shadowColor = 'rgba\(0,0,0,\.62\)'/);
+    assert.match(core,/EXP\.SKINS = SKINS/);assert.match(core,/settings\.skin = id/);
+  });
+  await test('Spawn procedural não deixa a primeira sala vazia nem conclui sem inimigos', () => {
+    const html=read('index.html'), spawnFn=declaration(html,'function spawnFloor('), clearFn=declaration(html,'function allClear(');
+    const rooms=[{x:0,y:0,w:50,h:50}];rooms.hall={x:200,y:0,w:500,h:500};
+    const ctx={Math:Object.assign(Object.create(Math),{random:()=>.5}),focusActor:()=>({x:0,y:0}),reachMap:()=>((x)=>x>=100),
+      rooms,lvl:1,enemies:[],pickups:[],hitWall:()=>false,hyp:Math.hypot};vm.createContext(ctx);
+    vm.runInContext(spawnFn,ctx);vm.runInContext('spawnFloor(3,0)',ctx);
+    assert.ok(vm.runInContext('enemies.length',ctx)>0,'spawn deve usar o corredor alcançável quando as salas estão isoladas por portas');
+    const clearCtx={levelStats:{total:0},enemies:[],predio:[{enemies:[]}],andar:0};vm.createContext(clearCtx);vm.runInContext(clearFn,clearCtx);
+    assert.equal(vm.runInContext('allClear()',clearCtx),false,'mapa sem qualquer inimigo não pode ser marcado concluído');
+    clearCtx.levelStats.total=1;assert.equal(vm.runInContext('allClear()',clearCtx),true);
+  });
+  await test('Spawn de mapa fixo é deslocado para área livre quando coordenada original colide', () => {
+    const html=read('index.html'),fn=declaration(html,'function safeSpawnPos('),areas=[{x:100,y:100,w:200,h:200}],ctx={rooms:areas,
+      unstick(){},hitWall:(x,y)=>x<100||y<100,hyp:Math.hypot};vm.createContext(ctx);vm.runInContext(fn,ctx);
+    const point=vm.runInContext('safeSpawnPos(10,10,13)',ctx);assert.ok(point[0]>=100&&point[1]>=100);assert.equal(ctx.hitWall(point[0],point[1],13),false);
+    assert.match(html,/startPos = safeSpawnPos\(startPos\[0\], startPos\[1\]\)/);
   });
   await test('Migração legada preserva recorde e desbloqueio', () => {
     const { exp } = environment({ hm_hiscore:'12345', hm_unlock:'1' });
@@ -414,7 +465,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v51.0');
+    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v52.0');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
   });

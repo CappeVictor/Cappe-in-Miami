@@ -1,9 +1,10 @@
 # Backlog mestre — 04/11/2026
 
-21 itens distintos identificados por inspeção. Não há meta artificial de quantidade nesta rodada. Status Em teste significa implementação completa e testes automatizados aprovados, com validação de navegador pendente. P0 crítico; P1 muito alto; P2 alto; P3 médio; P4 baixo.
+22 itens distintos identificados por inspeção. Não há meta artificial de quantidade nesta rodada. Status Em teste significa implementação completa e testes automatizados aprovados, com validação de navegador pendente. P0 crítico; P1 muito alto; P2 alto; P3 médio; P4 baixo.
 
 | ID | Categoria | Descrição | Justificativa | Prioridade | Complexidade | Dependências | Arquivos | Critério de conclusão | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CIM-024 | Visual/UX | Skins cosméticas separadas de atributos e armas com leitura volumétrica; exibir arma de P2 | Aparência de papel e P2 sem representação da arma compartilhada | P2 | Baixa | Validação visual | js/exp-core.js; js/exp-ui.js; index.html; js/exp-content.js | Persistência v2, regressões, distinção das armas e coop cobertos; confirmar legibilidade no navegador | Em teste |
 | CIM-021 | Gráficos/interface | Respeitar antialiasing e ajustar tremor da câmera | Opção visual ignorada pelo wrapper e tremor sem ajuste gradual | P2 | Baixa | — | index.html; js/exp-ui.js; css/expansion.css | Preferência persistida, faixa validada e desenho respeita opção em regressões; conferir navegador | Em teste |
 | CIM-001 | Continuidade | Estabelecer diretriz, arquitetura e memória de projeto | Evitar repetição/perda de contexto | P1 | Baixa | — | AGENTS.md; docs/* | Documentos presentes e coerentes com código | Concluída |
 | CIM-002 | Combate coop | Encaminhar target no wrapper hit | Dano em P2 atingia P1 | P1 | Baixa | — | js/exp-fx.js | Teste de colete/dano P1/P2 passou; repetir em partida | Em teste |

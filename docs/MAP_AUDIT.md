@@ -1,4 +1,9 @@
-# Auditoria de mapas — v51
+# Auditoria de mapas — v52
+
+## Verificação de spawns — v52
+Os 17 mapas fixos restantes foram montados no navegador após as alterações. `boate-b` tinha o ponto inicial sobre uma parede; `safeSpawnPos` agora move esse ponto para um local livre. Após a correção, os 17 spawns passaram em `hitWall(..., 13)`. Para mapas procedurais, fase 1 iniciou com 8 inimigos, usando o corredor central quando as portas isolam as salas.
+
+Limite: a função `reachMap` considera portas fechadas como obstáculos sólidos. O teste em estado inicial não demonstra se todas as salas/saídas continuam conectadas depois de abrir portas; isso requer interação de jogo e segue pendente.
 
 Gerada em 05/11/2026. O jogo mantém mapas que não têm o padrão equivalente a 640×580; a tolerância é largura ±4 e altura ±8.
 
