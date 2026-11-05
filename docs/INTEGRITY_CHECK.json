@@ -1,0 +1,13 @@
+{
+  "sourceSha256": "5EDB9E11FB6E76FBC289246935A3A47AEFEFBE5179C1458DDA2711E5AA3246C8",
+  "assetsIdentical": 86,
+  "modifiedOriginalFiles": [
+    "README.md",
+    "index.html",
+    "js/exp-core.js",
+    "js/exp-fx.js",
+    "js/exp-multi.js",
+    "js/exp-ui.js",
+    "sw.js"
+  ]
+}

@@ -1,115 +1,248 @@
-# 🎮 Cappe in Miami
+# Cappe-in-Miami — v49.0 (colisão de portas em todos os mapas)
 
-## 📝 Sobre o Jogo
-**Cappe in Miami** é um jogo de ação tática acelerada construído inteiramente sobre tecnologias web nativas (**HTML5, Canvas 2D e JavaScript ES6 puro**). 
+Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
 
-No controle de **Cappe**, uma capivara altamente treinada e letal, o jogador deve se infiltrar em complexos criminosos fortemente protegidos, utilizando reflexos rápidos, precisão cirúrgica e um arsenal variado de armas brancas e de fogo para eliminar ameaças em cenários que testam tanto o planejamento estratégico quanto a velocidade mecânica.
+O relay online agora interpola posição e direção do outro avatar para reduzir saltos entre atualizações. As salas mostram quantos jogadores estão em partida e explicam que ambos precisam escolher o mesmo modo/mapa. Mapas, combate e progresso continuam locais.
 
-### ✨ Funcionalidades Principais
-* **Letalidade Extrema (One-Hit-Kill):** Erros são punidos instantaneamente; tanto o jogador quanto a grande maioria dos oponentes caem com um único golpe ou tiro certeiro.
-* **Sistema Avançado de Visão e Oclusão (Raycasting):** Linhas de visão dinâmicas realistas em tempo real, onde paredes, portas e estruturas bloqueiam e moldam os campos de visão de aliados e inimigos (Fog of War).
-* **Inteligência Artificial de Patrulha e Alerta:** Inimigos possuem rotas de patrulhamento estritas, reagem a estímulos sonoros (como tiros ou quebra de vidros) e entram em modo de perseguição agressiva ao detectar o intruso.
-* **Mecânicas de Arremesso e Desarmamento:** Ficou sem munição? Arremesse sua arma atual contra um oponente para nocauteá-lo temporariamente e roubar o equipamento dele antes que ele se levante.
-* **Variedade de Ambientes:** Avanço modular por fases simulando Boates (*Clubs*), complexos de escritórios, Hospitais, Delegacias e mansões de luxo.
+Para multiplayer com servidor, use Node.js 18+ e siga [server/README.md](server/README.md). O lobby lista salas disponíveis neste servidor, informa ocupação/partida, permite entrar pela lista ou pelo código e atualiza a listagem automaticamente. A lista não é um catálogo global da internet. O relay exibe o outro avatar; combate e simulação ainda não são sincronizados.
+
+## Entrega v49.0 — 05/11/2026
+
+- Corrigido o estado de colisão dos mapas: portas procedurais agora entram em `sol`, e portas de mapas fixos não herdam portas da sala anterior.
+- Corrigido o bug em que aberturas de paredes não criavam portas reais.
+- Portas dos mapas procedurais e fixos agora têm desenho, colisão, interação e dimensões consistentes.
+- 47/47 regressões automatizadas aprovadas.
+
+## Entrega v47.0 — 05/11/2026
+- IA do cooperativo troca para o jogador vivo mais próximo quando um jogador morre.
+- Mira preditiva e classes de inimigos usam o alvo ativo correto.
+- Erros de carregamento e promises são capturados desde o começo da página.
+- 45/45 regressões automatizadas continuam passando.
+
+## Entrega v46.0 — 05/11/2026
+- Janelas quebráveis nos mapas gerados: tiros e golpes abrem passagem, geram ruído e deixam estilhaços.
+- Perímetro visual e físico corrigido nos mapas Neon, inclusive no mapa do trailer.
+- Silhuetas de armas redesenhadas com detalhes próprios para facilitar reconhecimento.
+- Aviso de desempenho automático convertido em notificação discreta.
+
+## Entrega v45.0 — 04/11/2026
+- Saves criados por uma versão futura agora exibem aviso persistente de modo protegido na interface.
+- O estado `EXP.saveReadOnly()` fica exposto para a UI sem sobrescrever o progresso incompatível.
+- 44/44 regressões automatizadas aprovadas. FPS real ainda precisa de medição no navegador.
+
+## Histórico da entrega v44.0 — 04/11/2026
+- O ajuste automático agora mede o tempo de quadro real antes do limite de simulação; travamentos longos não são escondidos pelo `dt` truncado.
+- Após uma sequência lenta, o jogo reduz partículas, chuva, luzes e névoa decorativas temporariamente, preservando as preferências salvas.
+- Atualizações de partículas usam operações mais baratas e a resolução automática continua limitada a 1,5x.
+- 43/43 regressões automatizadas aprovadas. FPS real ainda precisa de medição no navegador.
+
+## Histórico da entrega v43.0 — 04/11/2026
+- Corrigido o bug em que “Jogar Solo” mantinha a preferência multiplayer salva e iniciava dois personagens; o fluxo solo agora limpa P2 e grava `multi=false` antes de começar.
+- Escala automática do Canvas limitada a 1,5x, evitando o custo de 2x em telas de alta densidade.
+- Poeira e cápsulas são desenhadas em lotes, reduzindo chamadas de desenho por quadro.
+- 42/42 regressões automatizadas aprovadas.
+
+## Histórico da entrega v42.0 — 04/11/2026
+- Corrigido o movimento remoto para manter o avatar entre snapshots, interpolar deslocamento/rotação e remover estado parado após 5 s sem dados.
+- Snapshots com revisão antiga são ignorados; lobby exibe tempo de resposta aproximado e idade da última posição.
+- Adicionado botão para copiar código da sala com fallback de seleção manual e instrução Ctrl+C.
+- Opção “reduzir flashes” também suprime relâmpagos e cintilações de tela.
+- 40/40 regressões aprovadas; rede real de duas máquinas não foi testada.
+
+## Histórico da entrega v41.0 — 04/11/2026
+- Movimento e rotação do avatar remoto interpolados entre atualizações para reduzir saltos e manter a animação de movimento.
+- Lobby mostra participantes que estão em partida e explica que modo/mapa precisam coincidir manualmente.
+- 39/39 regressões aprovadas; conexão real entre duas máquinas não foi testada.
+
+## Histórico da entrega v40.0 — 04/11/2026
+- Antialiasing agora respeita a configuração de qualidade escolhida durante os quadros do jogo; antes, um wrapper de desenho forçava suavização alta e ignorava a opção.
+- Nova configuração persistente permite regular a intensidade do tremor da câmera de 0 a 100%, preservando o interruptor geral de tremor.
+- Opções refinadas com foco visível, controles de faixa mais claros, painéis com acabamento neon e abas roláveis em celulares.
+- 39/39 regressões automatizadas aprovadas. Inspeção gráfica em navegador ainda não foi possível neste ambiente.
+
+## Histórico da entrega v39.0 — 04/11/2026
+- Recarga automática agora só inicia quando a preferência está ativada; o jogador ainda pode recarregar manualmente com C.
+- Volume mestre agora escala música e efeitos sem alterar os níveis individuais de cada canal.
+- Abas de opções aceitam setas, Home e End, mantêm foco previsível e expõem relações ARIA entre aba e painel.
+- 38/38 regressões automatizadas aprovadas. Áudio e navegação por teclado ainda precisam de validação em navegador real.
+
+## Histórico da entrega v38.0 — 04/11/2026
+- Lobby online lista salas abertas/lotadas e indica quando uma partida começou; lista atualiza a cada 5 segundos enquanto aberta e pode ser atualizada manualmente.
+- Salas com uma partida ativa ficam identificadas e não aceitam entrada tardia, pois mapas e combate ainda não são sincronizados.
+- Se o jogador cair da conexão, a sala deixa de aparecer como ativa após 60 s sem heartbeat, liberando a vaga antes da expiração geral de cinco minutos.
+- Preferências persistidas do jogo e do multiplayer local são validadas por tipo, faixa e opções aceitas antes de serem usadas, evitando configurações corrompidas.
+- A opção de zoom agora inclui o valor padrão real (0,9x), para não abrir sem uma seleção visível.
+- Servidor expõe somente código, nomes e ocupação na listagem; credenciais privadas continuam fora da resposta pública.
+- Colisão invisível nas quatro bordas do mundo impede jogadores e atores de saírem do mapa, inclusive em mapas sem paredes de perímetro.
+- Spawns das salas Neon são ajustados para dentro do limite seguro e reposicionados se iniciarem dentro de uma parede.
+- Corrigidos layout e uso da lista em telas estreitas; botões identificam salas cheias e desativam entrada duplicada.
+- 36/36 regressões automatizadas aprovadas, incluindo lobby, presença expirada, preferências inválidas e spawns reais dos 74 mapas Neon; teste TCP e navegador multiusuário continuam pendentes neste ambiente.
+
+## Histórico da entrega v37.0 — 04/11/2026
+- Corrigido o ciclo de vida de jogadores no cooperativo e a saída pelo sobrevivente.
+- P2 agora procura spawn seguro e pode usar tiro e armas com as regras do inventário compartilhado.
+- Correções anteriores de dano e controles P1/P2 continuam incluídas.
+- Saves validados, backups preservados e restauração separada da recarga de arma.
+- Manifesto offline corrigido e cache limitado à instalação do jogo.
+- Servidor Node sem dependências, lobby por código e relay de presença/posição para até dois navegadores.
+- Tokens privados não aparecem mais no estado público; sessão pode ser retomada ao recarregar a aba, e falhas temporárias tentam reconectar automaticamente.
+- Inatividade, tamanho/tipo de payload, cadência de atualizações e esperas penduradas são tratados no servidor.
+- 30 testes automatizados aprovados, incluindo chamadas diretas às rotas HTTP com respostas simuladas; conexão TCP e navegador ainda precisam de validação local.
+- Documentação permanente em docs/ e protocolo em AGENTS.md.
+- Microbenchmark sintético: `node tests/benchmark.cjs`; não mede FPS.
+
+Leia [o relatório técnico](docs/RELATORIO_TECNICO.md), [os testes](docs/AI_TESTS.md) e [as pendências](docs/AI_KNOWN_ISSUES.md). A execução de partidas e o offline real ainda precisam ser verificados no navegador; esta entrega não declara o multiplayer integralmente corrigido.
+
+A distribuição original estava numa pasta v30, mas já incluía o changelog v33. O histórico abaixo foi preservado. O formato do save continua v2. Para manter progresso entre versões, use a mesma origem do navegador ou exporte o save pelo Perfil & Coleção → Dados antes de mudar de endereço; não limpe os dados do navegador.
+
+## Histórico: novidades v30
+- **Menu redesenhado**: controles separados (solo / multiplayer), botão dedicado de Multiplayer Local, melhor hierarquia visual.
+- **Multiplayer Local (2 jogadores)**:
+  - P1: WASD + Mouse (mirar e atirar)
+  - P2: Setas + Ctrl Direito (atirar) / . (soco) / / (pegar) / ; (largar)
+  - Câmera segue o ponto médio (configurável: P1, P2 ou médio)
+  - Modo de vidas: compartilhadas ou independentes
+  - Fogo amigo opcional
+- **Mais configurações** em Opções:
+  - Seção MULTIPLAYER LOCAL completa
+  - Volume mestre, sensibilidade do mouse, inverter Y
+  - Mira customizada (cruz) com opacidade
+  - Recarregar automático
+  - Contador de FPS
+- Arquivo novo: `js/exp-multi.js`
+
+## Estrutura
+- `index.html`: jogo base (inalterado, exceto 10 ganchos `EXP.*`).
+- `js/maps.js`, `js/collision_sizes.js`: mapas e colisões originais.
+- `js/exp-core.js`: salvamento v2 (backup, migração, exportar/importar), XP, perks, conquistas, ranking.
+- `js/exp-content.js`: 30 máscaras, 23 armas, 6 chefes, regras de desbloqueio.
+- `js/exp-world.js`: IA por classe, chefes, barris, câmeras/alarme, eventos, recarga.
+- `js/exp-modes.js`: 8 modos novos + Diário/Personalizado, notas até SS, resumo por sala, HUD.
+- `js/exp-fx.js`: clima, luzes, escuridão, transições, SFX, música dinâmica, volumes.
+- `js/exp-ui.js`: telas de modos, perfil/coleção, resumo, resultado, opções.
+- `js/exp-debug.js`: ferramentas de desenvolvedor (desligadas por padrão).
+- `css/expansion.css`: estilos das telas novas.
+- `assets/`: inalterado. As máscaras novas são geradas por código.
+
+## Controles novos
+`C` recarregar · `B` (na pausa) voltar ao menu.
+
+## Modo desenvolvedor
+Abra `index.html?dev=1`. F3 painel · F4 colisões · F6 IA · F7 próximo mapa · F8 reiniciar · F9 erros · F10 chefe.
+
+## Salvamento
+Automático em `localStorage` (`hm_save_v2`) com backup rotativo (`hm_save_v2_bak`). Dados da v4 (recorde, desbloqueio) são migrados. Perfil & Coleção → Dados exporta/importa o save.
+
+Backup do projeto original: ver o ZIP `Cappe-in-Miami-v4-original.zip`.
+
+## v5.1
+- `docs/CODIGO_NOVO.md`: todo o código novo da campanha em tiles, personagens, IA e vidros, separado por arquivo.
+- Personagem: escolhido na tela de máscaras. Campanha: Modos de Jogo → Campanha: 3 Fases.
+- Tiles de `TILE_LEVELS` (maps.js): 0 chão, 1 parede, 2 vidro, 3 porta, 4 início, 5 inimigo corpo a corpo, 6 inimigo armado. As GRIDS antigas do index.html não mudaram (lá 2 continua parede).
+
+## v14 — organização de menus
+- Menu principal agora fica inteiro no `index.html`, em dois grupos: **Jogar / Modos de Jogo** (ações principais) e **Modo História / Perfil & Coleção** (telas secundárias). Opções fica abaixo.
+- Tela de Opções montada no HTML: VÍDEO (inclui tamanho da tela), JOGABILIDADE, ÁUDIO & DADOS, IDIOMA. O JS só liga os eventos.
+- Lista de controles do menu inclui a linha de `C` / `ESC` / `B` diretamente no HTML.
+- Estilos que estavam no JS (rolagem de Opções) foram para `css/expansion.css`.
+
+## v15 — otimização de desempenho
+- `js/maps.js`: os tiles de cada mapa agora são decodificados só quando o mapa é usado (antes eram decodificados todos os 159 na abertura). Carregamento inicial ~2,8x mais rápido. Dados verificados: os 159 mapas são idênticos aos da v14.
+- Inimigos: o brilho do anel usa um traço largo translúcido em vez de `shadowBlur` a cada quadro (visual parecido, bem mais barato).
+- Sangue, faíscas e efeitos de texto são compactados no próprio array, sem criar novos arrays a cada quadro.
+- Escala máxima do canvas em telas de alta densidade reduzida de 2,5x para 2x.
+- Sugestão para hospedagem: servir o `maps.js` com compressão gzip (o arquivo de texto cai bastante de tamanho).
+
+## v16 — carregamento
+- Máscaras novas são desenhadas em canvas direto (antes: 23 PNGs gerados via toDataURL na abertura). Visual igual.
+- Fonte do Google não bloqueia mais a primeira renderização (carrega em segundo plano; com fallback).
+- `sw.js`: cache offline. Só funciona em http(s) (ex.: hospedagem ou Live Server); abrindo o index.html direto (file://) o jogo funciona normalmente, sem cache.
+- ATENÇÃO: ao publicar uma versão nova, troque o número em `const CACHE = 'cappe-vNN'` dentro de `sw.js`, senão quem já visitou continua com a versão antiga.
+
+## v17 — PCs fracos
+- Ajuste automático: se a partida ficar abaixo de ~38 FPS nos primeiros 240 quadros, aplica "Desempenho máximo" uma única vez (marcado em `hm_perf_auto`). Para voltar, escolha outra predefinição em Opções.
+- Filtro de brilho do canvas só é aplicado quando diferente de 100% (evita composição extra a cada quadro).
+
+## v18 — otimização profunda (medida no Chromium, renderização por software)
+Medição: 420 quadros por cenário, mesmo roteiro de jogo, v17 vs v18. Os testes de equivalência (colisão e distâncias) deram 0 divergências em 40 mil amostras.
+- **Lanterna / escuridão**: os 3 gradientes radiais criados por quadro viraram sprites pré-renderizados, e a camada escura passou a meia resolução (4x menos pixels). Custo de `draw` no escuro: ~8 ms → ~0,6 ms.
+- **Luzes de neon e clarão de tiro**: sprite guardado em cada luz, intensidade via `globalAlpha` (antes: 1 gradiente novo por luz por quadro).
+- **Sangue parado**: desenhado uma única vez numa camada (antes: até 1.200 arcos a cada quadro). O corte do limite agora é em lote (1.500 → 1.200), para a camada quase nunca ser refeita.
+- **Chão, móveis e sangue**: só a área visível da tela é copiada por quadro (`drawImage` com recorte).
+- **`shadowBlur` removido de tudo que roda por quadro** (portas, escadas/elevador, itens, saída, atordoamento, barris, chefes, inimigos sem sprite, combo, "GO TO CAR", modos). Substituído por halos translúcidos. Os de geração de tiles/máscaras (rodam uma vez) foram mantidos.
+- **Sem alocação por quadro**: `slice()`/`filter()` nos laços de balas, inimigos, itens, arremessos, textos flutuantes e ruídos trocados por cópias reutilizáveis e compactação no próprio array; `forEach` dos fantasmas virou `for`; `tx()` não chama mais `getTransform()` (criava uma matriz por texto) nem concatena a chave do cache.
+- **Distâncias**: `Math.hypot` (lento no V8) → `hyp()`; separação entre inimigos e escuta de ruídos comparam distância ao quadrado, sem raiz.
+- **Linha de visão da IA com vidro**: usa a mesma grade espacial de colisão (`hitWallNG`) em vez de varrer todos os sólidos, e não copia mais o array de sólidos a cada atualização.
+- **Pausa**: a cena estática é redesenhada 5x/s em vez de 60x/s.
+- **CSS**: scanlines sem `mix-blend-mode` (visual idêntico, sem recomposição extra) e a grade 3D do fundo para de animar durante a partida (antes repintava a tela inteira todo quadro).
+- `sw.js`: cache `cappe-v18`.
+
+## v19 — segunda rodada de otimização
+Perfil de CPU na v18: a thread principal ficou ~93% ociosa (o JavaScript deixou de ser o gargalo); o que restava era composição/GPU.
+- **Scanlines CRT**: durante a partida ficam dentro da vinheta (que já era desenhada todo quadro) em vez de uma camada DOM sobre o canvas, que custava cerca de 40% do FPS em máquinas sem GPU forte. Nos menus a camada CSS continua. A opção "Scanlines CRT" segue funcionando.
+- **Faíscas** em lote: 1 preenchimento por cor e nível de transparência (6 níveis), em vez de 1 desenho por faísca.
+- **Tradução** (`tr()`): resultado guardado por texto (antes ordenava as chaves do dicionário a cada chamada fora do português) e `tx()` sem array de argumentos por chamada.
+- **Rótulo de clima** do canto: vira imagem guardada em vez de `fillText` + `toUpperCase` por quadro.
+- `sw.js`: cache `cappe-v19`.
+
+## v26 — IA e gráficos
+- **Perseguição inteligente** (`js/exp-core.js`, `EXP.steer`): o inimigo só anda em linha reta quando o caminho está livre com o seu tamanho real (raio 13). Se houver parede no meio, segue o caminho calculado. Antes, em perseguição ele andava direto até o jogador e batia nas paredes e quinas.
+- **Pinça**: inimigos que ainda estão longe pegam um dos dois lados do jogador, em vez de formar fila atrás.
+- **Anti-travamento**: se um inimigo fica sem avançar por 0,7 s, replaneja o caminho e dá um passo lateral.
+- **Grade de navegação** com folga igual ao raio do inimigo (14 px); o caminho começa no nó mais próximo, não no início.
+- **Corredores** também usam o caminho; **chefe** para a investida ao bater numa parede.
+- **Gráficos**: suavização ligada nos sprites rotacionados (jogador, inimigos, armas, portas, neon) e no zoom, o que remove o serrilhado. Desempenho igual ao da v25.
+- `sw.js`: cache `cappe-v26`.
+
+## v27 — bots, mira, idioma e título
+- **Nome**: menu e aba agora são "Cappe-in-Miami".
+- **Idioma padrão**: português do Brasil, independente do idioma do navegador. Quem escolher outro idioma em Opções mantém a escolha.
+- **Mira dos bots** (`js/exp-brain.js`): antecipação do movimento do jogador limitada e proporcional à inteligência. Antes, o cálculo ia longe demais e as balas iam para o vazio. O erro de mira diminui conforme a dificuldade, e o leque de tiro da espingarda ficou mais estreito.
+- **Reação**: o bot só atira depois de um tempo de reação após te ver (0,7 s no fácil, cerca de 0,4 s no difícil).
+- **Esquiva**: bots mais espertos desviam de balas que vêm na direção deles.
+- **Inteligência por dificuldade** (`DIF.iq`): fácil 0,15, médio 0,4, difícil 0,6, Hardcore 0,72, com teto de 0,75 para o nível mais alto.
+- **Qualidade**: escala de renderização padrão mínima de 1,5x e suavização em alta qualidade. O modo "Desempenho máximo" (também ativado automaticamente em PCs fracos) volta para 1x.
+- `sw.js`: cache `cappe-v27`.
+
+## v28 — vendedor de armas
+- **Créditos**: +10 por abate e bônus ao limpar a sala. Zerados quando uma partida Arcade começa ou quando uma campanha de História começa (não a cada capítulo).
+- **Quando aparece**: no Arcade, nas fases 5, 10, 15...; na História, nos capítulos 3, 6, 9... Surge no meio da fase, depois que metade dos inimigos cai.
+- **Como usar**: chegue perto e aperte E. Teclas 1-9 compram, ESC fecha.
+- **Itens**: munição (recarga), colete extra, faca, pistola, revólver, escopeta, SMG, uzi, rifle.
+- Ajustes: `EXP.shop` e `ITEMS` em `js/exp-shop.js`; a frequência fica em `eligibleLevel()`.
+- `sw.js`: cache `cappe-v28`.
 
 ---
 
-## 👥 Personagens e Facções
+## 🆕 Novidades v29
 
-O universo de *Cappe in Miami* é habitado por animais antropomórficos com sprites customizados e funções bem definidas no ecossistema da gameplay:
+* **Vendedor sem menu (`js/exp-shop.js`):** o vendedor cai perto do jogador com três cartas no chão — OFENSIVA (arma aleatória), DEFENSIVA (colete) e UTILIDADE (munição). Compra-se passando por cima. O mundo não para. Ele fica 4s e vai embora.
+* **Trilha sonora escolhível (`js/exp-music.js`):** em Opções → TRILHA SONORA, escolha uma faixa fixa ou deixe em automática. Novos gêneros sintetizados: Dub Techno, Industrial Techno, Dark Disco e Cyberpunk Midtempo. Chefes mantêm a trilha própria. A escolha fica salva no navegador.
 
-### 🗡️ Protagonista (Jogador)
-* **Cappe (A Capivara):** O executor definitivo. Silencioso, ágil e adaptável a qualquer arma disponível no chão.
+## 🆕 v30
 
-### 🎭 Operativos e Máscaras (Assets Culto)
-O ecossistema gráfico conta com representações de animais icônicos que alteram a percepção estética e contextual das missões:
-* **Lobo 🐺 / Leão 🦁 / Tigre 🐯 / Coelho 🐰 / Coruja 🦉 / Macaco 🐒 / Galo ⚗️ / Cavalo 🐴 / Porco 🐷 / Elefante 🐘 / Sapo 🐸**
+* **Madame Piranha (vendedora):** personagem com falas de chegada, compra, falta de crédito e saída. Aparece no máximo uma vez por fase, não reaparece depois de sair e fica 4s.
+* **Correções:** o vendedor não volta sem parar depois de sair; Tony (sem armas de fogo) não recebe mais armas na loja; a carta de munição vira faca quando você não tem arma de fogo.
+* **Preços:** sobem 6% por fase.
+* **História reescrita:** novos personagens, lugares e capítulos. Mapas e progressão iguais.
 
-### 👑 Inimigos e Ameaças (Enemies)
-* **Club Walkers (Gângsteres de Boate):** Patrulham armados com bastões e armas de curto alcance. Movimentam-se de forma previsível até serem alertados.
-* **Uzi / M16 Patrols (Patrulhas Armadas):** Inimigos perigosos de longo alcance que disparam rajadas assim que o jogador entra em seu campo de visão.
-* **SWAT / Bodyguards (Unidades Pesadas):** Oponentes blindados que exigem aproximação furtiva ou reações ainda mais rápidas para serem neutralizados.
-* **Chefes de Fase (Stage Bosses):** Alvos de alto valor com arenas e comportamentos únicos de combate, incluindo veículos de fuga e mecânicas integradas ao cenário (*Boss Car 2*, *Boss Fountain*).
+## 🆕 v31 (loja)
 
----
+* **3 mercadorias + REROLAR:** a loja tem três itens (Ofensiva, Defensiva, Utilidade) e uma carta de reroll.
+* **Reroll:** 1 grátis por partida. Depois custa 40 cr, subindo 10 cr a cada 30s da partida.
+* **Raridade:** cada reroll na mesma visita aumenta a chance de itens raros e épicos. Novos itens: Caixa de munição (dobra a munição), Colete reforçado (+2 de escudo).
 
-## 🖥️ Requisitos do Sistema
+## 🆕 v32 (loja)
 
-Por ser um projeto puramente baseado em Canvas do navegador, o jogo é extremamente leve e altamente acessível.
+* **Descrição dos itens:** ao chegar perto de uma mercadoria, aparece o que ela faz.
+* **Congelamento de impacto:** compra e reroll param o mundo por 50–70 ms, para o clique ter peso.
 
-| Componente | Requisitos Mínimos | Requisitos Recomendados |
-| :--- | :--- | :--- |
-| **Sistema Operacional** | Windows 7 / macOS 10.12 / Linux | Windows 10/11 / macOS recente |
-| **Processador** | Intel Core i3 Dual-Core de 2.0 GHz | Intel Core i5 Quad-Core ou superior |
-| **Memória RAM** | 4 GB RAM | 8 GB RAM |
-| **Navegador** | Google Chrome ou Firefox atualizados | Google Chrome, Opera ou Firefox com aceleração de hardware ativa |
-| **Armazenamento** | 50 MB de espaço livre | 50 MB de espaço disponível (SSD) |
 
----
-
-## ⚙️ Arquitetura de Código (Módulos JavaScript)
-
-O projeto adota uma arquitetura limpa, modular e orientada a eventos para garantir máxima performance de renderização no Canvas:
-
-* **`index.html` / `expansion.css`:** O ponto de entrada da aplicação. Configura o contêiner do Canvas e gerencia a interface responsiva de menus usando estilos modernos.
-* **`js/maps.js`:** Banco de dados geométrico do jogo. Contém a definição das matrizes estruturais de paredes, posicionamento de portas e coordenadas de spawn de itens/inimigos para cada andar.
-* **`js/exp-core.js`:** O cérebro do jogo. Controla o Game Loop principal, regulando as taxas de atualização lógica (`update`) e desenho na tela (`render`) com suporte a sincronização via `requestAnimationFrame`.
-* **`js/exp-world.js`:** Motor de física e colisão. Gerencia caixas de colisão delimitadoras (*Bounding Boxes*), o sistema de raycasting de visão e resolve as interações físicas entre o jogador e as paredes.
-* **`js/exp-content.js` & `js/collision_sizes.js`:** Dicionários de configuração de dados. Armazenam as dimensões exatas de colisão de objetos estáticos (camas, mesas, sofás hospitalares) e folhas de sprites (*Spritesheets*).
-* **`js/exp-fx.js`:** Motor de efeitos visuais. Gerencia poças de sangue procedurais, partículas de cartuchos deflagrados, flashes de disparos (*muzzle flashes*) e tremores de tela (*screen shake*).
-* **`js/exp-modes.js` & `js/exp-ui.js`:** Máquina de estados do jogo. Controla as transições entre os estados de Menu, Gameplay, Pausa, Game Over e Vitória, além de desenhar o HUD dinâmico na tela.
-* **`js/exp-debug.js`:** Ferramentas de desenvolvimento. Permite a renderização visual das linhas de visão e caixas de colisão em tempo real para fins de balanceamento de fases.
-
----
-
-## 🕹️ Controles do Jogo
-
-### Teclado e Mouse (Padrão)
-* **`W, A, S, D`**: Movimentação do personagem pelo mapa.
-* **`Movimento do Mouse`**: Mira e rotaciona o campo de visão em 360 graus.
-* **`Clique Esquerdo (LMB)`**: Ataque físico (com arma branca) ou disparo de arma de fogo.
-* **`Clique Direito (RMB)`**: Arremessa a arma atual na direção do ponteiro / Coleta uma nova arma do chão.
-* **`Barra de Espaço`**: Execução rápida no chão (quando um inimigo estiver caído ou nocauteado).
-* **`Shift (Segurar)`**: Desloca a câmera na direção do mouse para estender o campo de visão panorâmico.
-* **`R`**: Reinício instantâneo da fase (Rápido Respawn).
-* **`ESC`**: Pausa o jogo e exibe o painel de opções.
-
----
-
-## 🚀 Como Executar o Projeto Localmente
-
-Devido às restrições de segurança de navegadores modernos (CORS) ao carregar scripts e assets locais via protocolo `file://`, é altamente recomendado rodar o jogo através de um servidor local simples.
-
-### Passo 1: Clonar o Repositório
-```bash
-git clone https://github.com
-cd Cappe-in-Miami
-```
-
-### Passo 2: Iniciar um Servidor Local
-Escolha um dos métodos abaixo dependendo do ambiente instalado em sua máquina:
-
-* **Utilizando Python (3.x):**
-  ```bash
-  python -m http.server 8000
-  ```
-* **Utilizando Node.js (via http-server):**
-  ```bash
-  npx http-server -p 8000
-  ```
-* **Utilizando Visual Studio Code:**
-  Instale a extensão **Live Server**, abra a pasta do projeto e clique no botão **"Go Live"** no canto inferior direito do editor.
-
-### Passo 3: Jogar
-Abra seu navegador de preferência e navegue até o endereço local correspondente (geralmente `http://localhost:8000`).
-
----
-
-## ✒️ Autores e Créditos
-* **[Victor Cappellesso e Davi Gehart]** - *Programação de Sistemas, Design de Fases, Arquitetura e Engenharia do Jogo*.
-* **Dennaton Games & Devolver Digital** - *Criadores originais da franquia Hotline Miami, cuja direção de arte, trilha sonora e estilo de jogabilidade serviram como base para este projeto acadêmico/fã*.
-
----
-
-## 📄 Licença
-Este é um projeto sem fins lucrativos desenvolvido estritamente para propósitos de estudo, portfólio e entretenimento de fãs. Todos os direitos associados à franquia original pertencem aos seus respectivos criadores legais.
+## v33 — melhorias incrementais (03/11/2026)
+- Mantido todo o conteúdo, arquivos, mapas, modos, personagens, sistemas e recursos existentes.
+- Adicionadas 8 trilhas instrumentais originais geradas em tempo real pela Web Audio API: Neon Boulevard, Blood Moon Drive, Outrun Memories, Concrete Dreams, After Hours, Toxic Skyline, VHS Sunset e Noir Pursuit.
+- As novas faixas aparecem automaticamente no seletor **Opções → Trilha Sonora**. A opção Automática e a trilha especial dos chefes continuam funcionando.
+- Refinado o menu principal: hierarquia visual, agrupamento dos botões, leitura dos controles e melhor aproveitamento do espaço.
+- Melhorada a adaptação para telas menores e telas com pouca altura; os cartões de modos, opções e formulários também receberam ajustes.
+- Ajustes de foco, estados desabilitados, feedback de clique e rolagem das telas para facilitar a navegação.
+- Validada a sintaxe de todos os arquivos JavaScript com Node.js. A execução completa ainda deve ser conferida no navegador, pois depende de interação, áudio e APIs do navegador.
