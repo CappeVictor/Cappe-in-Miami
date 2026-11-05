@@ -6,6 +6,7 @@
   'use strict';
   const EXP = window.EXP;
   const rnd = Math.random, TAU = Math.PI * 2;
+  const focusActor = () => EXP.focusActor ? EXP.focusActor() : P;
 
   // ---------- estado do mundo (arrays reaproveitados) ----------
   const WLD = { barrels: [], cams: [], rings: [], alarmT: 0, evT: 0, evDone: false, blackout: 0, boss: null, bossDef: null, flicker: 0, enemyCount0: 0, retreaters: 0, doorSfx: 0 };
@@ -17,9 +18,10 @@
 
   // ---------- utilidades ----------
   function randSpot(reach, minFromP, margin) {
+    const focus = focusActor();
     for (let t = 0; t < 260; t++) {
       const x = 40 + rnd() * (WW - 80), y = 40 + rnd() * (WH - 80);
-      if (!hitWall(x, y, margin || 24) && reach(x, y) && hyp(x - P.x, y - P.y) >= (minFromP || 160)) return [x, y];
+      if (!hitWall(x, y, margin || 24) && reach(x, y) && hyp(x - focus.x, y - focus.y) >= (minFromP || 160)) return [x, y];
     }
     return null;
   }

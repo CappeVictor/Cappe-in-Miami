@@ -1,6 +1,6 @@
 /* Cappe in Miami - Expansão | DEPURAÇÃO
    DESLIGADA por padrão. Ative abrindo o jogo com  index.html?dev=1  (ou localStorage hm_dev=1).
-   F3 painel · F4 colisões · F6 rotas/IA · F7 próximo mapa · F8 reinício rápido · F9 log de erros · F10 chefe */
+   F3 painel · F4 colisões · F6 rotas/IA · F7 próximo mapa · F9 log de erros · F10 chefe */
 (function () {
   'use strict';
   const EXP = window.EXP;

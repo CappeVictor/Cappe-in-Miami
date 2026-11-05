@@ -1,4 +1,4 @@
-# Auditoria de mapas — v50
+# Auditoria de mapas — v51
 
 Gerada em 05/11/2026. O jogo mantém mapas que não têm o padrão equivalente a 640×580; a tolerância é largura ±4 e altura ±8.
 

@@ -203,7 +203,7 @@ button { touch-action: manipulation; }
     <canvas id="c" width="960" height="600" aria-label="Área do jogo"></canvas>
 
     <section id="menu" class="overlay">
-      <p class="tag">Miami, 1989 · v50</p>
+      <p class="tag">Miami, 1989 · v51</p>
       <h1>Cappe-in-Miami</h1>
       <p class="bemvindo">Seja bem-vindo!</p>
       <p class="credito">Feito por <strong>Victor Cappellesso</strong> e <strong>Davi Gehart</strong></p>
@@ -914,6 +914,8 @@ function activeTarget(x = P?.x || 0, y = P?.y || 0) {
   return targets[0];
 }
 window.EXP.targetActor = activeTarget;
+function focusActor() { return activeTarget(P?.x || 0, P?.y || 0) || P; }
+window.EXP.focusActor = focusActor;
 function addBreakable(x, y, w, h, kind = 'janela') {
   const box = [x, y, w, h]; box.g = 1;
   breakables.push({ x, y, w, h, box, kind, hp: 1, broken: false });
@@ -1347,20 +1349,20 @@ function buildFloor(n, idx) {
 }
 function allClear() { return enemies.length === 0 && predio.every((f, i) => i === andar || f.enemies.length === 0); }
 function spawnFloor(n, k) {   // inimigos e armas do andar que está carregado agora
-  const reach = reachMap(P.x, P.y), spots = rooms.slice();
+  const focus = focusActor(), reach = reachMap(focus.x, focus.y), spots = rooms.slice();
   if (lvl >= 2 && rooms.hall) spots.push(rooms.hall);
   for (let tries = 0; enemies.length < n && tries < 3000; tries++) {
     const r = spots[Math.floor(Math.random() * spots.length)];
     const x = r.x + 20 + Math.random() * (r.w - 40), y = r.y + 20 + Math.random() * (r.h - 40);
     const far = tries < 1500 ? 300 : 180;
-    if (hitWall(x, y, 28) || !reach(x, y) || hyp(x - P.x, y - P.y) < far || enemies.some(o => hyp(o.x - x, o.y - y) < 36)) continue;
+    if (hitWall(x, y, 28) || !reach(x, y) || hyp(x - focus.x, y - focus.y) < far || enemies.some(o => hyp(o.x - x, o.y - y) < 36)) continue;
     const q = Math.random(), type = lvl >= 4 && q < .2 ? 'shot' : q < .6 ? 'gun' : 'bat';
     enemies.push({ x, y, r: 13, a: Math.random() * 6.28, type, cd: 1 + Math.random(), alert: false, state: 'IDLE', stateT: 0, stun: 0, lkp: null, heard: null, searchT: 0 });
   }
   const pool = ['taco','taco','faca','faca','cano','martelo','pe_de_cabra','escopeta','smg','pistola','revolver','rifle','uzi'], ammoW = { escopeta: 6, smg: 24, pistola: 8, revolver: 6, rifle: 10, uzi: 24 };
   for (let i = 0, t = 0; i < k && t < 600; t++) {
     const r = rooms[Math.floor(Math.random() * rooms.length)], x = r.x + 20 + Math.random() * (r.w - 40), y = r.y + 20 + Math.random() * (r.h - 40);
-    if (hitWall(x, y, 16) || !reach(x, y) || hyp(x - P.x, y - P.y) < 120) continue;
+    if (hitWall(x, y, 16) || !reach(x, y) || hyp(x - focus.x, y - focus.y) < 120) continue;
     const w = pool[Math.floor(Math.random() * pool.length)]; pickups.push({ x, y, w, n: ammoW[w] || 0, a: Math.random() * 6.28 }); i++;
   }
 }

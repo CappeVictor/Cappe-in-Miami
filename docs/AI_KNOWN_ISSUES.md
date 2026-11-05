@@ -1,7 +1,7 @@
 # Problemas conhecidos
 Confirmados por inspeção, salvo quando descritos como hipótese. Referências ao backlog são estáveis.
 
-v46 corrigiu as janelas dos mapas gerados, o perímetro visual/físico dos mapas Neon e o aviso central de desempenho. A v47 corrigiu o alvo ativo da IA no cooperativo e a captura de erros iniciais. A v48 corrigiu paredes no lugar de portas nos mapas procedurais e fixos. A v49 corrigiu portas que não entravam na colisão procedural e portas antigas herdadas entre mapas fixos. A v50 corrigiu a proteção da primeira fase, removeu o reinício por R e filtrou mapas equivalentes a 640×580. A validação visual em navegador real continua pendente.
+v46 corrigiu as janelas dos mapas gerados, o perímetro visual/físico dos mapas Neon e o aviso central de desempenho. A v47 corrigiu o alvo ativo da IA no cooperativo e a captura de erros iniciais. A v48 corrigiu paredes no lugar de portas nos mapas procedurais e fixos. A v49 corrigiu portas que não entravam na colisão procedural e portas antigas herdadas entre mapas fixos. A v50 corrigiu a proteção da primeira fase, removeu o reinício por R e filtrou mapas equivalentes a 640×580. A v51 corrigiu a referência de spawns no jogador vivo do cooperativo. A validação visual em navegador real continua pendente.
 
 | ID | Evidência / impacto | Próxima validação |
 | --- | --- | --- |

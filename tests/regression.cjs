@@ -79,7 +79,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v50.0');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v51.0');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/server/server.js')).status,404);
     const badType=await apiRequest(server,'POST','/api/rooms','{}',{'content-type':'text/plain'});assert.equal(badType.status,415);
@@ -368,6 +368,13 @@ async function run() {
     assert.match(world,/const target = targetFor\(e\.x, e\.y\)/);
     assert.match(debug,/window\.__earlyErrors\.splice\(0\)/);
   });
+  await test('Spawns cooperativos usam o jogador vivo como referência', () => {
+    const html=read('index.html'), world=read('js/exp-world.js');
+    assert.match(html,/function focusActor\(\) \{ return activeTarget\(P\?\.x \|\| 0, P\?\.y \|\| 0\) \|\| P; \}/);
+    assert.match(html,/const focus = focusActor\(\), reach = reachMap\(focus\.x, focus\.y\)/);
+    assert.match(world,/const focusActor = \(\) => EXP\.focusActor \? EXP\.focusActor\(\) : P/);
+    assert.match(world,/hyp\(x - focus\.x, y - focus\.y\)/);
+  });
   await test('Aberturas de parede geram portas com colisão e desenho próprios', () => {
     const html=read('index.html');
     assert.match(html,/function addDoor\(x, y, w, h, vert/);
@@ -407,7 +414,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v50.0');
+    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v51.0');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
   });

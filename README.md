@@ -1,4 +1,4 @@
-# Cappe-in-Miami — v50.0 (campanha e mapas filtrados)
+# Cappe-in-Miami — v51.0 (spawns cooperativos e estabilidade)
 
 Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
 
@@ -6,7 +6,10 @@ O relay online agora interpola posição e direção do outro avatar para reduzi
 
 Para multiplayer com servidor, use Node.js 18+ e siga [server/README.md](server/README.md). O lobby lista salas disponíveis neste servidor, informa ocupação/partida, permite entrar pela lista ou pelo código e atualiza a listagem automaticamente. A lista não é um catálogo global da internet. O relay exibe o outro avatar; combate e simulação ainda não são sincronizados.
 
-## Entrega v50.0 — 05/11/2026
+## Entrega v51.0 — 05/11/2026
+
+- Spawns de inimigos, armas, barris e suprimentos agora usam o jogador vivo mais próximo no cooperativo, evitando concentrações no P1 morto.
+- Corrigida a documentação técnica e adicionada regressão para essa referência de spawn.
 
 - Corrigido o avanço duplicado da campanha e garantido o início sempre na primeira fase.
 - Removido o reinício acidental por R de teclado, pausa, HUD, traduções e debug.

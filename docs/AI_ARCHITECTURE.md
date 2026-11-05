@@ -1,4 +1,4 @@
-# Arquitetura real — v50.0
+# Arquitetura real — v51.0
 
 O loop mantém `rawDt` para medir atraso real e usa `dt` limitado apenas para a simulação. Depois de 120 amostras lentas, `EXP.perfTier` reduz efeitos decorativos; a configuração persistida continua intacta. Partículas e elementos ambientais consultam esse tier.
 
@@ -28,7 +28,7 @@ Em v39, `EXP.multiCfg.autoReload` condiciona o início da recarga nos fluxos de 
 | js/exp-i18n-extra.js, exp-i18n-extra2.js | Dicionários adicionais consumidos pelo tradutor. |
 | js/exp-i18n.js | Tradução DOM/Canvas, cache de textos, observador DOM e preferência de idioma. |
 | js/exp-acess.js | Abas de opções e anúncios aria-live de telas. |
-| js/exp-debug.js | Log de erros/rejeições; painel e atalhos habilitados por ?dev=1. É carregado tarde: não captura todos os erros anteriores à própria execução. |
+| js/exp-debug.js | Log de erros/rejeições; painel e atalhos habilitados por ?dev=1. O bloco inline inicial guarda erros anteriores e o módulo os importa quando carrega. |
 | js/exp-shop.js | Créditos, Madame Piranha, cartas, raridade, reroll e efeitos de compra. |
 | js/exp-multi.js | Configuração, criação de P2, teclado/gamepad, câmera, vidas, HUD auxiliar. Usa arma/munição globais compartilhadas. |
 | js/exp-online.js | Lobby, criação/entrada/reentrada, token de sessão, saída, retry/backoff, long polling e envio de posição; depende da API same-origin e hooks em index.html. |
@@ -39,7 +39,7 @@ Em v39, `EXP.multiCfg.autoReload` condiciona o início da recarga nos fluxos de 
 
 As janelas geradas ficam em `breakables`, com caixas marcadas com `g` no mesmo sólido usado por colisão e LOS. `shatterBreakable` chama `refreshSol`, registra ruído e mantém o caminho navegável após o impacto. O perímetro Neon é acrescentado em `buildNeonFloor` como geometria visual e colisível para cobrir mapas sem parede externa.
 
-`activeTarget` seleciona entre os jogadores vivos o ator mais próximo do inimigo. A base, `exp-brain.js` e as classes de IA usam esse alvo para visão, perseguição e mira, evitando que o cooperativo continue mirando um jogador morto.
+`activeTarget` seleciona entre os jogadores vivos o ator mais próximo do inimigo. `focusActor` compartilha essa decisão com spawns de inimigos, armas, barris e suprimentos. A base, `exp-brain.js` e as classes de IA usam esses alvos para visão, perseguição e mira, evitando que o cooperativo continue mirando ou criando entidades em torno de um jogador morto.
 
 `addDoor` é usado por `wallH`, `wallV` e `buildFixed`; portanto toda abertura criada por dados de mapa também recebe objeto de porta, caixa de colisão e dimensões próprias para renderização.
 
@@ -49,7 +49,7 @@ Preservar essa ordem. Vários módulos guardam a função anterior em _nome e a 
 
 ## Atualização e desenho
 loop(t) aplica limitador CFG.fps; dt é limitado a 1/30; acumulador chama update(FIXED) em passos de 1/60; hitstop consome passos. update só roda em play: EXP.tick → mundo/modos/efeitos → jogador/P2 → portas/câmera → projéteis/IA/colisões → saída de sala. draw compõe Canvas, chão pré-renderizado, objetos, atores, efeitos e HUD. Pausa redesenha aproximadamente 5 vezes/s.
-Não há garantia de 60 FPS medida nesta auditoria. O dt limitado também alimenta o ajuste automático de desempenho, o que mascara períodos lentos.
+Não há garantia de 60 FPS medida nesta auditoria. O ajuste automático usa `rawDt` para detectar atrasos, enquanto a simulação continua usando o `dt` limitado.
 
 ## Multiplayer online — limite atual
 POST cria/entra sala; token secreto em Authorization identifica o participante, enquanto a lista pública usa outro ID. POST /state publica posição/ângulo/estado vivo e GET /state long-polls por revisão. A sessão pode recuperar após reload e participantes ociosos expiram. O cliente desenha o avatar remoto e centra a câmera entre eles. Não há autoridade do servidor sobre simulação nem sincronização de inimigos/projéteis/dano/mapa/modo/progresso. Ambos iniciam o mesmo mapa. Não exponha o serviço diretamente à internet sem HTTPS e hospedagem adequados.

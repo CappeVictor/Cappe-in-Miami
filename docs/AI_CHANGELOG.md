@@ -1,4 +1,9 @@
 # Changelog técnico
+## v51.0 — 05/11/2026
+- Spawns de inimigos e pickups em modos cooperativos agora usam o jogador vivo como referência de distância e navegação; P2 não fica sem reforços por causa da posição de P1 morto.
+- Regressão adicionada para impedir regressão desse comportamento.
+- 50/50 regressões automatizadas aprovadas.
+
 ## v50.0 — 05/11/2026
 - Campanha em tiles agora força `tileIdx=0` ao iniciar e bloqueia callbacks de avanço de uma fase antiga; a primeira fase não é pulada.
 - Removido o reinício por R do input, pausa, HUD, traduções e painel de debug.
