@@ -85,7 +85,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v53.0');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v54.0');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/server/server.js')).status,404);
     const badType=await apiRequest(server,'POST','/api/rooms','{}',{'content-type':'text/plain'});assert.equal(badType.status,415);
@@ -316,6 +316,24 @@ async function run() {
     p2.inv=0;ctx.hit(p2);assert.equal(exp.MULTI.deadFlags[1],true);assert.equal(ctx.deaths,0);
     ctx.hit(ctx.P);assert.equal(ctx.P.shield,0);ctx.P.inv=0;ctx.hit(ctx.P);assert.equal(ctx.deaths,1);
   });
+  await test('Fogo amigo identifica o proprietário e respeita a opção', () => {
+    const html=read('index.html');
+    const shoot=html.match(/function shoot\(from, ang, spd, mine, life\) \{[\s\S]*?\n\}/)?.[0];
+    const target=html.match(/function friendlyBulletTarget\(b\) \{[\s\S]*?\n\}/)?.[0];
+    assert.ok(shoot&&target);
+    assert.match(html,/if \(!gone && window\.EXP && EXP\.MULTI && EXP\.MULTI\.enabled && EXP\.MULTI\.friendlyFire\)/);assert.match(html,/const friendly = friendlyBulletTarget\(b\)/);
+    const p1={x:10,y:10,r:13},p2={x:40,y:10,r:13,isP2:true},multi={enabled:true,friendlyFire:true,P2:p2};
+    const ctx=vm.createContext({P:p1,S:{pierce:0},bullets:[],hyp:Math.hypot,window:{EXP:{MULTI:multi}}});
+    vm.runInContext(shoot+'\n'+target,ctx);
+    ctx.shoot(ctx.P,0,300,true,1);ctx.shoot(p2,0,300,true,1);
+    assert.equal(ctx.bullets[0].owner,'p1');assert.equal(ctx.bullets[1].owner,'p2');
+    assert.equal(ctx.friendlyBulletTarget({mine:true,owner:'p1',x:40,y:10}),p2);
+    assert.equal(ctx.friendlyBulletTarget({mine:true,owner:'p2',x:10,y:10}),p1);
+    assert.equal(ctx.friendlyBulletTarget({mine:true,owner:'p1',x:80,y:10}),null);
+    multi.friendlyFire=false;assert.equal(ctx.friendlyBulletTarget({mine:true,owner:'p1',x:40,y:10}),null);
+    multi.friendlyFire=true;assert.equal(ctx.friendlyBulletTarget({mine:false,owner:null,x:40,y:10}),null);
+    p2.dead=true;assert.equal(ctx.friendlyBulletTarget({mine:true,owner:'p1',x:40,y:10}),null);
+  });
   await test('Vidas compartilhadas encerram ao cair qualquer jogador', () => {
     const {ctx,exp}=environment();vm.runInContext(read('js/exp-multi.js'),ctx);
     exp.MULTI.enabled=true;exp.MULTI.lives='shared';exp.multi.markDead(true);assert.equal(exp.multi.shouldGameOver(),true);
@@ -465,7 +483,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v53.0');
+    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v54.0');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
   });

@@ -1,4 +1,5 @@
 # Problemas conhecidos
+v54: fogo amigo local agora aplica dano ao parceiro apenas quando ativado; regressão automatizada 55/55. A validação visual do cooperativo ainda está pendente. Sem medição real de FPS; fases completas, online em duas máquinas, áudio e service worker offline real também pendentes.
 v53: a auditoria encontrou inimigos/armas sobre paredes em 51/72 mapas Neon; corrigido e revalidado: 72 mapas, 720 inimigos, 84 armas, zero posições bloqueadas. Sem exceções JavaScript nos fluxos abertos. Limitações: fases intermediária/final até conclusão, multiplayer online entre máquinas, áudio, offline real e FPS ainda pendentes. Google Fonts remoto falha com `ERR_TUNNEL_CONNECTION_FAILED` neste ambiente; há fontes alternativas.
 Confirmados por inspeção, salvo quando descritos como hipótese. Referências ao backlog são estáveis.
 
@@ -14,9 +15,9 @@ v46 corrigiu as janelas dos mapas gerados, o perímetro visual/físico dos mapas
 | CIM-009 | Ciclo de vida: morte marca P1/P2; bloqueia ações do morto e P2 sobrevivente pode alcançar a saída. Falta validação manual em todos os modos. | Testar ambas as regras de vidas, reinício e troca de sala. |
 | CIM-010 | Corrigido na v47: IA, mira preditiva e comunicação usam o jogador vivo mais próximo; a última posição ainda respeita o estado de investigação. | Validar visualmente em coop com morte alternada de P1/P2. |
 | CIM-011 | P2 agora usa fireOk/onFire e pode coletar/soltar arma com inventário compartilhado, sem armas de fogo para personagem que as proíbe. Munição e arma permanecem compartilhadas. | Validar tiro, recarga, coleta e troca em partidas com Richard/Tony. |
-| CIM-012 | `masterVol` e `autoReload` integrados na v39; fogo amigo e compartilhamento completo do modo cooperativo ainda não foram integrados. | Implementar fogo amigo de forma explícita e definir regras do co-op local. |
+| CIM-012 | `masterVol` e `autoReload` já integrados; v54 conecta a opção de fogo amigo às colisões P1/P2, com teste automatizado. A validação visual e as regras de co-op completo ainda precisam de conferência. | Testar com fogo amigo ligado/desligado, escudo, invulnerabilidade e regras de vidas no navegador. |
 | CIM-013 | spawnP2 busca 64 posições em anéis e exige colisão livre/acesso; sem espaço retorna null e avisa. | Validar spawn em mapas reais densos. |
-| CIM-015 | Métrica de ajuste automático é baseada em dt truncado. | Separar medição e passo de simulação; comparar com DevTools. |
+| CIM-015 | Corrigido no código: o governador coleta `rawDt` antes de limitar `dt`; usa média de 120 quadros, sem p95 nem medição de update/draw. | Conferir o tier no navegador e medir frame time bruto com DevTools. |
 | CIM-016 | Corrigido na v47: listeners iniciais guardam erros e rejeições antes de `exp-debug.js`. | Induzir falha de carga em navegador real e conferir o painel. |
 | CIM-017 | Vínculos ARIA e roving tabindex implementados na v39; validação em navegador e leitor de tela pendente. | Testar com teclado/leitor de tela e garantir que atalhos do jogo não sejam afetados. |
 | CIM-018 | Não há medição de sessão longa, frame pacing ou crescimento de memória. | Roteiro reprodutível e comparação real de cenários. |

@@ -214,5 +214,9 @@
   {
     "name": "buildNeonFloor mantém spawns, inimigos e armas fora de paredes nos 72 mapas Neon",
     "status": "PASS"
+  },
+  {
+    "name": "Fogo amigo identifica o proprietário e respeita a opção",
+    "status": "PASS"
   }
 ]

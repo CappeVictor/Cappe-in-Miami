@@ -1,4 +1,6 @@
 # Decisões técnicas
+## D017 — v54.0 — Identificar origem dos projéteis locais
+Os projéteis dos jogadores carregam `owner: 'p1' | 'p2'`; tiros de inimigos não têm proprietário de jogador. A opção salva `friendlyFire` só permite colisão com o parceiro, nunca com o próprio atirador. A regra é aplicada no loop atual de projéteis para preservar colisão, paredes e perfuração existentes.
 ## D016 — v53.0 — Corrigir spawns de mapas Neon na geração
 Validar posições após consolidar a geometria e deslocar entidades para o ponto livre mais próximo, mantendo o conteúdo e o desenho fonte do mapa. É uma busca única por montagem; se não existir ponto válido, a entidade é omitida em vez de nascer dentro de sólido.
 
