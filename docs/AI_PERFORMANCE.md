@@ -1,4 +1,6 @@
 # Performance — linha de base parcial
+## v54.0 — sem medição de FPS
+A correção de fogo amigo adiciona uma verificação apenas quando há projétil de jogador e o multiplayer local com fogo amigo está habilitado. Não houve medição de impacto em FPS.
 ## v53.0 — sem medição de FPS
 A validação de posição é executada uma vez ao montar cada mapa Neon, não a cada quadro. Busca em anéis ocorre somente para objetos cuja posição de origem colide; varredura do mapa é um fallback para vizinhanças bloqueadas. Isso não constitui medição de FPS.
 
@@ -24,7 +26,7 @@ Nenhum ganho de FPS é reivindicado; esta rodada não alterou o algoritmo NAV.
 ## Inspeção estática
 Já existem grade espacial SG, cache de cenário/sangue/texto, compactação de arrays, buffers de snapshots, redução de redesenho em pausa e mapas decodificados sob demanda. Não duplicar essas otimizações.
 Candidatos a medir: separação de inimigos O(n²); circleHits varrendo NAV.solids nas amostras de clearRay; frequência de replanejamento; quantidade de canvases/texturas; tamanho/compilação de maps.js; imagens ausentes e espera de 6 s em neonPrepare.
-O ajuste automático usa dt já limitado a 1/30: medir tempo bruto separadamente antes de alterar seus limiares.
+O governador já coleta `rawDt` antes de limitar `dt` a 1/30; usa a média de 120 quadros uma vez por instalação e não substitui preferências salvas. Isso não fornece p95, custo de update/draw, CPU/GPU nem memória. Meça esses valores no navegador antes de ajustar o governador.
 
 ## Ainda não medido
 FPS, frame pacing, update/draw reais, CPU/GPU, memória/GC, carregamento no navegador e sessões longas. Coletar antes de adotar pooling adicional, quadtree, novas camadas ou renderização diferente.

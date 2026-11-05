@@ -1,4 +1,10 @@
 # Testes — 05/11/2026
+## Execução v54.0 — 05/11/2026
+`node tests/regression.cjs`: **55/55 PASS**. Inclui teste de fogo amigo que verifica origem P1/P2, opção ligada/desligada, alvo fora do alcance e jogador morto. Todos os testes anteriores permanecem aprovados.
+
+Não houve validação manual em navegador nesta iteração. O teste de fogo amigo executa a lógica isolada e verifica a integração no fluxo de atualização por regressão estática. Campanha completa, online entre dispositivos, áudio, service worker offline real e FPS continuam pendentes.
+
+## Execução v53.0 — 05/11/2026
 ## Execução v53.0 — 05/11/2026
 `node tests/regression.cjs`: **54/54 PASS**. A verificação de mapas Neon agora monta cada um dos 72 mapas e confirma spawn de jogador, colisão livre para cada inimigo e pickup. Sintaxe, servidor, service worker, saves, controles e demais regressões permanecem na suíte.
 

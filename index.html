@@ -2039,7 +2039,15 @@ function kill(e, bx = 0, by = 0) {
   }
 }
 function shoot(from, ang, spd, mine, life) {
-  bullets.push({ x: from.x + Math.cos(ang) * 18, y: from.y + Math.sin(ang) * 18, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, mine, p: mine ? S.pierce : 0, t: life || 99 });
+  const owner = mine ? (from && from.isP2 ? 'p2' : 'p1') : null;
+  bullets.push({ x: from.x + Math.cos(ang) * 18, y: from.y + Math.sin(ang) * 18, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, mine, owner, p: mine ? S.pierce : 0, t: life || 99 });
+}
+function friendlyBulletTarget(b) {
+  const multi = window.EXP && window.EXP.MULTI;
+  if (!b || !b.mine || !multi || !multi.enabled || !multi.friendlyFire) return null;
+  const target = b.owner === 'p1' ? multi.P2 : b.owner === 'p2' ? P : null;
+  if (!target || target.dead) return null;
+  return hyp(target.x - b.x, target.y - b.y) < (target.r || 13) ? target : null;
 }
 function melee() { P.atk = .2;
   const ms = WP[cw].melee ? WP[cw] : WP.punho;
@@ -2265,7 +2273,7 @@ function update(dt) {
         if (glass) { shatterBreakable(glass, b.vx, b.vy); gone = true; break; }
       }
       if (hitWall(b.x, b.y, 2)) { gone = true; break; }
-      if (b.mine) { for (let ei = enemies.length - 1; ei >= 0 && !gone; ei--) { const e = enemies[ei]; if (!e) continue; const ddx = e.x - b.x, ddy = e.y - b.y; if (ddx * ddx + ddy * ddy < e.r * e.r) { levelStats.hits++; kill(e, b.vx, b.vy); if (b.p > 0) b.p--; else gone = true; } } }
+      if (b.mine) { for (let ei = enemies.length - 1; ei >= 0 && !gone; ei--) { const e = enemies[ei]; if (!e) continue; const ddx = e.x - b.x, ddy = e.y - b.y; if (ddx * ddx + ddy * ddy < e.r * e.r) { levelStats.hits++; kill(e, b.vx, b.vy); if (b.p > 0) b.p--; else gone = true; } } if (!gone && window.EXP && EXP.MULTI && EXP.MULTI.enabled && EXP.MULTI.friendlyFire) { const friendly = friendlyBulletTarget(b); if (friendly) { gone = true; bullets.splice(bullets.indexOf(b), 1); if (hit(friendly)) return; } } }
       else {
         // P1
         let pd = P.dead ? Infinity : hyp(P.x - b.x, P.y - b.y);

@@ -1,4 +1,10 @@
 # Changelog técnico
+## v54.0 — 05/11/2026
+- Corrigido fogo amigo local: cada projétil de jogador registra P1/P2 como origem; com a opção ligada, pode ferir somente o parceiro e consome o projétil no impacto.
+- Com fogo amigo desligado, projéteis não atingem o parceiro. Projéteis de inimigos e alvos de inimigos permanecem inalterados.
+- Adicionada regressão cobrindo origem dos projéteis, toggle, jogador morto e distância; suíte 55/55.
+- Cache offline e endpoint `/api/health` avançaram para v54.0.
+- Não houve medição de FPS nem validação visual do fogo amigo nesta iteração.
 ## v53.0 — 05/11/2026
 - Corrigido bug reproduzido em Chromium: a geração Neon podia deixar inimigos e armas sobre colisores sólidos. Agora `neonSafePoint` procura piso livre próximo e, em layouts densos, o ponto livre mais próximo no mapa, respeitando limites e distâncias de segurança.
 - A colisão do piso é preparada antes de validar atores. Entidades sem local livre não são criadas em posição inválida.

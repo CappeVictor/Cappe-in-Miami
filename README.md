@@ -1,8 +1,15 @@
-# Cappe-in-Miami — v53.0 (spawns seguros nos mapas Neon)
+# Cappe-in-Miami — v54.0 (fogo amigo cooperativo corrigido)
 
 Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
 
 Na tela de escolha de máscara, selecione uma skin cosmética. Ela altera apenas as cores do traje e é salva em `settings.skin`, preservando saves v2 e os atributos dos personagens. As armas receberam contorno, brilhos e detalhes de material; no cooperativo local, P2 também exibe a arma compartilhada.
+
+## Entrega v54.0 — 05/11/2026
+
+- Corrigido fogo amigo no cooperativo local: projéteis identificam P1/P2 e só atingem o parceiro quando a opção está ativada.
+- A opção desligada mantém o comportamento anterior; tiros de inimigos e colisões com inimigos não mudam.
+- Suíte de regressão: 55/55. FPS real e validação manual do cooperativo continuam pendentes.
+- Cache offline e endpoint de saúde atualizados para v54.0.
 
 ## Entrega v53.0 — 05/11/2026
 
