@@ -318,14 +318,13 @@ async function run() {
   });
   await test('Fogo amigo identifica o proprietário e respeita a opção', () => {
     const html=read('index.html');
-    const shoot=html.match(/function shoot\\(from, ang, spd, mine, life\\) \\{[\\s\\S]*?\\n\\}/)?.[0];
-    const target=html.match(/function friendlyBulletTarget\\(b\\) \\{[\\s\\S]*?\\n\\}/)?.[0];
+    const shoot=html.match(/function shoot\(from, ang, spd, mine, life\) \{[\s\S]*?\n\}/)?.[0];
+    const target=html.match(/function friendlyBulletTarget\(b\) \{[\s\S]*?\n\}/)?.[0];
     assert.ok(shoot&&target);
-    assert.match(html,/if \\(!gone && window\\.EXP && EXP\\.MULTI && EXP\\.MULTI\\.enabled && EXP\\.MULTI\\.friendlyFire\\)/);
-    assert.match(html,/const friendly = friendlyBulletTarget\\(b\\)/);
+    assert.match(html,/if \(!gone && window\.EXP && EXP\.MULTI && EXP\.MULTI\.enabled && EXP\.MULTI\.friendlyFire\)/);assert.match(html,/const friendly = friendlyBulletTarget\(b\)/);
     const p1={x:10,y:10,r:13},p2={x:40,y:10,r:13,isP2:true},multi={enabled:true,friendlyFire:true,P2:p2};
     const ctx=vm.createContext({P:p1,S:{pierce:0},bullets:[],hyp:Math.hypot,window:{EXP:{MULTI:multi}}});
-    vm.runInContext(shoot+'\\n'+target,ctx);
+    vm.runInContext(shoot+'\n'+target,ctx);
     ctx.shoot(ctx.P,0,300,true,1);ctx.shoot(p2,0,300,true,1);
     assert.equal(ctx.bullets[0].owner,'p1');assert.equal(ctx.bullets[1].owner,'p2');
     assert.equal(ctx.friendlyBulletTarget({mine:true,owner:'p1',x:40,y:10}),p2);
