@@ -204,8 +204,7 @@
   // ---------- 3) menu de pausa com botões ----------
   const BTN = [
     { id: 'cont', label: 'ESC · CONTINUAR', dy: 26, col: '#ffffff' },
-    { id: 'rest', label: 'R · RECOMEÇAR FASE', dy: 82, col: '#19f0e6' },
-    { id: 'menu', label: 'M · LOBBY', dy: 138, col: '#ffd23f' },
+    { id: 'menu', label: 'M · LOBBY', dy: 82, col: '#ffd23f' },
   ];
   const BOX = { w: 420, h: 46 };
   function boxOf(b) { return { x: W / 2 - BOX.w / 2, y: H / 2 + b.dy - BOX.h / 2 + 4, w: BOX.w, h: BOX.h }; }
@@ -216,7 +215,6 @@
   }
   function act(id) {
     if (id === 'cont') togglePause();
-    else if (id === 'rest') newGame();
     else if (id === 'menu') goMenu();
   }
 
@@ -319,10 +317,10 @@
     if (EXP.run && EXP.run.id === 'roleta') rerollMask();
   };
 })();
-/* ============ EXPERIÊNCIA DO JOGADOR: CONFIRMAÇÃO AO SAIR, DICA DE CONTROLES (anexar ao final de js/exp-ui.js) ============
+/* ============ EXPERIÊNCIA DO JOGADOR: CONFIRMAÇÃO AO SAIR (anexar ao final de js/exp-ui.js) ============
    ARQUIVO: js/exp-ui.js (anexar ao final). Não altera index.html.
    1) Ao sair da partida para o menu (no meio de uma fase), pede confirmação para não perder o progresso.
-   2) Dica "ESC · MENU  ·  R · RECOMEÇAR" no canto superior esquerdo durante a partida. */
+   2) Reinício por tecla foi removido para evitar reinícios acidentais. */
 (function () {
   'use strict';
   const EXP = window.EXP;
@@ -335,18 +333,6 @@
     _toMenu();
   };
 
-  // ---------- 2) dica de controles na partida ----------
-  const _drawHUD = EXP.drawHUD;
-  EXP.drawHUD = function (g) {
-    _drawHUD(g);
-    if (st !== 'play') return;
-    g.save();
-    g.font = 'bold 14px Impact, sans-serif';
-    g.textAlign = 'left';
-    g.fillStyle = 'rgba(25,240,230,.85)';
-    g.fillText('ESC · PAUSAR   R · RECOMEÇAR', 34, 136);
-    g.restore();
-  };
 })();
 /* ============ FASES: NOMES, ORDEM DOS CAPÍTULOS E PROTEÇÃO CONTRA SPAWN NA PAREDE (anexar ao final de js/exp-ui.js) ============
    ARQUIVO: js/exp-ui.js (anexar ao final). Não altera index.html.

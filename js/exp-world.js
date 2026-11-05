@@ -481,6 +481,7 @@
     EXP.world.barrels.length = 0; EXP.world.cams.length = 0; EXP.world.boss = null;
     if (EXP.glassFxReset) EXP.glassFxReset();
     EXP.tileIdx = TILE_LEVELS.findIndex(l => l.id === nxt); lvl = EXP.tileIdx + 1;
+    if (EXP.run && EXP.run.tiles) { EXP.run.currentTile = EXP.tileIdx; EXP.run.pending = false; }
     startLevel(); st = 'play';
     const G = TILE_LEVELS[EXP.tileIdx]; banner = { txt: G.nome.toUpperCase(), sub: G.briefing, t: 3 };
     return true;

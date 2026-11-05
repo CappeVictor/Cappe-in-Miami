@@ -203,7 +203,7 @@ button { touch-action: manipulation; }
     <canvas id="c" width="960" height="600" aria-label="Área do jogo"></canvas>
 
     <section id="menu" class="overlay">
-      <p class="tag">Miami, 1989 · v49</p>
+      <p class="tag">Miami, 1989 · v50</p>
       <h1>Cappe-in-Miami</h1>
       <p class="bemvindo">Seja bem-vindo!</p>
       <p class="credito">Feito por <strong>Victor Cappellesso</strong> e <strong>Davi Gehart</strong></p>
@@ -350,7 +350,6 @@ button { touch-action: manipulation; }
         <button id="again" type="button">Tentar de novo</button>
         <button id="trocar" type="button" class="sec">Trocar máscara</button>
       </div>
-      <p class="dica">ou aperte R</p>
     </section>
     <div class="scan" aria-hidden="true"></div>
   </main>
@@ -360,7 +359,7 @@ button { touch-action: manipulation; }
 // Mapas fixos (layouts baseados nas imagens). Coordenadas em pixels da imagem de referência (iw x ih).
 // salas: [x, y, w, h, piso, 1 = mobília automática]   H/V: [linha, início, fim, [centros das portas]]
 // mob: [tipo, centroX, centroY, w, h] (tamanhos em px da imagem)   ini: início   saida: [cx, cy, w, h]
-const MAPAS = [
+const MAPAS_BASE = [
   { id: 'apto', esc: 1.6, nome: 'Apartamentos', iw: 640, ih: 576,
     salas: [
       [232, 5, 153, 80, 'brickRed'], [20, 85, 600, 50, 'brick'], [285, 135, 50, 425, 'brick'], [20, 325, 600, 50, 'brick'],
@@ -542,6 +541,7 @@ const MAPAS = [
     mob: [['banco', 100, 110, 60, 26], ['vaso', 440, 100, 24, 28], ['banco', 420, 360, 60, 26], ['vaso', 560, 300, 24, 28]],
     ini: [330, 380], saida: [560, 110, 60, 60] }
 ];
+const MAPAS = MAPAS_BASE.filter(m => !(Math.abs(m.iw - 640) <= 4 && Math.abs(m.ih - 580) <= 8));
 
 // ---------- MODO HISTÓRIA (capítulos baseados no texto do jogo) ----------
 let historia = false, capIdx = 0, dif = 'medio';
@@ -555,7 +555,7 @@ function unlocked() { try { return localStorage.getItem('hm_unlock') === '1'; } 
 function D() { return historia ? DIF[dif] : DIF.medio; }
 const STORY = [
   { t: 'Prelúdio · Porto de Biscayne · 3 de abril de 1989', m: 'metro', txt: 'Madame Piranha, dona do Mercado Escuro, paga bem por um serviço simples: recuperar um carregamento de ouro que sumiu do porto. Você desce ao metrô abandonado, derruba a guarda do cais e encontra a caixa vazia com um bilhete: "Para Cappe, de alguém que você ainda não conhece".' },
-  { t: 'Capítulo 2 · Maré alta · 16 de abril', m: 'apto', txt: 'Um contato de Little Havana diz que o ouro passou por um prédio em Coconut Grove. Os moradores falam de dinheiro vivo trocado no corredor e de um vizinho que nunca mais apareceu.' },
+  { t: 'Capítulo 2 · Maré alta · 16 de abril', m: 'loja', txt: 'Um contato de Little Havana diz que o ouro passou por uma loja em Coconut Grove. Os moradores falam de dinheiro vivo trocado no corredor e de um vizinho que nunca mais apareceu.' },
   { t: 'Capítulo 3 · Vitrine · 25 de abril', m: 'estudio', txt: 'Um produtor de cinema que financiava o contrabando recebe você no estúdio. Ele jura que o ouro foi trocado por armas, e que a pessoa que pagou tem um nome que ele não ousa dizer em voz alta.' },
   { t: 'Capítulo 4 · Apagão · 5 de maio', m: 'academia', txt: 'Um bairro inteiro ficou sem luz e a academia virou ponto de encontro dos homens do contrabando. Alguém enviado antes fez um trabalho ruim. A ordem é limpar o local rápido e sem deixar rastros.' },
   { t: 'Capítulo 6 · Hóspede VIP · 13 de maio', m: 'hotel', txt: 'O Hotel Coral precisa de um substituto na recepção. Os hóspedes VIP são investidores de uma companhia chamada Mar Vermelho, e a segurança do hotel vigia cada andar com rádios.' },
@@ -1795,8 +1795,10 @@ function drawStun(e) {
 // Mapas de uma só planta: sem escada/elevador; a saída é o carro (objPlayerCarEnter) quando existe.
 const NEON_ENEMY_RE = /enemy|guard|thug|mobster|assassin|patrol|gangster/i;
 const NEON_SKIP_RE = /player|enemy|guard|thug|gangster|patrol|mobster|assassin|weapon|spawn|lanestart|door|carenter/i;
-const NEON_BY = new Map(MAPS.map(m => [m.name, m]));
-const NEON_PLAYABLE = MAPS.filter(m => m.objects.some(o => NEON_ENEMY_RE.test(o[0])));
+// Salas 640x580 (incluindo a variante 640x576) são protótipos estreitos e ficam fora do seletor.
+const NEON_SIZE_BLOCK = m => Math.abs(m.w - 640) <= 4 && Math.abs(m.h - 580) <= 8;
+const NEON_PLAYABLE = MAPS.filter(m => !NEON_SIZE_BLOCK(m) && m.objects.some(o => NEON_ENEMY_RE.test(o[0])));
+const NEON_BY = new Map(NEON_PLAYABLE.map(m => [m.name, m]));
 const NEON_WEAPONS = ['taco', 'faca', 'cano', 'martelo', 'pe_de_cabra', 'pistola', 'revolver', 'escopeta', 'smg', 'rifle', 'uzi'];
 const NEON_AMMO = { escopeta: 6, smg: 24, pistola: 8, revolver: 6, rifle: 10, uzi: 24 };
 let curNeon = null, neonCar = false, exitArmed = false;
@@ -2595,7 +2597,7 @@ function draw() {
     tx('GO TO CAR ' + exitArrow(), W / 2, 150, '#19f0e6', 'bold 46px Impact, sans-serif', 'center'); ctx.restore();
   }
   if (banner.t > 0 && st === 'play') { ctx.globalAlpha = Math.min(1, banner.t * 1.5); tx(banner.txt, W / 2, H / 2 + 20, '#ff2e93', '72px Impact, sans-serif', 'center'); if (banner.sub) tx(banner.sub.toUpperCase(), W / 2, H / 2 + 64, '#19f0e6', '30px Impact, sans-serif', 'center'); ctx.globalAlpha = 1; }
-  if (st === 'paused') { ctx.fillStyle = 'rgba(5,0,18,.78)'; ctx.fillRect(0,0,W,H); tx('PAUSADO', W/2, H/2-30, '#ff2e93', '64px Impact, sans-serif', 'center'); tx('ESC · CONTINUAR', W/2, H/2+28, '#fff', '24px Impact, sans-serif', 'center'); tx('R · RECOMEÇAR FASE', W/2, H/2+64, '#19f0e6', '20px Impact, sans-serif', 'center'); }
+  if (st === 'paused') { ctx.fillStyle = 'rgba(5,0,18,.78)'; ctx.fillRect(0,0,W,H); tx('PAUSADO', W/2, H/2-30, '#ff2e93', '64px Impact, sans-serif', 'center'); tx('ESC · CONTINUAR', W/2, H/2+28, '#fff', '24px Impact, sans-serif', 'center'); }
   EXP.drawHUD(ctx);
   if (fade > 0) { ctx.fillStyle = 'rgba(8,0,20,' + fade + ')'; ctx.fillRect(0, 0, W, H); }
   if (flash > 0 && !CFG.noflash) { ctx.fillStyle = 'rgba(255,46,147,' + (flash * .5) + ')'; ctx.fillRect(0, 0, W, H); }
@@ -2670,7 +2672,6 @@ addEventListener('keydown', e => {
   if (e.code) keys[e.code.toLowerCase()] = true; // para distinguir ControlLeft/Right, Numpad etc.
   if (k === 'enter') { if (st === 'menu') { showMasks(); e.preventDefault(); } else if (st === 'pick') { newGame(); e.preventDefault(); } else if (st === 'brief' || st === 'win') { $('histgo').click(); e.preventDefault(); } }
   if (k === 'escape' && (st === 'play' || st === 'paused')) { togglePause(); e.preventDefault(); return; }
-  if (k === 'r' && (st === 'dead' || st === 'play' || st === 'paused')) newGame();
   if (k === 'm') musToggle();
   if (st === 'pick' && k.startsWith('arrow') && e.target !== msel) { sel = (sel + { arrowleft: -1, arrowright: 1, arrowup: -EXP.cols, arrowdown: EXP.cols }[k] + MASKS.length) % MASKS.length; mark(); }
   if (k === ' ' && st === 'play' && !P.dead) { if (!finish()) melee(); e.preventDefault(); }

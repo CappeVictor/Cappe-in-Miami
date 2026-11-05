@@ -1,4 +1,4 @@
-# Cappe-in-Miami — v49.0 (colisão de portas em todos os mapas)
+# Cappe-in-Miami — v50.0 (campanha e mapas filtrados)
 
 Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
 
@@ -6,7 +6,12 @@ O relay online agora interpola posição e direção do outro avatar para reduzi
 
 Para multiplayer com servidor, use Node.js 18+ e siga [server/README.md](server/README.md). O lobby lista salas disponíveis neste servidor, informa ocupação/partida, permite entrar pela lista ou pelo código e atualiza a listagem automaticamente. A lista não é um catálogo global da internet. O relay exibe o outro avatar; combate e simulação ainda não são sincronizados.
 
-## Entrega v49.0 — 05/11/2026
+## Entrega v50.0 — 05/11/2026
+
+- Corrigido o avanço duplicado da campanha e garantido o início sempre na primeira fase.
+- Removido o reinício acidental por R de teclado, pausa, HUD, traduções e debug.
+- Removidos do seletor os mapas equivalentes a 640×580; a história usa um mapa válido no capítulo substituído.
+- Auditoria registrada em `docs/MAP_AUDIT.md`.
 
 - Corrigido o estado de colisão dos mapas: portas procedurais agora entram em `sol`, e portas de mapas fixos não herdam portas da sala anterior.
 - Corrigido o bug em que aberturas de paredes não criavam portas reais.
@@ -76,7 +81,7 @@ Para multiplayer com servidor, use Node.js 18+ e siga [server/README.md](server/
 - Colisão invisível nas quatro bordas do mundo impede jogadores e atores de saírem do mapa, inclusive em mapas sem paredes de perímetro.
 - Spawns das salas Neon são ajustados para dentro do limite seguro e reposicionados se iniciarem dentro de uma parede.
 - Corrigidos layout e uso da lista em telas estreitas; botões identificam salas cheias e desativam entrada duplicada.
-- 36/36 regressões automatizadas aprovadas, incluindo lobby, presença expirada, preferências inválidas e spawns reais dos 74 mapas Neon; teste TCP e navegador multiusuário continuam pendentes neste ambiente.
+- 36/36 regressões automatizadas aprovadas, incluindo lobby, presença expirada, preferências inválidas e spawns reais dos 72 mapas Neon; teste TCP e navegador multiusuário continuam pendentes neste ambiente.
 
 ## Histórico da entrega v37.0 — 04/11/2026
 - Corrigido o ciclo de vida de jogadores no cooperativo e a saída pelo sobrevivente.
@@ -128,7 +133,7 @@ A distribuição original estava numa pasta v30, mas já incluía o changelog v3
 `C` recarregar · `B` (na pausa) voltar ao menu.
 
 ## Modo desenvolvedor
-Abra `index.html?dev=1`. F3 painel · F4 colisões · F6 IA · F7 próximo mapa · F8 reiniciar · F9 erros · F10 chefe.
+Abra `index.html?dev=1`. F3 painel · F4 colisões · F6 IA · F7 próximo mapa · F9 erros · F10 chefe.
 
 ## Salvamento
 Automático em `localStorage` (`hm_save_v2`) com backup rotativo (`hm_save_v2_bak`). Dados da v4 (recorde, desbloqueio) são migrados. Perfil & Coleção → Dados exporta/importa o save.

@@ -1,4 +1,4 @@
-# Arquitetura real — v49.0
+# Arquitetura real — v50.0
 
 O loop mantém `rawDt` para medir atraso real e usa `dt` limitado apenas para a simulação. Depois de 120 amostras lentas, `EXP.perfTier` reduz efeitos decorativos; a configuração persistida continua intacta. Partículas e elementos ambientais consultam esse tier.
 

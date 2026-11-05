@@ -1,4 +1,11 @@
 # Changelog técnico
+## v50.0 — 05/11/2026
+- Campanha em tiles agora força `tileIdx=0` ao iniciar e bloqueia callbacks de avanço de uma fase antiga; a primeira fase não é pulada.
+- Removido o reinício por R do input, pausa, HUD, traduções e painel de debug.
+- Filtro de mapas exclui protótipos equivalentes a 640×580 nos mapas fixos e Neon; capítulo que apontava para o mapa removido foi redirecionado para um mapa válido.
+- Auditoria de dimensões, portas, salas, spawns e saídas adicionada em `docs/MAP_AUDIT.md`.
+- 49/49 regressões automatizadas aprovadas.
+
 ## v49.0 — 05/11/2026
 - Corrigida a colisão das portas em mapas procedurais: a solução agora é reconstruída com portas abertas/fechadas incluídas.
 - Corrigido vazamento de portas entre mapas fixos: a lista é resetada antes de montar cada mapa.
@@ -70,7 +77,7 @@
 - Adicionada colisão de perímetro compartilhada por hitWall/hitWallNG/aabbHitsWall para impedir que atores saiam dos limites do mundo ou usem coordenadas inválidas.
 - Ajustados os pontos iniciais das salas Neon ao raio do jogador; unstick procura posição livre se a correção encostar em obstáculo.
 - Service worker/cache e identificação visual atualizados para v39.0.
-- CSS da lista adaptado a telas pequenas; testes de entrada/status, presença expirada, configurações inválidas, colisão das quatro bordas e spawns reais livres nos 74 mapas Neon jogáveis. 36/36 regressões aprovadas.
+- CSS da lista adaptado a telas pequenas; testes de entrada/status, presença expirada, configurações inválidas, colisão das quatro bordas e spawns reais livres nos 72 mapas Neon jogáveis. 36/36 regressões aprovadas.
 - Limite: lista apenas salas no servidor que o navegador já acessou; multiplayer segue como relay de posição, sem co-op autoritativo.
 
 ## v37.0 — 04/11/2026

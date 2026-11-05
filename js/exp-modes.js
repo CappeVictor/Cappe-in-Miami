@@ -125,7 +125,7 @@
     const m = MODES[id];
     if (id === 'diario') { const d = dailyInfo(); mapSel = d.map; sel = d.mask; }
     else if (id === 'custom') { mapSel = opts.map || 'seq'; sel = opts.mask || 0; }
-    else if (m.tiles) mapSel = 'tiles';
+    else if (m.tiles) { mapSel = 'tiles'; EXP.tileIdx = 0; lvl = 1; }
     else if (m.arena) mapSel = opts.map && opts.map !== 'rand' ? opts.map : ARENAS[Math.floor(rnd() * ARENAS.length)];
     else mapSel = opts.map || 'seq';
     if ([...msel.options].some(op => op.value === mapSel)) msel.value = mapSel;
@@ -148,7 +148,7 @@
     if (r.id === 'custom' && r.opts.weapon) cw = r.opts.weapon;
     if (r.id === 'diario') cw = r.daily.weapon;
     if (S.noGuns && WP[cw].gun) cw = 'punho';
-    if (r.tiles) { EXP.tileIdx = 0; lvl = 1; }
+    if (r.tiles) { EXP.tileIdx = 0; lvl = 1; r.currentTile = 0; r.pending = false; }
     if (r.arena) lvl = 1;
     EXP.xpMul = r.id === 'custom' ? .5 : 1; EXP.waveLvl = 0; EXP.keepEnemies = false;
     r.startScore = 0; EXP.save().stats.runs++; EXP.touch();
@@ -162,6 +162,7 @@
   startLevel = function () {
     _startLevel();
     const r = EXP.run;
+    if (r && r.tiles) { r.currentTile = EXP.tileIdx; r.pending = false; EXP.enemyCount0 = enemies.length; }
     if (r && r.arena) { enemies.length = 0; for (const f of predio) if (f && f.enemies) f.enemies.length = 0; levelStats.total = 0; EXP.keepEnemies = true; }
     else EXP.keepEnemies = false;
     EXP.onRoomStart();
@@ -249,7 +250,7 @@
 
   // ================= CAMPANHA (fases em matriz) =================
   function campaignTick(r, dt) {
-    if (r.pending || r.done || st !== 'play') return;
+    if (r.pending || r.done || st !== 'play' || r.currentTile !== EXP.tileIdx) return;
     if (r.t - (r.roomT0 || 0) < 1.2 || !(EXP.enemyCount0 > 0) || enemies.length > 0) return;
     r.pending = true;                                            // último inimigo eliminado
     const rep = roomReport(r);

@@ -48,7 +48,6 @@
     'Você morreu': ['You died', 'Has muerto', 'Vous êtes mort', 'Du bist gestorben', 'Sei morto'],
     'Tentar de novo': ['Try again', 'Intentar de nuevo', 'Réessayer', 'Nochmal versuchen', 'Riprova'],
     'Trocar máscara': ['Change mask', 'Cambiar máscara', 'Changer de masque', 'Maske wechseln', 'Cambia maschera'],
-    'ou aperte R': ['or press R', 'o pulsa R', 'ou appuie sur R', 'oder R drücken', 'o premi R'],
     'Feito por Victor Cappellesso e Davi Gehart': ['Made by Victor Cappellesso and Davi Gehart', 'Hecho por Victor Cappellesso y Davi Gehart', 'Réalisé par Victor Cappellesso et Davi Gehart', 'Entwickelt von Victor Cappellesso und Davi Gehart', 'Realizzato da Victor Cappellesso e Davi Gehart'],
     'Victor Cappellesso': ['Victor Cappellesso', 'Victor Cappellesso', 'Victor Cappellesso', 'Victor Cappellesso', 'Victor Cappellesso'],
     'Davi Gehart': ['Davi Gehart', 'Davi Gehart', 'Davi Gehart', 'Davi Gehart', 'Davi Gehart'],
@@ -162,8 +161,6 @@
     // ----- Pausa, HUD e resultados (canvas e DOM) -----
     'PAUSADO': ['PAUSED', 'PAUSA', 'PAUSE', 'PAUSIERT', 'PAUSA'],
     'ESC · CONTINUAR': ['ESC · RESUME', 'ESC · CONTINUAR', 'ESC · REPRENDRE', 'ESC · WEITER', 'ESC · CONTINUA'],
-    'R · RECOMEÇAR FASE': ['R · RESTART LEVEL', 'R · REINICIAR FASE', 'R · RECOMMENCER', 'R · NEU STARTEN', 'R · RICOMINCIA'],
-    'ESC · PAUSAR   R · RECOMEÇAR': ['ESC · PAUSE   R · RESTART', 'ESC · PAUSA   R · REINICIAR', 'ÉCHAP · PAUSE   R · RECOMMENCER', 'ESC · PAUSE   R · NEU STARTEN', 'ESC · PAUSA   R · RICOMINCIA'],
     'NOCAUTE · ESPAÇO': ['KNOCKED OUT · SPACE', 'NOQUEADO · ESPACIO', 'K.O. · ESPACE', 'K.O. · LEERTASTE', 'KO · SPAZIO'],
     'ATORDOADO': ['STUNNED', 'ATURDIDO', 'ÉTOURDI', 'BETÄUBT', 'STORDITO'],
     'PULO [SHIFT]': ['JUMP [SHIFT]', 'SALTO [SHIFT]', 'SAUT [SHIFT]', 'SPRUNG [SHIFT]', 'SALTO [SHIFT]'],

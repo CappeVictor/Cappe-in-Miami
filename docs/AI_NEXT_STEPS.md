@@ -1,4 +1,4 @@
-# Próximas ações — v49.0
+# Próximas ações — v50.0
 1. Medir FPS, CPU e memória em navegador real antes/depois do governador adaptativo.
 2. Testar o tier adaptativo em chuva, névoa, apagão e combate com muitos inimigos.
 3. Investigar custo de IA/colisão se quedas persistirem mesmo com efeitos reduzidos.

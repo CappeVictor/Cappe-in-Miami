@@ -30,7 +30,7 @@ Auditoria de código/documentação da v42. Rótulos: **Implementado** = há com
 
 ## C. Mapa, física e colisões
 
-21. **Parcial** — 74 mapas Neon têm spawns verificados; inventário de dimensões de toda a campanha pendente.
+21. **Parcial** — 72 mapas Neon têm spawns verificados; inventário de dimensões de toda a campanha pendente.
 22. **Parcial** — colisões e perímetro têm testes; não há varredura automatizada de toda combinação parede/porta.
 23. **Parcial** — existe reposicionamento e busca de spawn seguro; mapas densos precisam de teste manual.
 24. **Parcial** — `spawnP2` busca posição livre; diagnóstico completo de todas as rotinas de unstuck pendente.
