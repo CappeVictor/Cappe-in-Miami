@@ -1,8 +1,10 @@
-# Arquitetura real — v54.0
+# Arquitetura real — v55.0
 
 `js/exp-core.js` fornece o catálogo cosmético `EXP.SKINS`, `EXP.curSkin()` e `EXP.setSkin(id)`. A preferência ocupa somente `settings.skin` no save v2; saves antigos recebem `classic` pelo merge de defaults. A máscara/personagem e sua aplicação de atributos continuam independentes. `js/exp-ui.js` mostra seleção por botões acessíveis na tela de máscaras. O renderer utiliza a paleta no sprite procedural e acentos no spritesheet, sem carregar recursos adicionais.
 
 O fallback procedural do jogador quantiza fases de animação e armazena até 128 canvases por combinação de skin/estado/fase; spritesheet existente continua sendo preferido. Isso evita reconstruir a grade de pixels a cada quadro quando uma imagem falha ao carregar.
+
+Mapas fixos, grades e Neon têm allowlists em index.html. O seletor Neon mostra neonMapTitle sem dimensões; a campanha aponta somente para mapas permitidos. A construção Neon ancora a zona de saída em piso livre quando o objeto de carro de origem fica fora da área caminhável, sem editar js/maps.js.
 
 `weaponFinish` em `index.html` aplica detalhes de contorno, reflexo e partes funcionais às silhuetas Canvas existentes. O wrapper para armas adicionais chama o mesmo acabamento. O inventário segue compartilhado no coop local e `drawOnePlayer` desenha essa arma para P1 e P2.
 

@@ -1,4 +1,5 @@
 # Problemas conhecidos
+v55: allowlists e ordenação narrativa da campanha validadas por regressão; 57/57 testes passaram, incluindo saídas Neon acessíveis. Não houve validação visual em navegador nem medição de FPS. Ver lista, mapas removidos e dúvida de cronologia em MAP_AUDIT.md.
 v54: fogo amigo local agora aplica dano ao parceiro apenas quando ativado; regressão automatizada 55/55. A validação visual do cooperativo ainda está pendente. Sem medição real de FPS; fases completas, online em duas máquinas, áudio e service worker offline real também pendentes.
 v53: a auditoria encontrou inimigos/armas sobre paredes em 51/72 mapas Neon; corrigido e revalidado: 72 mapas, 720 inimigos, 84 armas, zero posições bloqueadas. Sem exceções JavaScript nos fluxos abertos. Limitações: fases intermediária/final até conclusão, multiplayer online entre máquinas, áudio, offline real e FPS ainda pendentes. Google Fonts remoto falha com `ERR_TUNNEL_CONNECTION_FAILED` neste ambiente; há fontes alternativas.
 Confirmados por inspeção, salvo quando descritos como hipótese. Referências ao backlog são estáveis.

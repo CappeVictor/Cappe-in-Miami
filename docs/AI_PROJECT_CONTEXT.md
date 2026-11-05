@@ -1,5 +1,5 @@
 # Cappe-in-Miami — contexto persistente
-Atualizado em 05/11/2026. Iteração: v54.0 (base distribuída na pasta v30, com changelog até v33).
+Atualizado em 05/11/2026. Iteração: v55.0 (base distribuída na pasta v30, com changelog até v33).
 
 ## Identidade e restrições
 Ação top-down em HTML, CSS e JavaScript, Canvas 2D e Web Audio. Preservar identidade, conteúdo, mapas, saves e recursos existentes. Objetivo: evolução incremental mensurável; referência de 60 FPS / 16,67 ms, sem alegar resultados sem medição.
@@ -7,7 +7,7 @@ A diretriz integral do proprietário está em AI_MASTER_DIRECTIVE.md. AGENTS.md 
 
 ## Origem e estado
 Origem histórica: Downloads/Cappe-in-Miami-main/Cappe-in-Miami-main/Cappe-in-Miami.zip. O ZIP original permanece intocado; esta cópia agora tem Git, suíte de testes e publicação em `origin/main`.
-Não confundir versão atual do jogo (v54.0), versão antiga da pasta (v30) e formato do save (v2, mantido).
+Não confundir versão atual do jogo (v55.0), versão antiga da pasta (v30) e formato do save (v2, mantido).
 
 ## Sistemas
 Base e estados globais em index.html; módulos JS, 2 folhas CSS, 86 imagens existentes e server/server.js sem dependências. Expansões carregadas em ordem fixa. Memória do jogador em localStorage. Multiplayer local continua disponível; v36 acrescentou lobby Node e relay de posição para até dois navegadores.
@@ -21,8 +21,11 @@ v52 acrescenta quatro skins puramente cosméticas em `settings.skin` no save v2,
 
 v53 corrige sobreposição de inimigos/armas com paredes na geração Neon: a colisão é montada antes da colocação e cada entidade procura piso livre próximo. Auditoria Chromium: 72 mapas, 720 inimigos e 84 armas, zero posições bloqueadas; regressões 54/54. Foram abertos os modos disponíveis e exercitados fase inicial, movimento/tiro coop local. Ainda não houve campanha completa, sessões intermediária/final, online de duas máquinas nem medição real de FPS.
 
+## v55
+Mapas fixos, grades e Neon filtrados por allowlists explícitas; seletor não mostra dimensões; Trailer, protótipos e testes removidos da experiência ativa. A campanha base segue a numeração existente e mantém expansões autorizadas. Saídas Neon são validadas e ancoradas em piso livre quando necessário, sem alterações em js/maps.js. Regressão 57/57; sem validação visual nem medição de FPS.
+
 ## v54
-Fogo amigo cooperativo distingue o proprietário de cada projétil e respeita a opção persistida. Regressões automatizadas: 55/55. O navegador, partidas completas e FPS real não foram validados nesta iteração.
+Fogo amigo cooperativo agora distingue o proprietário de cada projétil e respeita a opção persistida. Regressões automatizadas: 55/55. O navegador, as partidas completas e o FPS real não foram validados nesta iteração.
 
 ## Prioridade seguinte
 Validar visualmente o lobby e uma sessão online em dois navegadores/dispositivos; evoluir relay para sincronizar combate/objetivos com simulação autoritativa; recuperar assets ausentes; tratar seleção de alvo da IA e integrar opções de multiplayer. Os dados dos testes são fictícios e nunca usam o armazenamento real do jogador.

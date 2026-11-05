@@ -96,6 +96,10 @@
     "status": "PASS"
   },
   {
+    "name": "Fogo amigo identifica o proprietário e respeita a opção",
+    "status": "PASS"
+  },
+  {
     "name": "Vidas compartilhadas encerram ao cair qualquer jogador",
     "status": "PASS"
   },
@@ -172,7 +176,15 @@
     "status": "PASS"
   },
   {
-    "name": "Seletor Neon exclui o protótipo 640x580 e variantes equivalentes",
+    "name": "Allowlist de mapas, títulos limpos e progressão narrativa sem referências excluídas",
+    "status": "PASS"
+  },
+  {
+    "name": "Mapas fixos permitidos carregam spawn livre, colisões e saída dentro do mapa",
+    "status": "PASS"
+  },
+  {
+    "name": "Grades permitidas carregam spawn, inimigos, colisões e saída válidos",
     "status": "PASS"
   },
   {
@@ -212,11 +224,7 @@
     "status": "PASS"
   },
   {
-    "name": "buildNeonFloor mantém spawns, inimigos e armas fora de paredes nos 72 mapas Neon",
-    "status": "PASS"
-  },
-  {
-    "name": "Fogo amigo identifica o proprietário e respeita a opção",
+    "name": "buildNeonFloor mantém spawn, colisões e saída válidos nos 61 mapas Neon permitidos",
     "status": "PASS"
   }
 ]

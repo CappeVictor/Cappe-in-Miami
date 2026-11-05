@@ -1,8 +1,17 @@
-# Cappe-in-Miami — v54.0 (fogo amigo cooperativo corrigido)
+# Cappe-in-Miami — v55.0 (mapas e campanha organizados)
 
 Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
 
 Na tela de escolha de máscara, selecione uma skin cosmética. Ela altera apenas as cores do traje e é salva em `settings.skin`, preservando saves v2 e os atributos dos personagens. As armas receberam contorno, brilhos e detalhes de material; no cooperativo local, P2 também exibe a arma compartilhada.
+
+## Entrega v55.0 — 05/11/2026
+
+- Seletor Neon agora exibe títulos sem dimensões; allowlists removem Trailer, mapas de teste e protótipos.
+- Apartamentos voltou à lista fixa porque 640×576 é dado interno, não parte do título.
+- Campanha base segue a numeração existente; referências e expansões são validadas contra as allowlists.
+- Zonas de saída Neon fora do piso caminhável são ancoradas no ponto livre mais próximo sem editar os dados dos mapas.
+- Suíte de regressão: 57/57, cobrindo os mapas fixos, em grade e Neon. Não houve validação visual nem medição de FPS nesta entrega.
+- Cache offline e endpoint de saúde atualizados para v55.0.
 
 ## Entrega v54.0 — 05/11/2026
 
@@ -10,7 +19,6 @@ Na tela de escolha de máscara, selecione uma skin cosmética. Ela altera apenas
 - A opção desligada mantém o comportamento anterior; tiros de inimigos e colisões com inimigos não mudam.
 - Suíte de regressão: 55/55. FPS real e validação manual do cooperativo continuam pendentes.
 - Cache offline e endpoint de saúde atualizados para v54.0.
-
 ## Entrega v53.0 — 05/11/2026
 
 - Auditoria no Chromium encontrou inimigos e armas sobrepostos a sólidos em 51 dos 72 mapas Neon.

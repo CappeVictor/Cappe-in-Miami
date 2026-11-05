@@ -1,6 +1,8 @@
 # Performance — linha de base parcial
+## v55.0 — sem medição de FPS
+O filtro por allowlist e o texto mais curto do seletor não tiveram medição de desempenho. A normalização da saída roda somente ao montar o mapa. Não houve medição de FPS nesta sessão.
 ## v54.0 — sem medição de FPS
-A correção de fogo amigo adiciona uma verificação apenas quando há projétil de jogador e o multiplayer local com fogo amigo está habilitado. Não houve medição de impacto em FPS.
+A correção de fogo amigo adiciona apenas uma verificação quando um projétil de jogador está ativo e o multiplayer local com fogo amigo está habilitado. Não houve medição de impacto em FPS.
 ## v53.0 — sem medição de FPS
 A validação de posição é executada uma vez ao montar cada mapa Neon, não a cada quadro. Busca em anéis ocorre somente para objetos cuja posição de origem colide; varredura do mapa é um fallback para vizinhanças bloqueadas. Isso não constitui medição de FPS.
 

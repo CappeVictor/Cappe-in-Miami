@@ -1,4 +1,9 @@
 # Testes — 05/11/2026
+## Execução v55.0 — 05/11/2026
+node tests/regression.cjs: 57/57 PASS. A cobertura nova valida as allowlists fixas/grade/Neon, títulos sem dimensões (incluindo o caso Trailer 640 x 580), remoção de testes/protótipos da experiência ativa, referências e ordem da campanha, e construção de spawns/colisões/saídas em todos os mapas permitidos. Também confirma que tiles e objetos fonte dos mapas Neon permanecem iguais após a montagem.
+
+Não houve validação visual em navegador nem medição de desempenho nesta iteração. As verificações de mapa usam runtime de colisão e canvas simulado.
+
 ## Execução v54.0 — 05/11/2026
 `node tests/regression.cjs`: **55/55 PASS**. Inclui teste de fogo amigo que verifica origem P1/P2, opção ligada/desligada, alvo fora do alcance e jogador morto. Todos os testes anteriores permanecem aprovados.
 

@@ -542,7 +542,13 @@ const MAPAS_BASE = [
     mob: [['banco', 100, 110, 60, 26], ['vaso', 440, 100, 24, 28], ['banco', 420, 360, 60, 26], ['vaso', 560, 300, 24, 28]],
     ini: [330, 380], saida: [560, 110, 60, 60] }
 ];
-const MAPAS = MAPAS_BASE.filter(m => !(Math.abs(m.iw - 640) <= 4 && Math.abs(m.ih - 580) <= 8));
+const MAPAS_PERMITIDOS = Object.freeze([
+  'apto', 'academia', 'estudio', 'cassino', 'fliperama', 'central', 'mansao', 'metro',
+  'hotel', 'phonehom', 'boate', 'delegacia', 'garagem', 'loja', 'hospital', 'boate-b',
+  'estacao', 'oficina',
+]);
+const MAPAS_PERMITIDOS_SET = new Set(MAPAS_PERMITIDOS);
+const MAPAS = MAPAS_BASE.filter(m => MAPAS_PERMITIDOS_SET.has(m.id));
 
 // ---------- MODO HISTÓRIA (capítulos baseados no texto do jogo) ----------
 let historia = false, capIdx = 0, dif = 'medio';
@@ -554,6 +560,8 @@ const DIF = {
 };
 function unlocked() { try { return localStorage.getItem('hm_unlock') === '1'; } catch (e) { return false; } }
 function D() { return historia ? DIF[dif] : DIF.medio; }
+// A campanha segue a numeração dos capítulos já escrita; capítulos ausentes não criam fases vazias.
+// As datas dos capítulos 16 e 19 contradizem a numeração, então a ordem usa os capítulos e essa dúvida fica documentada.
 const STORY = [
   { t: 'Prelúdio · Porto de Biscayne · 3 de abril de 1989', m: 'metro', txt: 'Madame Piranha, dona do Mercado Escuro, paga bem por um serviço simples: recuperar um carregamento de ouro que sumiu do porto. Você desce ao metrô abandonado, derruba a guarda do cais e encontra a caixa vazia com um bilhete: "Para Cappe, de alguém que você ainda não conhece".' },
   { t: 'Capítulo 2 · Maré alta · 16 de abril', m: 'loja', txt: 'Um contato de Little Havana diz que o ouro passou por uma loja em Coconut Grove. Os moradores falam de dinheiro vivo trocado no corredor e de um vizinho que nunca mais apareceu.' },
@@ -562,13 +570,13 @@ const STORY = [
   { t: 'Capítulo 6 · Hóspede VIP · 13 de maio', m: 'hotel', txt: 'O Hotel Coral precisa de um substituto na recepção. Os hóspedes VIP são investidores de uma companhia chamada Mar Vermelho, e a segurança do hotel vigia cada andar com rádios.' },
   { t: 'Capítulo 7 · Linha cruzada · 23 de maio', m: 'phonehom', txt: 'Um telefonema anônimo leva você à central telefônica do bairro. Alguém grampeou as linhas dos investigadores. No escritório principal, o chefe da segurança é o último obstáculo, e você o derruba com um taco de golfe.' },
   { t: 'Capítulo 8 · Pista de dança · 27 de maio', m: 'boate', txt: 'Um convite para tocar como DJ na Boate Mar Vermelho. O recado é "vista-se bem", e a bebida é por conta da casa. Você percebe que a música está abafando gritos vindos do porão.' },
-  { t: 'Capítulo 13 · Delegacia · 21 de julho', m: 'delegacia', txt: 'Você acorda no hospital como principal suspeito. Seu apartamento está revirado. Invade a delegacia, enfrenta os policiais que resistem, inclusive o delegado, e encontra a investigadora Richter na cela. Ela não tem respostas, mas sugere que você leia o arquivo do caso.' },
-  { t: 'Capítulo 16 · Fliperama · 16 de maio', m: 'fliperama', txt: 'Um operador de máquinas de fliperama revela um endereço no restaurante The Blue Dragon. Um técnico conta que as linhas da central foram usadas para apagar rastros. Três dias depois, o fliperama vira o próximo alvo.' },
-  { t: 'Capítulo 19 · Resolução · 24 de maio', m: 'central', txt: 'Você desce ao esgoto, onde dois capangas operam o esquema. Eles fazem parte de um grupo que quer derrubar o governo da cidade e reconstruir tudo do zero. Você decide se os poupa ou os entrega antes de deixar Miami para sempre.' },
   { t: 'Capítulo 9 · Plantão · 2 de junho', m: 'hospital', txt: 'Um alarme no hospital abandonado aponta para um informante escondido na ala de emergência. Os corredores estão cheios de pacientes que não deveriam estar lá. Você encontra o informante, mas ele já foi silenciado. Alguém esteve aqui antes de você.' },
   { t: 'Capítulo 10 · Ponto cego · 9 de junho', m: 'garagem', txt: 'Um carro preto deixa a garagem com o ouro. Você tem minutos para interceptá-lo antes que ele chegue à estrada. Os capangas esperam entre os pilares e os carros estacionados, e nenhum deles quer ser o primeiro a falar.' },
   { t: 'Capítulo 11 · Trem noturno · 16 de junho', m: 'estacao', txt: 'O último trem da noite leva a pista que você procura. A plataforma está vazia, mas a estação não está. Uma equipe contratada espera pela entrega, e a única saída é pelos trilhos.' },
+  { t: 'Capítulo 13 · Delegacia · 21 de julho', m: 'delegacia', txt: 'Você acorda no hospital como principal suspeito. Seu apartamento está revirado. Invade a delegacia, enfrenta os policiais que resistem, inclusive o delegado, e encontra a investigadora Richter na cela. Ela não tem respostas, mas sugere que você leia o arquivo do caso.' },
   { t: 'Capítulo 14 · Acerto de contas · 23 de julho', m: 'mansao', txt: 'O gerente da boate entrega o endereço do dono do contrabando, um empresário que mora na mansão à beira-mar. Lá dentro, o chefe, o guarda-costas e a contadora caem um a um. Madame Piranha aparece no fim, mas não para negociar.' },
+  { t: 'Capítulo 16 · Fliperama · 16 de maio', m: 'fliperama', txt: 'Um operador de máquinas de fliperama revela um endereço no restaurante The Blue Dragon. Um técnico conta que as linhas da central foram usadas para apagar rastros. Três dias depois, o fliperama vira o próximo alvo.' },
+  { t: 'Capítulo 19 · Resolução · 24 de maio', m: 'central', txt: 'Você desce ao esgoto, onde dois capangas operam o esquema. Eles fazem parte de um grupo que quer derrubar o governo da cidade e reconstruir tudo do zero. Você decide se os poupa ou os entrega antes de deixar Miami para sempre.' },
   { t: 'Expansão 1 · Hospital · entrada', m: null, neon: 'rmHospitalEntrance', txt: 'Uma ambulância abandonada bloqueia a frente do hospital. Os guardas na recepção não deveriam estar ali, e o elevador só desce quando alguém aperta o botão certo.' },
   { t: 'Expansão 2 · Hospital · andar superior', m: null, neon: 'rmHospitalTopFloor', txt: 'No último andar, os quartos viraram esconderijo. Alguém chora atrás de uma porta trancada, e cada corredor tem um vigia.' },
   { t: 'Expansão 3 · Suíte do hotel', m: null, neon: 'rmHotelSuite', txt: 'Um hóspede VIP pagou pelo silêncio. Você sobe pela escada de serviço e encontra a suíte cheia de seguranças.' },
@@ -1686,10 +1694,12 @@ const GRIDS = [
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]] },
 ];
+const GRID_ALLOWED_MAP_IDS = Object.freeze(['metro', 'overdose']);
+const GRIDS_PERMITIDAS = GRIDS.filter(g => GRID_ALLOWED_MAP_IDS.includes(g.id));
 let doors = [], curGrid = null;
 function gridFor(n) {                       // grade ativa (só em modo livre; a história usa mapas fixos)
   if (historia || !mapSel.startsWith('grid:')) return null;
-  return GRIDS.find(g => 'grid:' + g.id === mapSel) || null;
+  return GRIDS_PERMITIDAS.find(g => 'grid:' + g.id === mapSel) || null;
 }
 function buildGrid(G) {
   const g0 = G.map, R = g0.length, C = g0[0].length;
@@ -1809,13 +1819,36 @@ function drawStun(e) {
 }
 
 // ============ MAPAS ORIGINAIS (maps.js do Hotline Neon) ============
-// 159 salas do maps.js. As 74 com inimigos entram no seletor e na história estendida.
+// Allowlist explícita; dimensões internas continuam sendo usadas para renderização e colisões.
+const NEON_ALLOWED_MAP_NAMES = Object.freeze([
+  'rmApartment1Upstairs', 'rmApartment2Entrance', 'rmApartment2Upstairs', 'rmArcadeDownstairs', 'rmArcadeUpstairs',
+  'rmBar3', 'rmBossClubFloor1', 'rmBossClubFloor2', 'rmBossClubFloor3', 'rmBuildingFloor1', 'rmBuildingFloor2',
+  'rmBuildingFloor3', 'rmBuildingFloor4', 'rmEurogamer', 'rmHighballer', 'rmHospitalEntrance', 'rmHospitalTopFloor',
+  'rmHotelEntrance', 'rmHotelSuite', 'rmHouse2Downstairs', 'rmHouse2Upstairs', 'rmHouse3Basement', 'rmHouse3Downstairs',
+  'rmHouse3Upstairs', 'rmHouse4Left', 'rmHouse4Middle', 'rmHouse4Right', 'rmHouse4Upstairs', 'rmHouse5Downstairs',
+  'rmHouse5Upstairs', 'rmMansionEntrance', 'rmMansionMainHall', 'rmNew10', 'rmNew11', 'rmNew12', 'rmNew13', 'rmNew14',
+  'rmNew15', 'rmNew2', 'rmNew4', 'rmNew5', 'rmNew6', 'rmNew7', 'rmNew8', 'rmNew9', 'rmNoodleShop', 'rmOfficeEntrance',
+  'rmOfficeFloor2', 'rmOfficeFloor3', 'rmOldHotel', 'rmPizzaHut3', 'rmPoliceHQFloor1', 'rmPoliceHQFloor3',
+  'rmSequence12b', 'rmStore3', 'rmSwatDownstairs', 'rmSwatUpstairs', 'rmTrainstationDownstairs', 'rmTrainstationEntrance',
+  'rmTutorial', 'rmVideoStore3',
+]);
+const NEON_ALLOWED_MAPS = new Set(NEON_ALLOWED_MAP_NAMES);
+const NEON_EXCLUDED_MAPS = new Set([
+  'rmHouse1Downstairs', 'rmHouse1Upstairs', 'rmSequence12c', 'rmTrailer', 'rmTestRoom',
+  'rmTestLevel1', 'rmTestLevel2', 'rmTestLevel3', 'rmTestLevel4', 'rmTestLevel5',
+  'rmTestLevel6', 'rmTestLevel7', 'rmTestLevel8', 'rmTestLevel9', 'rmTestLevel10',
+]);
 // Mapas de uma só planta: sem escada/elevador; a saída é o carro (objPlayerCarEnter) quando existe.
 const NEON_ENEMY_RE = /enemy|guard|thug|mobster|assassin|patrol|gangster/i;
 const NEON_SKIP_RE = /player|enemy|guard|thug|gangster|patrol|mobster|assassin|weapon|spawn|lanestart|door|carenter/i;
-// Salas 640x580 (incluindo a variante 640x576) são protótipos estreitos e ficam fora do seletor.
-const NEON_SIZE_BLOCK = m => Math.abs(m.w - 640) <= 4 && Math.abs(m.h - 580) <= 8;
-const NEON_PLAYABLE = MAPS.filter(m => !NEON_SIZE_BLOCK(m) && m.objects.some(o => NEON_ENEMY_RE.test(o[0])));
+const NEON_DIMENSION_TITLE_RE = /\b\d{2,5}\s*(?:x|×|by)\s*\d{2,5}\b/i;
+function neonMapTitle(m) { return String(m.title || m.name.replace(/^rm/, '')); }
+function neonTitleHasDimensions(title) { return NEON_DIMENSION_TITLE_RE.test(title); }
+function neonMapIsAllowed(m) {
+  return NEON_ALLOWED_MAPS.has(m.name) && !NEON_EXCLUDED_MAPS.has(m.name) &&
+    !neonTitleHasDimensions(neonMapTitle(m)) && m.objects.some(o => NEON_ENEMY_RE.test(o[0]));
+}
+const NEON_PLAYABLE = MAPS.filter(neonMapIsAllowed);
 const NEON_BY = new Map(NEON_PLAYABLE.map(m => [m.name, m]));
 const NEON_WEAPONS = ['taco', 'faca', 'cano', 'martelo', 'pe_de_cabra', 'pistola', 'revolver', 'escopeta', 'smg', 'rifle', 'uzi'];
 const NEON_AMMO = { escopeta: 6, smg: 24, pistola: 8, revolver: 6, rifle: 10, uzi: 24 };
@@ -1838,7 +1871,7 @@ function neonFor(n) {                       // mapa original da fase n (históri
   let name = null;
   if (historia) name = STORY[n - 1] && STORY[n - 1].neon;
   else if (mapSel.startsWith('neon:')) name = mapSel.slice(5);
-  return name ? (NEON_BY.get(name) || null) : null;
+  return name && NEON_ALLOWED_MAPS.has(name) && !NEON_EXCLUDED_MAPS.has(name) ? (NEON_BY.get(name) || null) : null;
 }
 function neonDrawProp(g, sp, x, y, rot) {
   const s = SPRITES[sp], im = neonImg(s.frames[0]);
@@ -1872,7 +1905,7 @@ function neonSafePoint(x, y, r, avoid = [], gap = 28) {
 }
 function buildNeonFloor(m) {
   curNeon = m; neonCar = false;
-  WW = m.w; WH = m.h; fixedMap = false; mapName = m.name.replace(/^rm/, '');
+  WW = m.w; WH = m.h; fixedMap = false; mapName = neonMapTitle(m);
   walls = []; furn = []; decor = []; posts = []; rooms = []; keep = []; breakables = []; brokenGlass = [];
   rooms = [{ x: 0, y: 0, w: WW, h: WH, t: 'conc' }]; rooms.hall = null;
   doors = []; transp = [];
@@ -1895,7 +1928,7 @@ function buildNeonFloor(m) {
       walls.push([x - s.ox, y - s.oy, Math.min(256, Math.max(4, sz[0])), Math.min(256, Math.max(4, sz[1]))]);
     }
   }
-  // Alguns mapas Neon (incluindo o trailer) não trazem os quatro objetos de parede.
+  // Alguns mapas Neon não trazem os quatro objetos de parede.
   // O perímetro visual acompanha a barreira de segurança do mundo e evita áreas sem parede.
   const edge = Math.max(12, Math.min(24, Math.round(Math.min(WW, WH) * .035)));
   walls.push([0, 0, WW, edge], [0, WH - edge, WW, edge], [0, 0, edge, WH], [WW - edge, 0, edge, WH]);
@@ -1917,7 +1950,9 @@ function buildNeonFloor(m) {
   const car = m.objects.find(o => /CarEnter/i.test(o[0]));
   startPos = fitWorldPosition(...(sp0 ? [sp0[1], sp0[2]] : car ? [car[1], car[2]] : [96, 96]), 13);
   neonCar = !!car;
-  exitR = car ? [car[1] - 40, car[2] - 40, 80, 80] : [startPos[0] - 45, startPos[1] - 45, 90, 90];
+  // Alguns objetos de carro ficam fora do piso caminhável; ajuste só a zona lógica de saída, sem editar o mapa-fonte.
+  const exitAnchor = car ? neonSafePoint(car[1], car[2], 13, [], 0) : startPos;
+  exitR = car && exitAnchor ? [exitAnchor[0] - 40, exitAnchor[1] - 40, 80, 80] : [startPos[0] - 45, startPos[1] - 45, 90, 90];
   // inimigos (facas = corpo a corpo; armas = atiradores) e armas no chão
   enemies = [];
   for (const o of m.objects) {
@@ -2748,7 +2783,15 @@ MASKS.forEach((m, i) => {
 });
 grade.onmouseleave = () => preview(sel);
 const msel = $('mapa');
-[['seq', 'Sequência (todos os mapas)'], ['proc', 'Apartamento aleatório'], ...MAPAS.map(m => [m.id, m.nome]), ...GRIDS.map(g => ['grid:' + g.id, 'Grade: ' + g.nome]), ...NEON_PLAYABLE.map(m => ['neon:' + m.name, m.name.replace(/^rm/, '') + ' (' + m.w + '×' + m.h + ')'])].forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; msel.appendChild(o); });
+const MAP_SELECTOR_MODES = Object.freeze(['seq', 'proc']);
+const MAP_SELECTOR_ALLOWED = new Set([...MAP_SELECTOR_MODES, ...MAPAS_PERMITIDOS,
+  ...GRID_ALLOWED_MAP_IDS.map(id => 'grid:' + id), ...NEON_ALLOWED_MAP_NAMES.map(name => 'neon:' + name)]);
+const MAP_SELECTOR_OPTIONS = [
+  ['seq', 'Sequência (todos os mapas)'], ['proc', 'Apartamento aleatório'],
+  ...MAPAS.map(m => [m.id, m.nome]), ...GRIDS_PERMITIDAS.map(g => ['grid:' + g.id, 'Grade: ' + g.nome]),
+  ...NEON_PLAYABLE.map(m => ['neon:' + m.name, neonMapTitle(m)]),
+].filter(([value]) => MAP_SELECTOR_ALLOWED.has(value));
+MAP_SELECTOR_OPTIONS.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; msel.appendChild(o); });
 msel.onchange = () => { mapSel = msel.value; msel.blur(); };
 
 // ---------- ENTRADAS ----------
