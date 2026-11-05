@@ -27,6 +27,37 @@ function declaration(source, signature) {
   for(let i=open;i<source.length;i++){if(source[i]==='{')depth++;else if(source[i]==='}'&&!--depth)return source.slice(start,i+1);}
   throw Error(`declaração incompleta: ${signature}`);
 }
+function mapConfiguration() {
+  const html=read('index.html');
+  const arrayLiteral=name=>{
+    const match=html.match(new RegExp(`const ${name} = Object\\.freeze\\((\\[[\\s\\S]*?\\])\\);`));
+    if(!match)throw Error(`allowlist ausente: ${name}`);
+    return vm.runInNewContext(match[1]);
+  };
+  const setLiteral=name=>{
+    const match=html.match(new RegExp(`const ${name} = new Set\\((\\[[\\s\\S]*?\\])\\);`));
+    if(!match)throw Error(`lista de exclusão ausente: ${name}`);
+    return vm.runInNewContext(match[1]);
+  };
+  const fixedLiteral=html.match(/const MAPAS_BASE = (\[[\s\S]*?\n\]);/)?.[1];
+  const gridLiteral=html.match(/const GRIDS = (\[[\s\S]*?\n\]);/)?.[1];
+  const storyLiteral=html.match(/const STORY = (\[[\s\S]*?\n\]);/)?.[1];
+  if(!fixedLiteral||!gridLiteral||!storyLiteral)throw Error('dados da campanha ou mapas ausentes');
+  const fixedBase=vm.runInNewContext(fixedLiteral),fixedAllowed=arrayLiteral('MAPAS_PERMITIDOS');
+  const gridBase=vm.runInNewContext(gridLiteral),gridAllowed=arrayLiteral('GRID_ALLOWED_MAP_IDS'),modes=arrayLiteral('MAP_SELECTOR_MODES');
+  const story=vm.runInNewContext(storyLiteral),fixed=new Set(fixedAllowed),gridSet=new Set(gridAllowed);
+  const grids=gridBase.filter(g=>gridSet.has(g.id));
+  const dataCtx=vm.createContext({});vm.runInContext(read('js/maps.js'),dataCtx);
+  const neonData=vm.runInContext('MAPS',dataCtx),neonAllowed=arrayLiteral('NEON_ALLOWED_MAP_NAMES'),neonExcluded=new Set(setLiteral('NEON_EXCLUDED_MAPS'));
+  const enemyExpr=html.match(/const NEON_ENEMY_RE = (\/[^;\n]+);/)?.[1];
+  const dimensionExpr=html.match(/const NEON_DIMENSION_TITLE_RE = (\/[^;\n]+);/)?.[1];
+  if(!enemyExpr||!dimensionExpr)throw Error('validadores de mapa ausentes');
+  const ctx=vm.createContext({NEON_DIMENSION_TITLE_RE:vm.runInNewContext(dimensionExpr),NEON_ENEMY_RE:vm.runInNewContext(enemyExpr),NEON_ALLOWED_MAPS:new Set(neonAllowed),NEON_EXCLUDED_MAPS:neonExcluded});
+  vm.runInContext(declaration(html,'function neonMapTitle(')+'\n'+declaration(html,'function neonTitleHasDimensions(')+'\n'+declaration(html,'function neonMapIsAllowed('),ctx);
+  const playable=neonData.filter(m=>ctx.neonMapIsAllowed(m));
+  const selectorAllowed=new Set([...modes,...fixedAllowed,...gridAllowed.map(id=>'grid:'+id),...neonAllowed.map(name=>'neon:'+name)]);
+  return {html,fixedBase,fixedAllowed,fixed:fixedBase.filter(m=>fixed.has(m.id)),gridBase,gridAllowed,grids,modes,selectorAllowed,story,neonData,neonAllowed,neonExcluded,playable,neonTitle:ctx.neonMapTitle,hasDimensions:ctx.neonTitleHasDimensions,mapAllowed:ctx.neonMapIsAllowed};
+}
 const results = [];
 async function test(name, fn) {
   try { await fn(); results.push({ name, status: 'PASS' }); }
@@ -85,7 +116,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v54.0');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v55.0');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/server/server.js')).status,404);
     const badType=await apiRequest(server,'POST','/api/rooms','{}',{'content-type':'text/plain'});assert.equal(badType.status,415);
@@ -469,21 +500,80 @@ async function run() {
     assert.doesNotMatch(ui,/R · RECOMEÇAR|id: 'rest'/);
     assert.doesNotMatch(debug,/F8 reiniciar|e\.key === 'F8'/);
   });
-  await test('Seletor Neon exclui o protótipo 640x580 e variantes equivalentes', () => {
-    const html=read('index.html');
-    assert.match(html,/const NEON_SIZE_BLOCK = m => Math\.abs\(m\.w - 640\) <= 4 && Math\.abs\(m\.h - 580\) <= 8/);
-    assert.match(html,/const MAPAS = MAPAS_BASE\.filter\(m => !\(Math\.abs\(m\.iw - 640\) <= 4 && Math\.abs\(m\.ih - 580\) <= 8\)\)/);
-    const dataCtx=vm.createContext({});vm.runInContext(read('js/maps.js'),dataCtx);
-    const n=vm.runInContext("MAPS.filter(m=>! (Math.abs(m.w-640)<=4 && Math.abs(m.h-580)<=8) && m.objects.some(o=>/enemy|guard|thug|mobster|assassin|patrol|gangster/i.test(o[0])))",dataCtx);
-    assert.equal(n.length,72);
-    assert.ok(!n.some(m=>m.name==='rmHouse1Downstairs'||m.name==='rmHouse1Upstairs'));
+  await test('Allowlist de mapas, títulos limpos e progressão narrativa sem referências excluídas', () => {
+    const c=mapConfiguration(),html=c.html;
+    assert.equal(c.fixedBase.length,18);assert.equal(c.fixed.length,18);assert.ok(c.fixedAllowed.includes('apto'),'mapa Apartamentos permanece apesar da dimensão interna');
+    assert.equal(new Set(c.fixedAllowed).size,c.fixedAllowed.length);assert.ok(c.fixedBase.every(m=>c.fixedAllowed.includes(m.id)));
+    assert.equal(c.neonAllowed.length,61);assert.equal(c.playable.length,61);assert.equal(new Set(c.neonAllowed).size,c.neonAllowed.length);
+    assert.ok(c.neonAllowed.every(name=>c.neonData.some(m=>m.name===name)));
+    assert.deepEqual(Array.from(c.gridAllowed),['metro','overdose']);assert.equal(c.grids.length,2);
+    const selectorValues=[...c.modes,...c.fixed.map(m=>m.id),...c.grids.map(g=>'grid:'+g.id),...c.playable.map(m=>'neon:'+m.name)];
+    assert.ok(selectorValues.every(value=>c.selectorAllowed.has(value)),'cada opção de mapa vem da allowlist global');
+    assert.match(html,/const MAP_SELECTOR_OPTIONS = \[[\s\S]*\.\.\.MAPAS\.map[\s\S]*\.\.\.GRIDS_PERMITIDAS\.map[\s\S]*\.\.\.NEON_PLAYABLE\.map[\s\S]*\.filter\(\(\[value\]\) => MAP_SELECTOR_ALLOWED\.has\(value\)\)/);
+    assert.ok(c.playable.every(m=>m.objects.some(o=>/enemy|guard|thug|mobster|assassin|patrol|gangster/i.test(o[0]))));
+    for(const name of ['rmTrailer','rmTestRoom','rmSequence12c','rmHouse1Downstairs','rmHouse1Upstairs',...Array.from({length:10},(_,i)=>`rmTestLevel${i+1}`)]){
+      assert.ok(c.neonExcluded.has(name),`${name} explicitamente excluído`);
+      assert.ok(!c.playable.some(m=>m.name===name),`${name} ausente do seletor ativo`);
+      assert.ok(!c.story.some(s=>s.neon===name),`${name} ausente da progressão`);
+    }
+    assert.equal(c.hasDimensions('Trailer 640 x 580'),true);assert.equal(c.hasDimensions('Trailer 640 × 580'),true);assert.equal(c.hasDimensions('Trailer 640 by 580'),true);
+    assert.ok(!c.neonAllowed.includes('rmTrailer'));assert.ok(!c.playable.some(m=>c.neonTitle(m)==='Trailer 640 x 580'));
+    const titleProbe={...c.neonData.find(m=>c.neonAllowed.includes(m.name)),title:'Trailer 640 x 580'};
+    assert.equal(c.mapAllowed(titleProbe),false,'título com dimensões bloqueado pela mesma regra do seletor');
+    assert.ok(c.playable.every(m=>!c.hasDimensions(c.neonTitle(m))),'títulos ativos sem dimensões');
+    assert.match(html,/NEON_PLAYABLE\.map\(m => \['neon:' \+ m\.name, neonMapTitle\(m\)\]/);
+    assert.match(html,/const NEON_PLAYABLE = MAPS\.filter\(neonMapIsAllowed\)/);
+    assert.doesNotMatch(html,/NEON_PLAYABLE\.map\(m => \['neon:' \+ m\.name, .*m\.w.*m\.h/);
+    assert.doesNotMatch(html,/const NEON_SIZE_BLOCK|MAPAS_BASE\.filter\(m => !\(Math\.abs\(m\.iw/);
+    const fixedIds=new Set(c.fixed.map(m=>m.id)),neonIds=new Set(c.neonAllowed);
+    for(const [i,stage] of c.story.entries()){
+      assert.notEqual(Boolean(stage.m),Boolean(stage.neon),`fase ${i+1} deve apontar para exatamente um mapa`);
+      if(stage.m)assert.ok(fixedIds.has(stage.m),`fase ${i+1}: mapa fixo ${stage.m}`);
+      if(stage.neon)assert.ok(neonIds.has(stage.neon),`fase ${i+1}: mapa Neon ${stage.neon}`);
+    }
+    assert.equal(c.story[0].m,'metro');assert.ok(c.story.every(s=>s.m||s.neon),'sem fases vazias');
+    const chapters=c.story.slice(0,14).map(s=>s.t.match(/Capítulo (\d+)/)?.[1]).filter(Boolean).map(Number);
+    assert.deepEqual(Array.from(chapters),[2,3,4,6,7,8,9,10,11,13,14,16,19]);
+    assert.ok(c.story.slice(14).every(s=>s.neon),'expansões preservadas depois dos capítulos base');
+    assert.match(html,/neonTitleHasDimensions\(neonMapTitle\(m\)\)/);
+  });
+  await test('Mapas fixos permitidos carregam spawn livre, colisões e saída dentro do mapa', () => {
+    const {fixed}=mapConfiguration(),html=read('index.html'),extract=re=>html.match(re)?.[0];
+    const blocks=[extract(/function worldEdgeHit\(x, y, r\) \{[\s\S]*?\n\}/),extract(/function sgBuild\(\) \{[\s\S]*?\n\}/),
+      extract(/function hitWall\(x, y, r\) \{[\s\S]*?\n\}/),extract(/function unstick\(e\) \{[\s\S]*?\n\}/),extract(/function safeSpawnPos\(x, y, r = 13, areas = rooms\) \{[\s\S]*?\n\}/),
+      extract(/function rng\(seed\) \{[\s\S]*?\n\}/),extract(/function seg\(x, y, w, h\) \{[\s\S]*?\n\}/),extract(/function addDoor\(x, y, w, h, vert, len = Math\.max\(w, h\)\) \{[\s\S]*?\n\}/),
+      extract(/function refreshSol\(\) \{[\s\S]*?\n\}/),extract(/function buildFixed\(m, n\) \{[\s\S]*?\n\}/)];
+    assert.ok(blocks.every(Boolean));
+    const ctx={T:12,hyp:Math.hypot,SG:{ref:null,len:-1,cs:64,cells:new Map()},sol:[],walls:[],furn:[],decor:[],posts:[],rooms:[],keep:[],doors:[],breakables:[],brokenGlass:[],exitR:[],startPos:[],fixedMap:false,mapName:'',
+      furnish(){},paintMap(){}};vm.createContext(ctx);vm.runInContext(blocks.join('\n'),ctx);
+    for(const map of fixed){ctx.walls=[];ctx.furn=[];ctx.decor=[];ctx.posts=[];ctx.rooms=[];ctx.keep=[];ctx.doors=[];ctx.breakables=[];ctx.brokenGlass=[];ctx.sol=[];ctx.SG.ref=null;ctx.SG.len=-1;
+      ctx.buildFixed(map,1);assert.ok(ctx.rooms.length>0,`${map.id}: salas`);assert.ok(ctx.walls.length>0,`${map.id}: colisões`);
+      assert.equal(ctx.hitWall(ctx.startPos[0],ctx.startPos[1],13),false,`${map.id}: spawn`);
+      const [x,y,w,h]=ctx.exitR;assert.ok(w>0&&h>0&&x>=0&&y>=0&&x+w<=ctx.WW&&y+h<=ctx.WH,`${map.id}: limites da saída`);
+      assert.equal(ctx.hitWall(x+w/2,y+h/2,13),false,`${map.id}: saída livre`);
+    }
+  });
+  await test('Grades permitidas carregam spawn, inimigos, colisões e saída válidos', () => {
+    const c=mapConfiguration(),html=c.html,extract=re=>html.match(re)?.[0];
+    const blocks=[extract(/function worldEdgeHit\(x, y, r\) \{[\s\S]*?\n\}/),extract(/function sgBuild\(\) \{[\s\S]*?\n\}/),
+      extract(/function hitWall\(x, y, r\) \{[\s\S]*?\n\}/),extract(/function buildGrid\(G\) \{[\s\S]*?\n\}/),
+      extract(/function spawnGrid\(G\) \{[\s\S]*?\n\}/),extract(/function refreshSol\(\) \{[\s\S]*?\n\}/)];
+    assert.ok(blocks.every(Boolean));
+    const ctx={TILE:40,EXP:{glass:{list:[],map:new Map()}},SG:{ref:null,len:-1,cs:64,cells:new Map()},sol:[],walls:[],furn:[],decor:[],posts:[],keep:[],doors:[],breakables:[],brokenGlass:[],rooms:[],startPos:[],exitR:[],enemies:[],WW:0,WH:0,fixedMap:false,mapName:'',lvl:1,paintMap(){}};
+    vm.createContext(ctx);vm.runInContext(blocks.join('\n'),ctx);
+    for(const grid of c.grids){ctx.walls=[];ctx.furn=[];ctx.doors=[];ctx.breakables=[];ctx.brokenGlass=[];ctx.sol=[];ctx.rooms=[];ctx.enemies=[];ctx.SG.ref=null;ctx.SG.len=-1;ctx.EXP.glass.list=[];ctx.EXP.glass.map.clear();
+      ctx.buildGrid(grid);ctx.spawnGrid(grid);assert.equal(ctx.hitWall(ctx.startPos[0],ctx.startPos[1],13),false,`${grid.id}: spawn`);
+      for(const e of ctx.enemies)assert.equal(ctx.hitWall(e.x,e.y,e.r),false,`${grid.id}: inimigo ${e.x},${e.y}`);
+      const [x,y,w,h]=ctx.exitR;assert.ok(w>0&&h>0&&x>=0&&y>=0&&x+w<=ctx.WW&&y+h<=ctx.WH,`${grid.id}: área de saída`);
+      assert.equal(ctx.hitWall(x+w/2,y+h/2,13),false,`${grid.id}: saída livre`);
+    }
   });
   await test('Save de versão futura expõe modo protegido na interface', () => {
     const core=read('js/exp-core.js');assert.match(core,/saveReadOnly: \(\) => unsupportedSave/);assert.match(core,/saveReadonlyNotice/);assert.match(core,/modo protegido/);
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v54.0');
+    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v55.0');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
   });
@@ -530,9 +620,7 @@ async function run() {
   await test('Spawns de todas as salas Neon jogáveis ficam dentro da borda segura', () => {
     const {ctx}=environment();const html=read('index.html');const edge=html.match(/function worldEdgeHit\(x, y, r\) \{[\s\S]*?\n\}/)?.[0];const fit=html.match(/function fitWorldPosition\(x, y, r\) \{[\s\S]*?\n\}/)?.[0];
     assert.ok(edge&&fit);vm.runInContext(edge+'\n'+fit,ctx);
-    const dataCtx=vm.createContext({});vm.runInContext(read('js/maps.js'),dataCtx);
-    const maps=vm.runInContext('MAPS.filter(m=>!(Math.abs(m.w-640)<=4&&Math.abs(m.h-580)<=8)&&m.objects.some(o=>/enemy|guard|thug|mobster|assassin|patrol|gangster/i.test(o[0])))',dataCtx);
-    assert.equal(maps.length,72);
+    const maps=mapConfiguration().playable;assert.equal(maps.length,61);
     for(const map of maps){
       ctx.WW=map.w;ctx.WH=map.h;
       const spawn=map.objects.find(o=>/objPlayerBiker|objPlayerMouseHouse|objJackets|objPlayerMouse|spawn|start/i.test(o[0])&&!/CarEnter/i.test(o[0]));
@@ -541,8 +629,8 @@ async function run() {
       assert.equal(ctx.worldEdgeHit(position[0],position[1],13),false,map.name);
     }
   });
-  await test('buildNeonFloor mantém spawns, inimigos e armas fora de paredes nos 72 mapas Neon', () => {
-    const html=read('index.html'),extract=re=>html.match(re)?.[0],noop=()=>{};
+  await test('buildNeonFloor mantém spawn, colisões e saída válidos nos 61 mapas Neon permitidos', () => {
+    const html=read('index.html'),extract=re=>html.match(re)?.[0],noop=()=>{},config=mapConfiguration();
     const blocks=[extract(/function worldEdgeHit\(x, y, r\) \{[\s\S]*?\n\}/),extract(/function fitWorldPosition\(x, y, r\) \{[\s\S]*?\n\}/),
       extract(/function sgBuild\(\) \{[\s\S]*?\n\}/),extract(/function hitWall\(x, y, r\) \{[\s\S]*?\n\}/),extract(/function unstick\(e\) \{[\s\S]*?\n\}/),
       extract(/function refreshSol\(\) \{[\s\S]*?\n\}/),extract(/function neonSafePoint\(x, y, r, avoid = \[\], gap = 28\) \{[\s\S]*?\n\}/),extract(/function buildNeonFloor\(m\) \{[\s\S]*?\n\}/)];
@@ -550,14 +638,19 @@ async function run() {
     const canvas=()=>({width:0,height:0,getContext:()=>g});
     const ctx={WW:0,WH:0,SG:{ref:null,len:-1,cs:64,cells:new Map()},sol:[],walls:[],furn:[],decor:[],posts:[],keep:[],rooms:[],doors:[],transp:[],enemies:[],pickups:[],corpses:[],blood:[],liveBlood:[],throws:[],predio:[{}],andar:0,curNeon:null,neonCar:false,fixedMap:false,mapName:'',startPos:[96,96],exitR:[0,0,0,0],
       NEON_SKIP_RE:/player|enemy|guard|thug|gangster|patrol|mobster|assassin|weapon|spawn|lanestart|door|carenter/i,NEON_ENEMY_RE:/enemy|guard|thug|mobster|assassin|patrol|gangster/i,
-      NEON_WEAPONS:['taco','faca','cano','martelo','pe_de_cabra','pistola','revolver','escopeta','smg','rifle','uzi'],NEON_AMMO:{},fl:canvas(),tp:canvas(),neonImg:()=>null,neonLoaded:()=>false,neonDrawProp:noop,saveFloor:noop,hyp:Math.hypot};
+      NEON_WEAPONS:['taco','faca','cano','martelo','pe_de_cabra','pistola','revolver','escopeta','smg','rifle','uzi'],NEON_AMMO:{},neonMapTitle:config.neonTitle,fl:canvas(),tp:canvas(),neonImg:()=>null,neonLoaded:()=>false,neonDrawProp:noop,saveFloor:noop,hyp:Math.hypot};
     vm.createContext(ctx);vm.runInContext(read('js/maps.js'),ctx);vm.runInContext(read('js/collision_sizes.js'),ctx);vm.runInContext(blocks.join('\n'),ctx);
-    const maps=vm.runInContext('MAPS.filter(m=>!(Math.abs(m.w-640)<=4&&Math.abs(m.h-580)<=8)&&m.objects.some(o=>NEON_ENEMY_RE.test(o[0])))',ctx);assert.equal(maps.length,72);
-    let enemies=0,pickups=0;
+    const maps=config.playable;assert.equal(maps.length,61);
+    let enemies=0,pickups=0;const invalidExits=[];
+    const originalMapData=JSON.stringify(maps.map(m=>({name:m.name,w:m.w,h:m.h,tiles:m.tiles,objects:m.objects})));
     for(const map of maps){ctx.buildNeonFloor(map);assert.equal(ctx.hitWall(ctx.startPos[0],ctx.startPos[1],13),false,`${map.name}: spawn`);
+      const [x,y,w,h]=ctx.exitR;let exitAccessible=false;
+      for(let ey=Math.max(13,y);ey<=Math.min(ctx.WH-13,y+h)&&!exitAccessible;ey+=8)for(let ex=Math.max(13,x);ex<=Math.min(ctx.WW-13,x+w);ex+=8)if(!ctx.hitWall(ex,ey,13)){exitAccessible=true;break;}
+      if(!(w>0&&h>0&&exitAccessible))invalidExits.push(map.name);
       for(const e of ctx.enemies){assert.equal(ctx.hitWall(e.x,e.y,e.r),false,`${map.name}: inimigo ${e.x},${e.y}`);enemies++;}
       for(const p of ctx.pickups){assert.equal(ctx.hitWall(p.x,p.y,8),false,`${map.name}: arma ${p.x},${p.y}`);pickups++;}}
-    assert.ok(enemies>0);assert.ok(pickups>0);
+    assert.ok(enemies>0);assert.ok(pickups>0);assert.deepEqual(invalidExits,[],'saídas inválidas: '+invalidExits.join(', '));
+    assert.equal(JSON.stringify(maps.map(m=>({name:m.name,w:m.w,h:m.h,tiles:m.tiles,objects:m.objects}))),originalMapData,'geometria, tiles e objetos fonte sem alterações');
   });
   return results;
 }

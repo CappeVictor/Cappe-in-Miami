@@ -1,54 +1,83 @@
-# Auditoria de mapas — v52
+# Auditoria de mapas — v55.0
 
-## Verificação de spawns — v52
-Os 17 mapas fixos restantes foram montados no navegador após as alterações. `boate-b` tinha o ponto inicial sobre uma parede; `safeSpawnPos` agora move esse ponto para um local livre. Após a correção, os 17 spawns passaram em `hitWall(..., 13)`. Para mapas procedurais, fase 1 iniciou com 8 inimigos, usando o corredor central quando as portas isolam as salas.
+Atualizada em 05/11/2026 a partir das definições de `MAPAS_BASE`, `STORY` e `js/maps.js`.
 
-Limite: a função `reachMap` considera portas fechadas como obstáculos sólidos. O teste em estado inicial não demonstra se todas as salas/saídas continuam conectadas depois de abrir portas; isso requer interação de jogo e segue pendente.
+## Regra ativa
 
-Gerada em 05/11/2026. O jogo mantém mapas que não têm o padrão equivalente a 640×580; a tolerância é largura ±4 e altura ±8.
+- O seletor mostra apenas o título do mapa; dimensões internas continuam disponíveis para renderização e colisões.
+- `MAPAS_PERMITIDOS`, `GRID_ALLOWED_MAP_IDS` e `NEON_ALLOWED_MAP_NAMES` são as allowlists explícitas; `MAP_SELECTOR_ALLOWED` combina as três com os modos Sequência e Apartamento aleatório.
+- `NEON_DIMENSION_TITLE_RE` bloqueia títulos com dimensões como `640 x 580`, `640 × 580` e `640 by 580`. A regressão verifica também o exemplo `Trailer 640 x 580`.
+- Mapas não são excluídos somente porque `w`, `h`, `iw` ou `ih` têm valores de pixels. `Apartamentos` (640×576 internamente) voltou à lista fixa porque seu título não contém dimensões.
+- Os dados de mapas em `js/maps.js` não foram editados. Quando um objeto de carro está fora do piso caminhável, o runtime ancora a zona lógica de saída no piso livre mais próximo; tiles, objetos, spawns e geometria de origem permanecem intactos.
 
-## Mapas fixos mantidos
+## Mapas fixos mantidos — 18
 
-| ID | Dimensão original | Escala | Portas | Salas | Spawn | Saída |
-|---|---:|---:|---:|---:|---:|---:|
-| academia | 706×720 | 1.5 | 11 | 10 | 340, 590 | 380, 60 |
-| estudio | 2086×1412 | 0.95 | 21 | 15 | 100, 640 | 1850, 1090 |
-| cassino | 940×720 | 1.4 | 28 | 19 | 467, 680 | 100, 100 |
-| fliperama | 841×880 | 1.3 | 7 | 7 | 410, 760 | 455, 60 |
-| central | 840×720 | 1.4 | 9 | 10 | 418, 300 | 770, 100 |
-| mansao | 654×720 | 1.5 | 12 | 13 | 500, 690 | 330, 105 |
-| metro | 640×480 | 1.5 | 10 | 6 | 330, 240 | 540, 75 |
-| hotel | 700×560 | 1.3 | 8 | 5 | 350, 500 | 600, 470 |
-| phonehom | 600×480 | 1.4 | 5 | 4 | 400, 430 | 100, 370 |
-| boate | 760×600 | 1.2 | 6 | 4 | 200, 500 | 660, 520 |
-| delegacia | 700×600 | 1.3 | 6 | 5 | 600, 480 | 70, 380 |
-| garagem | 640×480 | 1.4 | 6 | 4 | 480, 400 | 560, 80 |
-| loja | 700×500 | 1.3 | 6 | 4 | 350, 400 | 600, 120 |
-| hospital | 720×520 | 1.35 | 7 | 5 | 360, 420 | 560, 120 |
-| boate-b | 680×500 | 1.3 | 6 | 4 | 400, 380 | 580, 120 |
-| estacao | 760×500 | 1.35 | 7 | 5 | 380, 400 | 600, 120 |
-| oficina | 660×480 | 1.3 | 6 | 4 | 330, 380 | 560, 110 |
+| ID | Título exibido |
+|---|---|
+| `apto` | Apartamentos |
+| `academia` | Academia |
+| `estudio` | Estúdio |
+| `cassino` | Cassino |
+| `fliperama` | Fliperama |
+| `central` | Escritório Central |
+| `mansao` | Mansão |
+| `metro` | Estação de metrô |
+| `hotel` | Hotel Coral |
+| `phonehom` | Central Telefônica |
+| `boate` | Boate Mar Vermelho |
+| `delegacia` | Delegacia |
+| `garagem` | Garagem |
+| `loja` | Loja de conveniência |
+| `hospital` | Hospital abandonado |
+| `boate-b` | Boate |
+| `estacao` | Estação de trem |
+| `oficina` | Oficina |
 
-- Mapas fixos originais: **18**.
-- Mapas fixos mantidos: **17**.
-- Mapa fixo excluído: **apto**.
+Todos os 18 têm entrada explícita na allowlist. `apto` não é mais descartado pelo tamanho interno. A ordem de seleção original dos outros mapas foi preservada.
 
-## Mapas Neon
+## Mapas em grade mantidos — 2
 
-- Salas no pacote: **159**.
-- Salas com inimigos antes do filtro: **74**.
-- Salas jogáveis mantidas: **72**.
-- Salas excluídas por dimensão equivalente a 640×580: **2**.
+`metro` (The Metro) e `overdose` (Overdose) permanecem na seleção por terem títulos próprios e dados completos. A sequência da campanha não os referencia; são opções independentes do modo livre.
 
-### Excluídas
+## Mapas Neon mantidos — 61
 
-- rmHouse1Downstairs: 640×576
-- rmHouse1Upstairs: 640×576
+Todos têm inimigos, estão na allowlist, não são classificados como teste/protótipo e são carregados com título sem dimensões:
 
-### Validação
+`rmApartment1Upstairs`, `rmApartment2Entrance`, `rmApartment2Upstairs`, `rmArcadeDownstairs`, `rmArcadeUpstairs`, `rmBar3`, `rmBossClubFloor1`, `rmBossClubFloor2`, `rmBossClubFloor3`, `rmBuildingFloor1`, `rmBuildingFloor2`, `rmBuildingFloor3`, `rmBuildingFloor4`, `rmEurogamer`, `rmHighballer`, `rmHospitalEntrance`, `rmHospitalTopFloor`, `rmHotelEntrance`, `rmHotelSuite`, `rmHouse2Downstairs`, `rmHouse2Upstairs`, `rmHouse3Basement`, `rmHouse3Downstairs`, `rmHouse3Upstairs`, `rmHouse4Left`, `rmHouse4Middle`, `rmHouse4Right`, `rmHouse4Upstairs`, `rmHouse5Downstairs`, `rmHouse5Upstairs`, `rmMansionEntrance`, `rmMansionMainHall`, `rmNew10`, `rmNew11`, `rmNew12`, `rmNew13`, `rmNew14`, `rmNew15`, `rmNew2`, `rmNew4`, `rmNew5`, `rmNew6`, `rmNew7`, `rmNew8`, `rmNew9`, `rmNoodleShop`, `rmOfficeEntrance`, `rmOfficeFloor2`, `rmOfficeFloor3`, `rmOldHotel`, `rmPizzaHut3`, `rmPoliceHQFloor1`, `rmPoliceHQFloor3`, `rmSequence12b`, `rmStore3`, `rmSwatDownstairs`, `rmSwatUpstairs`, `rmTrainstationDownstairs`, `rmTrainstationEntrance`, `rmTutorial`, `rmVideoStore3`.
 
-Os mapas mantidos passam pelo ajuste de spawn dentro do perímetro e pela construção de paredes externas em buildNeonFloor. A conectividade completa de objetivos dinâmicos depende de partida em navegador.
+## Removidos da experiência ativa
 
+- `rmTrailer`, independentemente das dimensões internas. O seletor não exibe o título com pixels e a campanha não pode carregar o Trailer.
+- `rmTestLevel1` a `rmTestLevel10` e `rmTestRoom` (salas de teste).
+- `rmHouse1Downstairs` e `rmHouse1Upstairs` (protótipos já classificados como tal na auditoria anterior).
+- `rmSequence12c` (sala de sequência/protótipo; não tinha inimigos e não era uma fase selecionável).
+- Nenhum mapa fixo foi excluído nesta atualização. `Apartamentos` foi restaurado; os dados de todas as fases fixas foram preservados.
 
-## Colisões em mapas Neon — v53
-A varredura em Chromium reproduziu pelo menos um inimigo/arma bloqueado em 51 dos 72 mapas jogáveis. Após `neonSafePoint`, os 72 mapas continham 720 inimigos e 84 armas no chão, com zero entidades sobre colisores. O spawn do jogador também permaneceu livre nos 72. A suíte executa a mesma montagem/collision check para impedir regressão. A busca altera apenas a posição efetiva em runtime; os mapas e assets fonte foram preservados.
+## Ordem narrativa da campanha
+
+Os capítulos base seguem a numeração já escrita. Fases sem número não foram criadas para preencher lacunas:
+
+1. Prelúdio — Estação de metrô (`metro`)
+2. Capítulo 2 — Loja (`loja`)
+3. Capítulo 3 — Estúdio (`estudio`)
+4. Capítulo 4 — Academia (`academia`)
+5. Capítulo 6 — Hotel (`hotel`)
+6. Capítulo 7 — Central Telefônica (`phonehom`)
+7. Capítulo 8 — Boate Mar Vermelho (`boate`)
+8. Capítulo 9 — Hospital abandonado (`hospital`)
+9. Capítulo 10 — Garagem (`garagem`)
+10. Capítulo 11 — Estação de trem (`estacao`)
+11. Capítulo 13 — Delegacia (`delegacia`)
+12. Capítulo 14 — Mansão (`mansao`)
+13. Capítulo 16 — Fliperama (`fliperama`)
+14. Capítulo 19 — Resolução (`central`)
+
+Depois vêm, na ordem existente, as 12 expansões: Hospital · entrada (`rmHospitalEntrance`), Hospital · andar superior (`rmHospitalTopFloor`), Suíte do hotel (`rmHotelSuite`), Mansão · salão principal (`rmMansionMainHall`), Delegacia · térreo (`rmPoliceHQFloor1`), Delegacia · 3º andar (`rmPoliceHQFloor3`), Clube · pista (`rmBossClubFloor1`), Clube · cobertura (`rmBossClubFloor3`), Unidade tática · térreo (`rmSwatDownstairs`), Estação de trem (`rmTrainstationEntrance`), Fliperama (`rmEurogamer`) e Restaurante (`rmNoodleShop`). Todas as referências pertencem à allowlist.
+
+**Dúvida preservada:** o texto não contém os capítulos 5, 12, 15, 17 e 18. Além disso, as datas dos capítulos 16 e 19 (16 e 24 de maio) antecedem as datas dos capítulos 7 e 8 (23 e 27 de maio), apesar da numeração posterior. A campanha usa a numeração explícita e não altera os acontecimentos; a ordenação puramente cronológica não fica determinada pelo material existente. Mapas fixos sem capítulo permanecem na ordem de seleção original.
+
+## Validação
+
+`node tests/regression.cjs`: **57/57 PASS**. A suíte verifica as allowlists, títulos dimensionados, Trailer, mapas de teste/protótipos, referências da campanha, ordem, spawns, colisões, inimigos, armas e saídas. As verificações de runtime montam os 18 mapas fixos, 2 em grade e 61 mapas Neon permitidos e comparam os dados de tiles/objetos Neon antes e depois.
+
+Não houve validação visual em navegador nem medição de desempenho nesta atualização.

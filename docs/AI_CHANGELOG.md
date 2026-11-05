@@ -1,4 +1,12 @@
 # Changelog técnico
+## v55.0 — 05/11/2026
+- Allowlists explícitas para 18 mapas fixos, 2 grades e 61 mapas Neon; Apartamentos voltou porque sua resolução é somente dado interno.
+- Títulos do seletor Neon não exibem dimensões. Trailer, salas de teste e protótipos ficam fora da seleção; as mesmas regras protegem a progressão.
+- Campanha base reorganizada pela numeração já existente, sem criar fases para capítulos ausentes; dúvida das datas contraditórias documentada em MAP_AUDIT.md.
+- Zona lógica de saída Neon busca ponto livre próximo quando o objeto de carro está fora do piso; dados fonte e geometria dos mapas não são alterados.
+- Regressões de allowlist, história, spawns, colisões e saídas; node tests/regression.cjs: 57/57. Sem validação visual nem medição de FPS nesta iteração.
+- Cache offline e endpoint /api/health avançaram para v55.0.
+
 ## v54.0 — 05/11/2026
 - Corrigido fogo amigo local: cada projétil de jogador registra P1/P2 como origem; com a opção ligada, pode ferir somente o parceiro e consome o projétil no impacto.
 - Com fogo amigo desligado, projéteis não atingem o parceiro. Projéteis de inimigos e alvos de inimigos permanecem inalterados.

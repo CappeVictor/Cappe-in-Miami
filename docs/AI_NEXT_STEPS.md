@@ -1,4 +1,4 @@
-# Próximas ações — v54.0
+# Próximas ações — v55.0
 1. Jogar a campanha até vitória em uma fase inicial, uma intermediária e uma final; conferir morte e transições.
 2. Validar fogo amigo ligado/desligado, armas, portas, janelas, áudio e efeitos durante combate real.
 3. Validar criação/entrada/saída e reconexão online em dois navegadores/dispositivos.
