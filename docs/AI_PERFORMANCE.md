@@ -1,4 +1,7 @@
 # Performance — linha de base parcial
+## v53.0 — sem medição de FPS
+A validação de posição é executada uma vez ao montar cada mapa Neon, não a cada quadro. Busca em anéis ocorre somente para objetos cuja posição de origem colide; varredura do mapa é um fallback para vizinhanças bloqueadas. Isso não constitui medição de FPS.
+
 ## v52.0 — sem medição de FPS
 O acabamento das armas acrescenta poucas operações Canvas por arma desenhada e não introduz imagens, dependências nem partículas. O sprite procedural do personagem agora mantém no máximo 128 entradas visuais quantizadas, evitando reconstruir centenas de pixels em cada quadro no fallback; não há medição de FPS nesta sessão. Conferir custo/leitura em hardware modesto.
 

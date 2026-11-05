@@ -204,7 +204,7 @@ button { touch-action: manipulation; }
     <canvas id="c" width="960" height="600" aria-label="Área do jogo"></canvas>
 
     <section id="menu" class="overlay">
-      <p class="tag">Miami, 1989 · v52</p>
+      <p class="tag">Miami, 1989 · v53</p>
       <h1>Cappe-in-Miami</h1>
       <p class="bemvindo">Seja bem-vindo!</p>
       <p class="credito">Feito por <strong>Victor Cappellesso</strong> e <strong>Davi Gehart</strong></p>
@@ -1850,6 +1850,26 @@ function neonDrawDoor(d) {
   if (!neonLoaded(im)) return;
   ctx.save(); ctx.translate(d.px, d.py); ctx.rotate(d.base + d.th); ctx.drawImage(im, -s.ox, -s.oy); ctx.restore();
 }
+function neonSafePoint(x, y, r, avoid = [], gap = 28) {
+  const valid = (px, py) => !hitWall(px, py, r) && avoid.every(o => hyp(px - o.x, py - o.y) >= Math.max(gap, o.gap || 0));
+  if (valid(x, y)) return [x, y];
+  // Keep the original position when possible; otherwise search nearby walkable floor deterministically.
+  for (let d = 12; d <= Math.max(WW, WH); d += 12) {
+    const n = Math.max(12, Math.ceil(6.28 * d / 18));
+    for (let k = 0; k < n; k++) {
+      const a = k * 6.28 / n, px = x + Math.cos(a) * d, py = y + Math.sin(a) * d;
+      if (px < r || py < r || px > WW - r || py > WH - r) continue;
+      if (valid(px, py)) return [px, py];
+    }
+  }
+  // Crowded source layouts can have an entire blocked neighborhood; use the nearest free point in the map.
+  let best = null, bestD = Infinity;
+  for (let py = r + 12; py <= WH - r; py += 24) for (let px = r + 12; px <= WW - r; px += 24) {
+    const d = hyp(px - x, py - y);
+    if (d < bestD && valid(px, py)) { best = [px, py]; bestD = d; }
+  }
+  return best;
+}
 function buildNeonFloor(m) {
   curNeon = m; neonCar = false;
   WW = m.w; WH = m.h; fixedMap = false; mapName = m.name.replace(/^rm/, '');
@@ -1891,6 +1911,7 @@ function buildNeonFloor(m) {
     doors.push({ x, y, w, h, vert: h > w, len: Math.max(w, h), th: 0, target: 0, swing: false, open: false, fast: false,
       box: [x, y, w, h], spr: o[3], px: o[1], py: o[2], base: -(o[5] || 0) * Math.PI / 180 });
   }
+  refreshSol();
   // início e saída
   const sp0 = m.objects.find(o => /objPlayerBiker|objPlayerMouseHouse|objJackets|objPlayerMouse|spawn|start/i.test(o[0]) && !/CarEnter/i.test(o[0]));
   const car = m.objects.find(o => /CarEnter/i.test(o[0]));
@@ -1902,15 +1923,19 @@ function buildNeonFloor(m) {
   for (const o of m.objects) {
     if (enemies.length >= 65 || !NEON_ENEMY_RE.test(o[0])) continue;
     if (hyp(o[1] - startPos[0], o[2] - startPos[1]) < 45) continue;
-    enemies.push({ x: o[1], y: o[2], r: 13, a: Math.random() * 6.28,
+    const pos = neonSafePoint(o[1], o[2], 13, [{ x: startPos[0], y: startPos[1], gap: 45 }, ...enemies], 30);
+    if (!pos) continue;
+    enemies.push({ x: pos[0], y: pos[1], r: 13, a: Math.random() * 6.28,
       type: /melee|bat|knife/i.test(o[0]) ? 'bat' : /shot/i.test(o[0]) ? 'shot' : 'gun',
       cd: 1 + Math.random(), alert: false, state: 'IDLE', stateT: 0, stun: 0, lkp: null, heard: null, searchT: 0 });
   }
   pickups = [];
   m.objects.forEach((o, i) => {
     if (!/Weapon/.test(o[0])) return;
+    const pos = neonSafePoint(o[1], o[2], 8, [{ x: startPos[0], y: startPos[1], gap: 18 }, ...enemies], 20);
+    if (!pos) return;
     const w = NEON_WEAPONS[(i * 7 + Math.round(o[1] + o[2])) % NEON_WEAPONS.length];
-    pickups.push({ x: o[1], y: o[2], w, n: NEON_AMMO[w] || 0, a: 0 });
+    pickups.push({ x: pos[0], y: pos[1], w, n: NEON_AMMO[w] || 0, a: 0 });
   });
   corpses = []; blood = []; liveBlood = []; throws = [];
   predio[0] = { enemies, pickups, corpses, blood, liveBlood, transp: [] };

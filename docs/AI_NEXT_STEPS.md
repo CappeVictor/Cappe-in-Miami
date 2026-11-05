@@ -1,8 +1,8 @@
-# Próximas ações — v52.0
-1. Validar visualmente skins e armas com spritesheet em navegador real; verificar contraste em combate.
-2. Jogar uma fase inicial, intermediária e final; testar menu, pausa, morte, vitória e transições.
-3. Validar criação/entrada/saída e reconexão online em dois navegadores.
-4. Medir FPS, CPU e memória em presets gráficos, clima e combate intenso.
-5. Investigar custo de IA/colisão se quedas persistirem mesmo com efeitos reduzidos.
-6. Planejar protocolo autoritativo para mapa, combate, objetivos e progresso online.
-7. Validar assets ausentes, acessibilidade e instalação real do service worker.
+# Próximas ações — v53.0
+1. Jogar a campanha até vitória em uma fase inicial, uma intermediária e uma final; conferir morte e transições.
+2. Validar armas, portas, janelas, áudio e efeitos durante combate real.
+3. Validar criação/entrada/saída e reconexão online em dois navegadores/dispositivos.
+4. Medir FPS, CPU, memória e frame pacing em hardware modesto e mapas densos.
+5. Validar instalação real do service worker e recarga offline.
+6. Conferir skins e armas com spritesheets carregados, assets ausentes e acessibilidade.
+7. Manter a regressão Neon de 72 mapas e atualizar auditoria se os dados fonte forem alterados.

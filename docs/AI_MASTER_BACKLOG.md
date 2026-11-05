@@ -1,8 +1,9 @@
 # Backlog mestre — 04/11/2026
 
-22 itens distintos identificados por inspeção. Não há meta artificial de quantidade nesta rodada. Status Em teste significa implementação completa e testes automatizados aprovados, com validação de navegador pendente. P0 crítico; P1 muito alto; P2 alto; P3 médio; P4 baixo.
+23 itens distintos identificados por inspeção. Não há meta artificial de quantidade nesta rodada. Status Em teste significa implementação completa e testes automatizados aprovados, com validação de navegador pendente. P0 crítico; P1 muito alto; P2 alto; P3 médio; P4 baixo.
 
 | ID | Categoria | Descrição | Justificativa | Prioridade | Complexidade | Dependências | Arquivos | Critério de conclusão | Status |
+| CIM-025 | Mapas/colisão | Validar e deslocar inimigos/armas Neon para locais livres | 51/72 mapas tinham entidades sobre paredes em Chromium | P1 | Baixa | — | index.html; tests/regression.cjs | 72 mapas sem entidades bloqueadas, regressão automatizada e dados fonte preservados | Concluída |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | CIM-024 | Visual/UX | Skins cosméticas separadas de atributos e armas com leitura volumétrica; exibir arma de P2 | Aparência de papel e P2 sem representação da arma compartilhada | P2 | Baixa | Validação visual | js/exp-core.js; js/exp-ui.js; index.html; js/exp-content.js | Persistência v2, regressões, distinção das armas e coop cobertos; confirmar legibilidade no navegador | Em teste |
 | CIM-021 | Gráficos/interface | Respeitar antialiasing e ajustar tremor da câmera | Opção visual ignorada pelo wrapper e tremor sem ajuste gradual | P2 | Baixa | — | index.html; js/exp-ui.js; css/expansion.css | Preferência persistida, faixa validada e desenho respeita opção em regressões; conferir navegador | Em teste |

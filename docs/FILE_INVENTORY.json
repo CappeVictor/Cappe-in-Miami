@@ -6,8 +6,8 @@
   },
   {
     "file": "README.md",
-    "bytes": 14462,
-    "sha256": "7c73cc327a3d1ca8407fcc4343706003a795a68223471dad60ea43df70a8825b"
+    "bytes": 24554,
+    "sha256": "73634cca805095b55701d22c1ccf3f7f507918ebd22298b60d91e5d7acc98824"
   },
   {
     "file": "assets/background/images/tlCorners1.png",
@@ -446,13 +446,13 @@
   },
   {
     "file": "css/expansion.css",
-    "bytes": 12246,
-    "sha256": "a01e7c74c77235c067d1ac2e3cad83fcfc00684c70b9c2dc0972075aa42ffcb8"
+    "bytes": 15898,
+    "sha256": "e163ded6da9e20f3ce1dff1b7e2fbb21e13acb626c5daf8078124e93c0c4940e"
   },
   {
     "file": "index.html",
-    "bytes": 185181,
-    "sha256": "095c99d12bc97e187cc9cecaba9e17d6b1c4e8a3766afcd88012293aed903b63"
+    "bytes": 200926,
+    "sha256": "1ed64c9bebbd1ec8778b34df9b894f8070101b9e182d2adf45f3ad77c05e6b72"
   },
   {
     "file": "js/collision_sizes.js",
@@ -461,58 +461,58 @@
   },
   {
     "file": "js/exp-acess.js",
-    "bytes": 2673,
-    "sha256": "d6adadbc3521e9cd52fb979a22e917a7a81febbb6616c99c15b3c357921cca90"
+    "bytes": 3379,
+    "sha256": "b8190ae1efe5675dbd24b32b5da96f55cf072eaf32cb29ebaa3cb1b1ffa93601"
   },
   {
     "file": "js/exp-brain.js",
-    "bytes": 2368,
-    "sha256": "018f79c390f7fe182e3b2785862bf69bf68a09b9cf18ffdde01fdc50db7f2983"
+    "bytes": 2504,
+    "sha256": "06cdd283459c47ad46fba7675733ebab02cc4a501d664526addd8b6ba6cec89f"
   },
   {
     "file": "js/exp-content.js",
-    "bytes": 24460,
-    "sha256": "bf9e86bab4a5713aaf8f3e384b94369e0a592643d3316ec8267189ab72d80e02"
+    "bytes": 24670,
+    "sha256": "bf873a4bb76211c143323a1b29dcc802aac802ad5791537c76f1c15b0682fc91"
   },
   {
     "file": "js/exp-core.js",
-    "bytes": 24272,
-    "sha256": "5a5f1a05fccf790c46f5b398b6fe7873949fc21aaecf7a32a1157c68f55ed9e1"
+    "bytes": 25974,
+    "sha256": "771f8764933a4ea98c27a847ca8a82791f8a9b174884c6054f80aad2b4dc5d2f"
   },
   {
     "file": "js/exp-debug.js",
-    "bytes": 3611,
-    "sha256": "dc686a0af7c43b56f168876d409dc14567984697dc97c94b0c153d931436a94e"
+    "bytes": 3607,
+    "sha256": "13235de66bc75a9d0a28bd103efef36e95d9b4d41df95232f95f5999a7ba4735"
   },
   {
     "file": "js/exp-fx.js",
-    "bytes": 26033,
-    "sha256": "f5b9d30757c4ebdb130efc2af2e3ae5b780e6459a3e13657a8d9a1d2d149ad73"
+    "bytes": 26400,
+    "sha256": "d4bab51e9cd0fe098ebb96df975ead324a7d9d2c9f24231f1489ffc076d619e9"
   },
   {
     "file": "js/exp-i18n-extra.js",
-    "bytes": 13517,
-    "sha256": "eb226aea23f010a4be93dad6327d0bfa2ca22cf698857e7d0ff8bf9dbb9a8110"
+    "bytes": 12828,
+    "sha256": "8d08deb134852f506ac5a85903a9a3c3ada06db08a00240d27ce6f9e606cb5f3"
   },
   {
     "file": "js/exp-i18n-extra2.js",
-    "bytes": 9158,
-    "sha256": "3fd24a10c6c48de9989746f7aafb712802fd3193b1d59823595e7916bdda3882"
+    "bytes": 8701,
+    "sha256": "07b647d82c27624b755d13bf5ce891fd83399032fab504c71c2fec8df1166f2b"
   },
   {
     "file": "js/exp-i18n.js",
-    "bytes": 28324,
-    "sha256": "d4bb73e6ca14b3868da406fcef3734d686be1eb04ce2c961d1949198f0d4818f"
+    "bytes": 27879,
+    "sha256": "16fe85207a1ea79791e16ae290bf61392ced8fd34df6ba3e24d4549ff255e6e5"
   },
   {
     "file": "js/exp-modes.js",
-    "bytes": 38711,
-    "sha256": "90143016f0198cdd3f9c06df1346074e936c37c83bb9c385cbab961eb9f3daa7"
+    "bytes": 38920,
+    "sha256": "06c803489704782ea7aca13b94b49d3de9b29b902e0b5faf63874bc9afeacd52"
   },
   {
     "file": "js/exp-multi.js",
-    "bytes": 14106,
-    "sha256": "d4c7c195d0d84c4c44e27841a59623f560303715433ad612aa857cd7bffd5cc8"
+    "bytes": 17321,
+    "sha256": "46695fadc3c2b84f8fc51d9f12deaf4946bf78a820af29c5ac6b89fb8b6d234b"
   },
   {
     "file": "js/exp-music.js",
@@ -526,13 +526,13 @@
   },
   {
     "file": "js/exp-ui.js",
-    "bytes": 31781,
-    "sha256": "0501a0dc7577b2f30b3d2b1e3f56d2f57094d1626ad54f0f9595a47e91b06e59"
+    "bytes": 33482,
+    "sha256": "ac0d693f3a95fd8a112bbbab9cf6f911a01e0865ef99ee80248f5722abcdaef6"
   },
   {
     "file": "js/exp-world.js",
-    "bytes": 30748,
-    "sha256": "4166fe80c5e260c10cfbf2884ef567e7b2b659511da09d4ad1b6c660811fdf33"
+    "bytes": 31370,
+    "sha256": "af694d28c54e2f2319d93ab8688d632fcc8f7492d47dcef56983f0d44d9fc3d1"
   },
   {
     "file": "js/maps.js",
@@ -541,7 +541,7 @@
   },
   {
     "file": "sw.js",
-    "bytes": 5417,
-    "sha256": "f29dc87b412b77f3d8dc6385bc3e133c511f494d4ebdc20e83d35409e5c9c2f0"
+    "bytes": 5524,
+    "sha256": "bce33752da6b749a1f38f68918425ce28216826d45bde6f9d4bd874e62cd0b57"
   }
 ]

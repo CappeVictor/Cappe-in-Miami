@@ -1,4 +1,4 @@
-# Arquitetura real — v52.0
+# Arquitetura real — v53.0
 
 `js/exp-core.js` fornece o catálogo cosmético `EXP.SKINS`, `EXP.curSkin()` e `EXP.setSkin(id)`. A preferência ocupa somente `settings.skin` no save v2; saves antigos recebem `classic` pelo merge de defaults. A máscara/personagem e sua aplicação de atributos continuam independentes. `js/exp-ui.js` mostra seleção por botões acessíveis na tela de máscaras. O renderer utiliza a paleta no sprite procedural e acentos no spritesheet, sem carregar recursos adicionais.
 
@@ -17,6 +17,8 @@ No relay online, `setRemotePlayers` mantém o mesmo ator entre snapshots recebid
 Na resolução final do Canvas, `js/exp-ui.js` aplica o antialiasing e a qualidade de suavização atuais em cada quadro; `CFG.shakeAmt` escala coice e tremor visual, sendo validado como número entre 0 e 100 na leitura das preferências.
 
 Em v39, `EXP.multiCfg.autoReload` condiciona o início da recarga nos fluxos de arma; `EXP.applyVol` multiplica volumes individuais pelo mestre do multiplayer local; `exp-acess.js` implementa tablist/tabpanel com IDs associados, foco móvel e setas/Home/End.
+Em `buildNeonFloor`, a geometria de colisão é consolidada antes de inserir atores. `neonSafePoint` conserva posições válidas; para spawns inválidos procura piso caminhável em anéis crescentes e usa varredura global apenas quando a vizinhança está ocupada. Inimigos respeitam distância do jogador e uns dos outros; armas respeitam o spawn e inimigos. A rotina é executada ao montar o mapa, fora do loop por quadro.
+
 ## Inventário e responsabilidades
 | Arquivo | Responsabilidade e dependências |
 | --- | --- |

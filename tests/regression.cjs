@@ -85,7 +85,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v52.0');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v53.0');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/server/server.js')).status,404);
     const badType=await apiRequest(server,'POST','/api/rooms','{}',{'content-type':'text/plain'});assert.equal(badType.status,415);
@@ -465,7 +465,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v52.0');
+    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v53.0');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
   });
@@ -523,11 +523,11 @@ async function run() {
       assert.equal(ctx.worldEdgeHit(position[0],position[1],13),false,map.name);
     }
   });
-  await test('buildNeonFloor cria spawn livre nos 72 mapas jogáveis', () => {
+  await test('buildNeonFloor mantém spawns, inimigos e armas fora de paredes nos 72 mapas Neon', () => {
     const html=read('index.html'),extract=re=>html.match(re)?.[0],noop=()=>{};
     const blocks=[extract(/function worldEdgeHit\(x, y, r\) \{[\s\S]*?\n\}/),extract(/function fitWorldPosition\(x, y, r\) \{[\s\S]*?\n\}/),
       extract(/function sgBuild\(\) \{[\s\S]*?\n\}/),extract(/function hitWall\(x, y, r\) \{[\s\S]*?\n\}/),extract(/function unstick\(e\) \{[\s\S]*?\n\}/),
-      extract(/function refreshSol\(\) \{[\s\S]*?\n\}/),extract(/function buildNeonFloor\(m\) \{[\s\S]*?\n\}/)];
+      extract(/function refreshSol\(\) \{[\s\S]*?\n\}/),extract(/function neonSafePoint\(x, y, r, avoid = \[\], gap = 28\) \{[\s\S]*?\n\}/),extract(/function buildNeonFloor\(m\) \{[\s\S]*?\n\}/)];
     assert.ok(blocks.every(Boolean));const g={setTransform:noop,fillRect:noop,drawImage:noop,clearRect:noop,save:noop,restore:noop,translate:noop,rotate:noop};
     const canvas=()=>({width:0,height:0,getContext:()=>g});
     const ctx={WW:0,WH:0,SG:{ref:null,len:-1,cs:64,cells:new Map()},sol:[],walls:[],furn:[],decor:[],posts:[],keep:[],rooms:[],doors:[],transp:[],enemies:[],pickups:[],corpses:[],blood:[],liveBlood:[],throws:[],predio:[{}],andar:0,curNeon:null,neonCar:false,fixedMap:false,mapName:'',startPos:[96,96],exitR:[0,0,0,0],
@@ -535,7 +535,11 @@ async function run() {
       NEON_WEAPONS:['taco','faca','cano','martelo','pe_de_cabra','pistola','revolver','escopeta','smg','rifle','uzi'],NEON_AMMO:{},fl:canvas(),tp:canvas(),neonImg:()=>null,neonLoaded:()=>false,neonDrawProp:noop,saveFloor:noop,hyp:Math.hypot};
     vm.createContext(ctx);vm.runInContext(read('js/maps.js'),ctx);vm.runInContext(read('js/collision_sizes.js'),ctx);vm.runInContext(blocks.join('\n'),ctx);
     const maps=vm.runInContext('MAPS.filter(m=>!(Math.abs(m.w-640)<=4&&Math.abs(m.h-580)<=8)&&m.objects.some(o=>NEON_ENEMY_RE.test(o[0])))',ctx);assert.equal(maps.length,72);
-    for(const map of maps){ctx.buildNeonFloor(map);assert.equal(ctx.hitWall(ctx.startPos[0],ctx.startPos[1],13),false,map.name);}
+    let enemies=0,pickups=0;
+    for(const map of maps){ctx.buildNeonFloor(map);assert.equal(ctx.hitWall(ctx.startPos[0],ctx.startPos[1],13),false,`${map.name}: spawn`);
+      for(const e of ctx.enemies){assert.equal(ctx.hitWall(e.x,e.y,e.r),false,`${map.name}: inimigo ${e.x},${e.y}`);enemies++;}
+      for(const p of ctx.pickups){assert.equal(ctx.hitWall(p.x,p.y,8),false,`${map.name}: arma ${p.x},${p.y}`);pickups++;}}
+    assert.ok(enemies>0);assert.ok(pickups>0);
   });
   return results;
 }

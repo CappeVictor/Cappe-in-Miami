@@ -1,4 +1,4 @@
-# Servidor do Cappe-in-Miami v52
+# Servidor do Cappe-in-Miami v53
 
 Requer Node.js 18 ou superior. Não instala pacotes.
 

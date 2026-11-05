@@ -1,4 +1,11 @@
 # Changelog técnico
+## v53.0 — 05/11/2026
+- Corrigido bug reproduzido em Chromium: a geração Neon podia deixar inimigos e armas sobre colisores sólidos. Agora `neonSafePoint` procura piso livre próximo e, em layouts densos, o ponto livre mais próximo no mapa, respeitando limites e distâncias de segurança.
+- A colisão do piso é preparada antes de validar atores. Entidades sem local livre não são criadas em posição inválida.
+- Revarredura em navegador: 72 mapas, 720 inimigos, 84 armas no chão, zero spawns sobre paredes; sem exceções JavaScript.
+- Regressão agora valida jogador, cada inimigo e cada arma em todos os mapas Neon. Suíte: 54/54.
+- Cache offline e endpoint de saúde atualizados para v53.0. Sessões completas, online real e FPS continuam sem validação.
+
 ## v52.0 — 05/11/2026
 - Quatro skins cosméticas selecionáveis são persistidas em `settings.skin` no save v2; seleção independente de personagem/máscara, sem atributos ou desbloqueios alterados.
 - A paleta cosmética colore o sprite procedural e fornece acentos visuais no spritesheet existente, sem assets externos.

@@ -1,8 +1,15 @@
-# Cappe-in-Miami — v52.0 (skins cosméticas e arte de armas)
+# Cappe-in-Miami — v53.0 (spawns seguros nos mapas Neon)
 
 Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
 
 Na tela de escolha de máscara, selecione uma skin cosmética. Ela altera apenas as cores do traje e é salva em `settings.skin`, preservando saves v2 e os atributos dos personagens. As armas receberam contorno, brilhos e detalhes de material; no cooperativo local, P2 também exibe a arma compartilhada.
+
+## Entrega v53.0 — 05/11/2026
+
+- Auditoria no Chromium encontrou inimigos e armas sobrepostos a sólidos em 51 dos 72 mapas Neon.
+- A geração agora localiza posições livres próximas, respeita o spawn do jogador e evita sobreposição entre inimigos; armas no chão também são deslocadas para piso livre.
+- Todos os 72 mapas foram novamente montados no navegador: 720 inimigos e 84 armas no chão, nenhum colidindo com paredes. A suíte automatizada ampliada passou em 54/54.
+- Modos disponíveis abriram no navegador; campanha iniciou na fase 1, coop local aceitou movimento/tiro dos dois jogadores. Uma sessão completa até vitória não foi validada.
 
 ## Entrega v52.0 — 05/11/2026
 

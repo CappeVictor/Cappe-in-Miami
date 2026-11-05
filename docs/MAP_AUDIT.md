@@ -48,3 +48,7 @@ Gerada em 05/11/2026. O jogo mantém mapas que não têm o padrão equivalente a
 ### Validação
 
 Os mapas mantidos passam pelo ajuste de spawn dentro do perímetro e pela construção de paredes externas em buildNeonFloor. A conectividade completa de objetivos dinâmicos depende de partida em navegador.
+
+
+## Colisões em mapas Neon — v53
+A varredura em Chromium reproduziu pelo menos um inimigo/arma bloqueado em 51 dos 72 mapas jogáveis. Após `neonSafePoint`, os 72 mapas continham 720 inimigos e 84 armas no chão, com zero entidades sobre colisores. O spawn do jogador também permaneceu livre nos 72. A suíte executa a mesma montagem/collision check para impedir regressão. A busca altera apenas a posição efetiva em runtime; os mapas e assets fonte foram preservados.

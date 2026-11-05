@@ -24,6 +24,22 @@
     "status": "PASS"
   },
   {
+    "name": "Skins cosméticas selecionam e persistem sem alterar progresso",
+    "status": "PASS"
+  },
+  {
+    "name": "Renderer aplica paletas cosméticas e desenha arma também para P2",
+    "status": "PASS"
+  },
+  {
+    "name": "Spawn procedural não deixa a primeira sala vazia nem conclui sem inimigos",
+    "status": "PASS"
+  },
+  {
+    "name": "Spawn de mapa fixo é deslocado para área livre quando coordenada original colide",
+    "status": "PASS"
+  },
+  {
     "name": "Migração legada preserva recorde e desbloqueio",
     "status": "PASS"
   },
@@ -136,6 +152,30 @@
     "status": "PASS"
   },
   {
+    "name": "Janelas quebráveis, perímetro Neon e armas têm integração própria",
+    "status": "PASS"
+  },
+  {
+    "name": "IA cooperativa troca para alvo vivo e captura erros iniciais",
+    "status": "PASS"
+  },
+  {
+    "name": "Spawns cooperativos usam o jogador vivo como referência",
+    "status": "PASS"
+  },
+  {
+    "name": "Aberturas de parede geram portas com colisão e desenho próprios",
+    "status": "PASS"
+  },
+  {
+    "name": "Campanha mantém a primeira fase, bloqueia avanço duplicado e remove reinício por R",
+    "status": "PASS"
+  },
+  {
+    "name": "Seletor Neon exclui o protótipo 640x580 e variantes equivalentes",
+    "status": "PASS"
+  },
+  {
     "name": "Save de versão futura expõe modo protegido na interface",
     "status": "PASS"
   },
@@ -172,7 +212,7 @@
     "status": "PASS"
   },
   {
-    "name": "buildNeonFloor cria spawn livre nos 74 mapas jogáveis",
+    "name": "buildNeonFloor mantém spawns, inimigos e armas fora de paredes nos 72 mapas Neon",
     "status": "PASS"
   }
 ]

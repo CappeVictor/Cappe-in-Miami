@@ -1,4 +1,7 @@
 # Decisões técnicas
+## D016 — v53.0 — Corrigir spawns de mapas Neon na geração
+Validar posições após consolidar a geometria e deslocar entidades para o ponto livre mais próximo, mantendo o conteúdo e o desenho fonte do mapa. É uma busca única por montagem; se não existir ponto válido, a entidade é omitida em vez de nascer dentro de sólido.
+
 ## D014 — v52.0 — Skin como preferência cosmética separada
 Guardar o identificador cosmético em `settings.skin` do save v2 e fornecer default via merge, preservando todo progresso. Não reaproveitar `settings.char`, pois personagens atuais definem atributos e máscaras. Não criar desbloqueios ou economia para skins nesta entrega.
 
