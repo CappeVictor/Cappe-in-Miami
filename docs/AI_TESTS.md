@@ -5,7 +5,6 @@
 Não houve validação manual em navegador nesta iteração. O teste de fogo amigo executa a lógica isolada e verifica a integração no fluxo de atualização por regressão estática. Campanha completa, online entre dispositivos, áudio, service worker offline real e FPS continuam pendentes.
 
 ## Execução v53.0 — 05/11/2026
-## Execução v53.0 — 05/11/2026
 `node tests/regression.cjs`: **54/54 PASS**. A verificação de mapas Neon agora monta cada um dos 72 mapas e confirma spawn de jogador, colisão livre para cada inimigo e pickup. Sintaxe, servidor, service worker, saves, controles e demais regressões permanecem na suíte.
 
 Chromium via servidor local: auditoria dos 72 mapas encontrou inicialmente pelo menos uma entidade sobre parede em 51 mapas; após a correção, os 72 foram montados com 720 inimigos e 84 armas no chão, zero posições bloqueadas. Nenhuma exceção JavaScript. Os 17 mapas fixos iniciaram com spawn livre; após abrir portas, a busca de rota do spawn ao centro da saída alcançou todos os 17. Os modos visíveis abriram; campanha começou no capítulo/fase 1. Coop local: movimento dos dois jogadores e um disparo foram exercitados. Uma fase inicial foi aberta e controles básicos foram exercitados, mas não concluída até vitória.
