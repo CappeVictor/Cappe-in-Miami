@@ -1,0 +1,547 @@
+[
+  {
+    "file": "AGENTS.md",
+    "bytes": 1722,
+    "sha256": "428d180b6fa5a6cf083a28e14783772cc00a647750ed206b34cd83f34cbcaa7c"
+  },
+  {
+    "file": "README.md",
+    "bytes": 24554,
+    "sha256": "73634cca805095b55701d22c1ccf3f7f507918ebd22298b60d91e5d7acc98824"
+  },
+  {
+    "file": "assets/background/images/tlCorners1.png",
+    "bytes": 330,
+    "sha256": "25fb31e651f9ecbd48e60573af7b50e3560171d1486465aec770707afa071882"
+  },
+  {
+    "file": "assets/background/images/tlFloorTiles.png",
+    "bytes": 64305,
+    "sha256": "ab201b2d74ca31ba5e7ba95351b5db1aa77cc7a59f299e1e77200781bd4e882f"
+  },
+  {
+    "file": "assets/barbudo.png",
+    "bytes": 10678,
+    "sha256": "53d7691a2591597acf0840219d01ebe6b6b7c10a5fdd1956580704de6a3af3fb"
+  },
+  {
+    "file": "assets/capacete.png",
+    "bytes": 11151,
+    "sha256": "5cf1bd08e64b727f4d2f2fb5d08ce1d6459d913c215737d2b0fecadf6c204070"
+  },
+  {
+    "file": "assets/cavalo.png",
+    "bytes": 20188,
+    "sha256": "44087543f72e48ea1a6c8a290b0e3b4e32ebc41c4cca5367d3c3fb495318d0cb"
+  },
+  {
+    "file": "assets/coelho.png",
+    "bytes": 21255,
+    "sha256": "9e9d0fa4ee29eb11bb6fd48b7d5153711f32e75382394b9f28e3d75301075c15"
+  },
+  {
+    "file": "assets/coruja.png",
+    "bytes": 26055,
+    "sha256": "e98e147b13316d8f04667737bce5431e73a7b5c61fd0041768406ded33b87824"
+  },
+  {
+    "file": "assets/doors.png",
+    "bytes": 269,
+    "sha256": "d16643648cb3cd078e970e581be796daa8a92b656f7b3a96e2410b1ab4e1f771"
+  },
+  {
+    "file": "assets/elefante.png",
+    "bytes": 27861,
+    "sha256": "3f472a18ff50151c0a5045358d7a91f34c80dea47b206e10be1d0cff6c8c8775"
+  },
+  {
+    "file": "assets/enemies_spritesheet.png",
+    "bytes": 1390,
+    "sha256": "fdca972d5cda7939ec4e501e1e5afac4627e955846cc5e5546f2d31c2c25b466"
+  },
+  {
+    "file": "assets/floor_tileset.png",
+    "bytes": 262,
+    "sha256": "f14010178590b5168835473a007a5ba80952c68e6032454cef98f972a371961a"
+  },
+  {
+    "file": "assets/furniture_tileset.png",
+    "bytes": 787,
+    "sha256": "43cb1826b6bdc11f5524970272cb835a032d2e85eb097debf47d05f510a31563"
+  },
+  {
+    "file": "assets/galo.png",
+    "bytes": 23943,
+    "sha256": "2c129e3bde8aa5cf1d2dea09e460873cd904a1d411fb7898a1a51e774a509d27"
+  },
+  {
+    "file": "assets/leao.png",
+    "bytes": 28713,
+    "sha256": "2ef375092d3546fb6eb8152a78ee3a89c67311648e2f205e59696923fe293cd7"
+  },
+  {
+    "file": "assets/lobo.png",
+    "bytes": 25156,
+    "sha256": "68947734c93b967775d2e287b8d28431de806d2343e5a5a8e4af6bc742ebdd66"
+  },
+  {
+    "file": "assets/macaco.png",
+    "bytes": 25729,
+    "sha256": "d3b7b2b978ce63780dfad17cacc1550469e2bba3bd093920bbf4361efce0abfb"
+  },
+  {
+    "file": "assets/player_spritesheet.png",
+    "bytes": 2094,
+    "sha256": "91b5590fea36e940b79b249aee57f00e57c0c1406384bd4edd2b8cdd3772d24b"
+  },
+  {
+    "file": "assets/porco.png",
+    "bytes": 26348,
+    "sha256": "f90d3230d3303b6cc04d86ba965b3fc1d04132535c6a3145c013309ff595635a"
+  },
+  {
+    "file": "assets/sapo.png",
+    "bytes": 26105,
+    "sha256": "3d5eff1ca85158cf12405250ae4d4ddf81e719366483fb24278ae05a00530339"
+  },
+  {
+    "file": "assets/sprites/images/sprAndersBed_0.png",
+    "bytes": 613,
+    "sha256": "9a112956c8dbee6fd0197d294e1f478f25e8345b7444996b98ebd462c63d183e"
+  },
+  {
+    "file": "assets/sprites/images/sprAndersCouch_0.png",
+    "bytes": 444,
+    "sha256": "53264f7fce35eea633cce5513cf3119b80235972e8b171aa7fa99a17360109ba"
+  },
+  {
+    "file": "assets/sprites/images/sprArcadeCabinet1_0.png",
+    "bytes": 336,
+    "sha256": "60cb7d67e620222bf23721efa1e4bd80997c7f341f11fab4785d7ae34844b81d"
+  },
+  {
+    "file": "assets/sprites/images/sprArcadeLight1_0.png",
+    "bytes": 62531,
+    "sha256": "b60a939558134a5ddb7a340d7199dfd5c89087ddbe6c08905208dc7b45785eb1"
+  },
+  {
+    "file": "assets/sprites/images/sprBarPoolTable_0.png",
+    "bytes": 354,
+    "sha256": "cab0418f2a9c9afba5a99632b9afafe0b6d33646d8e667fbce39ec251838bad5"
+  },
+  {
+    "file": "assets/sprites/images/sprBarRegister_0.png",
+    "bytes": 1392,
+    "sha256": "1860100b49818a6d73952099cdec9020de7bc4b9a71cee20d20c649cf144f2fe"
+  },
+  {
+    "file": "assets/sprites/images/sprBarShelf_0.png",
+    "bytes": 1145,
+    "sha256": "c63a82a336ccdb875d3ec3ea0730e2715041999b2a38ee57a897fac41b885b34"
+  },
+  {
+    "file": "assets/sprites/images/sprBarTable_0.png",
+    "bytes": 245,
+    "sha256": "96b4e73b44ed3fccbcf18aca2f18c94a998da87055c7fd5782107507d0113541"
+  },
+  {
+    "file": "assets/sprites/images/sprBench_0.png",
+    "bytes": 171,
+    "sha256": "67726121a18559800a90bdd85dba4e575c08a1c75b28b606d549ed201e253601"
+  },
+  {
+    "file": "assets/sprites/images/sprBigBed_0.png",
+    "bytes": 449,
+    "sha256": "4c72785e409697402bb8dd0aad1938bee129c9250c626c6d5c05d516c04af63d"
+  },
+  {
+    "file": "assets/sprites/images/sprBoss4Seat_0.png",
+    "bytes": 307,
+    "sha256": "004c57a242f88d5f0fd7c69a2eb6592401b87861bbf00f308f28cac0f5ba6311"
+  },
+  {
+    "file": "assets/sprites/images/sprBoss4Sofa_0.png",
+    "bytes": 1068,
+    "sha256": "0b7654c05b3a1e0bd89804b7794a2492d8a9301b874a3097eea093c9da5eabe2"
+  },
+  {
+    "file": "assets/sprites/images/sprBowlingLane_0.png",
+    "bytes": 226,
+    "sha256": "24b52488e8fc1d15cabf937692afc283505def33cefd15dd710c5b3f4f6c16eb"
+  },
+  {
+    "file": "assets/sprites/images/sprCellDoor_0.png",
+    "bytes": 96,
+    "sha256": "c3fa264c5f4b0e36446b6d5ecac825607f58072a0254da43c9630391f173e21f"
+  },
+  {
+    "file": "assets/sprites/images/sprCellKeys_0.png",
+    "bytes": 145,
+    "sha256": "f2d24612edcc4a9d90ffeef7eb6bd556e0efe085ac32c10c874b0890441d62a4"
+  },
+  {
+    "file": "assets/sprites/images/sprCellSink_0.png",
+    "bytes": 241,
+    "sha256": "12b138cb8dfa2ec68aeabe27f14ad4d85694c4f3f6b59642fd4e677dcf2f17e7"
+  },
+  {
+    "file": "assets/sprites/images/sprClosedLockerH_0.png",
+    "bytes": 116,
+    "sha256": "a3b745d05b3699c2b51f4bd9eb375531148fbcd012ecef4a839019e6d12c83bd"
+  },
+  {
+    "file": "assets/sprites/images/sprClubRegister_0.png",
+    "bytes": 607,
+    "sha256": "f2c5e024219c9f873cecca0ea80edb6bdd7ebab4848163fb1bcf79b7aefbc8d9"
+  },
+  {
+    "file": "assets/sprites/images/sprCorner_0.png",
+    "bytes": 125,
+    "sha256": "86ff744d5ae79adeaf35bb96eb550f8aafbe92c142707d7aa5664c2232372df8"
+  },
+  {
+    "file": "assets/sprites/images/sprDJ_0.png",
+    "bytes": 291,
+    "sha256": "69df91d06c16aaba0bf89457ae7d2219f78bc8e066762dff7775363b6ac6cfbc"
+  },
+  {
+    "file": "assets/sprites/images/sprDoorV_0.png",
+    "bytes": 97,
+    "sha256": "12ac284794fd31b1cfdb62dc76d995cd99ddcde95069897a34678302ccf92f43"
+  },
+  {
+    "file": "assets/sprites/images/sprDrugSafe_0.png",
+    "bytes": 480,
+    "sha256": "88f6b2b6f40fce20e6410d947e6ebc7a387ac457df47f32252cc47a222c6c5d6"
+  },
+  {
+    "file": "assets/sprites/images/sprElevator_0.png",
+    "bytes": 657,
+    "sha256": "d0a5e4d9c95d22108ae782e9e61e606669105264ac0161180c0aad9cc81baedc"
+  },
+  {
+    "file": "assets/sprites/images/sprEnvelopes_0.png",
+    "bytes": 277,
+    "sha256": "b212f2f96d1dc59c57a15bc9cae1306239b2e3ce5849f03db01746d037f97193"
+  },
+  {
+    "file": "assets/sprites/images/sprEuroPillar_0.png",
+    "bytes": 309,
+    "sha256": "bcbae97fc21d173ce5825f4ba2109af299512b562c4ff9d4fe339f99f7b3dc0d"
+  },
+  {
+    "file": "assets/sprites/images/sprFatmanEating_0.png",
+    "bytes": 406,
+    "sha256": "d4ab0f2ef1c56b513b92ef0828f58c3ed42086e01161bbcef60fb899531c88a6"
+  },
+  {
+    "file": "assets/sprites/images/sprFloorMail_0.png",
+    "bytes": 174,
+    "sha256": "eda3d29580131aab8763c6297cf0834a64c1e8dc57fe318cb1b03a9401192739"
+  },
+  {
+    "file": "assets/sprites/images/sprGirlfriendDrugged_0.png",
+    "bytes": 502,
+    "sha256": "2edf2cc3901efd01aeca498cca218967978482756a849804285b3d8811a3bd87"
+  },
+  {
+    "file": "assets/sprites/images/sprHighballBooth_0.png",
+    "bytes": 566,
+    "sha256": "33924570596e03ae78516ca7753e7ba37b1f8ae5c14f54cf56bb6bba5b2fb2d2"
+  },
+  {
+    "file": "assets/sprites/images/sprHospitalBed2_0.png",
+    "bytes": 266,
+    "sha256": "f8e2a13bcbbe7e1f90bf38a305be5d08cd9c514622e71a21f499af0388e25b3c"
+  },
+  {
+    "file": "assets/sprites/images/sprHospitalCupboard_0.png",
+    "bytes": 172,
+    "sha256": "b4a08f8dfc50dda30672c000b753ec42323c4299f13e7a1a9b4673069289c846"
+  },
+  {
+    "file": "assets/sprites/images/sprHospitalLocker_0.png",
+    "bytes": 120,
+    "sha256": "290d1132a15f335dd14bbd569990d817a2fcbd2c995083f29a932915d956374b"
+  },
+  {
+    "file": "assets/sprites/images/sprHospitalSofaH_0.png",
+    "bytes": 220,
+    "sha256": "e3b9452a8ba640fbfeddce937ecdafe15283329c004f4b4558c583cecf6f1740"
+  },
+  {
+    "file": "assets/sprites/images/sprInvestigationFiles_0.png",
+    "bytes": 243,
+    "sha256": "59a13a8cf21c537a486bce049bf211d0e1cabecddd1624fe94e6655108fe822a"
+  },
+  {
+    "file": "assets/sprites/images/sprKaraokeCouchBlack_0.png",
+    "bytes": 352,
+    "sha256": "aefdc69966a771cc1733c9758aa929e1cab157704639fd645e3bf2d2c26115eb"
+  },
+  {
+    "file": "assets/sprites/images/sprMicrowaveDown_0.png",
+    "bytes": 211,
+    "sha256": "e5c9904cef1972a6e8153b8576283bcc9bf7e9b612bb35b873022ecf118c615c"
+  },
+  {
+    "file": "assets/sprites/images/sprMonitors_0.png",
+    "bytes": 737,
+    "sha256": "a6d71ccafde82734c3e503243ff1976a23f79c5ebf9bae83a08989486047f545"
+  },
+  {
+    "file": "assets/sprites/images/sprMoon_0.png",
+    "bytes": 781,
+    "sha256": "79bf2dfd20486b9cc01445135b32f994144a9d0b749663e891458a37234dd77d"
+  },
+  {
+    "file": "assets/sprites/images/sprOwnerDesk_0.png",
+    "bytes": 1154,
+    "sha256": "4c3b7c54dc5e706435f39ccdba26356f58e778618e813e69feba940ae417a32f"
+  },
+  {
+    "file": "assets/sprites/images/sprPetersCloset_0.png",
+    "bytes": 158,
+    "sha256": "2281378b48f3c2d577344e7a89fa10812386f331308917d6cec0ffee7f777711"
+  },
+  {
+    "file": "assets/sprites/images/sprPlayerBed2_0.png",
+    "bytes": 416,
+    "sha256": "8e74ab85dd30a29a4475586a8e3aa17805bbcc6b527247579ccffa68529aa2a8"
+  },
+  {
+    "file": "assets/sprites/images/sprPoliceFrontDesk_0.png",
+    "bytes": 2862,
+    "sha256": "3620ad9f29a2465357b701d02b10ec287bb0dfe9275b7b6b3b91a98fc94820f4"
+  },
+  {
+    "file": "assets/sprites/images/sprPolicePhone1_0.png",
+    "bytes": 234,
+    "sha256": "0fda452390d1c97b6adbb144bd7e54d3ff22187e96b35d0127aac49135d27e48"
+  },
+  {
+    "file": "assets/sprites/images/sprPoliceWalkNightStick_0.png",
+    "bytes": 354,
+    "sha256": "000839fabf66f5e9a566bece8dad02b3d299ed19d86609974b2b7b697017a172"
+  },
+  {
+    "file": "assets/sprites/images/sprPoolTray_0.png",
+    "bytes": 229,
+    "sha256": "c4a67e5edd93417306e197974aa87e7edf6318f04ba79b1ff65bf3468b854389"
+  },
+  {
+    "file": "assets/sprites/images/sprPornBed_0.png",
+    "bytes": 514,
+    "sha256": "f18eb03334d311755e88cc7cbbb042e4e9d746abd259381ac88c843aaf1193da"
+  },
+  {
+    "file": "assets/sprites/images/sprRezzedLogo_0.png",
+    "bytes": 286,
+    "sha256": "860487dcc1b2118861885a5cd1852e7872121882c59b7dcd4e0bb78c5144ce27"
+  },
+  {
+    "file": "assets/sprites/images/sprRichTable_0.png",
+    "bytes": 427,
+    "sha256": "36f43b667949d1def835b1467ec4c3faabe7a25ba1bbc24917107c7caee0f042"
+  },
+  {
+    "file": "assets/sprites/images/sprSecretSewerManhole_0.png",
+    "bytes": 467,
+    "sha256": "8950d543bc573d546740f00d285b97c319147ddad6914c4f95c6cb0cc025059e"
+  },
+  {
+    "file": "assets/sprites/images/sprSofaH64_0.png",
+    "bytes": 300,
+    "sha256": "fd2d4b70a123bdb45dc81e3440c9d00e7c2bdeffe8998b0adc096eeefb9d4d01"
+  },
+  {
+    "file": "assets/sprites/images/sprSpeaker_0.png",
+    "bytes": 129,
+    "sha256": "ebd8e92b79821697da479f3305d4dbfae476b32d307642a460f69d8dfc8291e7"
+  },
+  {
+    "file": "assets/sprites/images/sprSpotLight_0.png",
+    "bytes": 107,
+    "sha256": "a365c1a1642fa518e6118c51a50c8a7305207384299006d0fabc5a551f74275d"
+  },
+  {
+    "file": "assets/sprites/images/sprSquareTable_0.png",
+    "bytes": 383,
+    "sha256": "0b371737c78135f210538dab67b79edc2ba6ab39685e5eb21a0fb33dd89d56c3"
+  },
+  {
+    "file": "assets/sprites/images/sprStoreShelf_0.png",
+    "bytes": 1060,
+    "sha256": "4a9af5e4065a93e0ef2174ce7750d2c0ca13504871019112a827a9fb1db51c48"
+  },
+  {
+    "file": "assets/sprites/images/sprSwatFade_0.png",
+    "bytes": 796,
+    "sha256": "458a230a2492c4d46989003bfafc6fd200b8ba8ef1034d7acd4122d5d842d272"
+  },
+  {
+    "file": "assets/sprites/images/sprSwatWalkM16_0.png",
+    "bytes": 355,
+    "sha256": "2c875c0bdbf7d20e6ceeb0ba4cc8d577d9783b7d429c4df5b2aaa218a4d0737f"
+  },
+  {
+    "file": "assets/sprites/images/sprTableStriped_0.png",
+    "bytes": 181,
+    "sha256": "3d791c297e5604ec688ffe5a3affde7a5bb731352c64f76005b3bbe923798d12"
+  },
+  {
+    "file": "assets/sprites/images/sprTowels_0.png",
+    "bytes": 140,
+    "sha256": "55ef4d39d1f9cf587d53ec28c375d069fa9e80e6fdb29b5007d7042590316923"
+  },
+  {
+    "file": "assets/sprites/images/sprToyLego_0.png",
+    "bytes": 162,
+    "sha256": "1e527f6cea747061ff23f27b36ef3b6364bd099701187df45a488bee2f6cd2f8"
+  },
+  {
+    "file": "assets/sprites/images/sprTrashcan_0.png",
+    "bytes": 354,
+    "sha256": "625d902d281585268d72d6723d71273cfef687b372e68916ef4a14e250c47811"
+  },
+  {
+    "file": "assets/sprites/images/sprVenusCandle_0.png",
+    "bytes": 131,
+    "sha256": "a577c333c99fee4dd2d22120977f33ce5842194bf421c1955670f57e41044de6"
+  },
+  {
+    "file": "assets/sprites/images/sprWokKitchen_0.png",
+    "bytes": 959,
+    "sha256": "b07bbd4fb0dbad1e9f5a9d71c1b2d85be2a122ba33cd53feebdfdcca542b3c90"
+  },
+  {
+    "file": "assets/sprites/images/sprXray_0.png",
+    "bytes": 983,
+    "sha256": "6b0f736bf48ea42b59efa828ee17e4663e0f8c171c9903a76508d7046896c97a"
+  },
+  {
+    "file": "assets/sprites/images/sprite927_0.png",
+    "bytes": 1173,
+    "sha256": "663f7d2390433481c1052e7776b913f871972f610ca6f80f05c27176a87a8e25"
+  },
+  {
+    "file": "assets/tigre.png",
+    "bytes": 24482,
+    "sha256": "1ea5296ad0a95b24e86a405afb1ffe62e561fa0d237cb276d7aaec26ae73b2d8"
+  },
+  {
+    "file": "assets/unicornio.png",
+    "bytes": 23438,
+    "sha256": "24c877d31ee493b474195a57fa96da1527d7054924e228af505241b4d4cc201a"
+  },
+  {
+    "file": "assets/wall_tileset.png",
+    "bytes": 465,
+    "sha256": "5adf22d39a509dea4a64dca3b15f4264011350ec3a6d0ec6248c0b89c6414f6e"
+  },
+  {
+    "file": "css/acessibilidade.css",
+    "bytes": 6803,
+    "sha256": "28e1d4ae3911b78ecdda9bcc5ecafb885052955ee515ca21b579d2da36e574cc"
+  },
+  {
+    "file": "css/expansion.css",
+    "bytes": 15898,
+    "sha256": "e163ded6da9e20f3ce1dff1b7e2fbb21e13acb626c5daf8078124e93c0c4940e"
+  },
+  {
+    "file": "index.html",
+    "bytes": 200926,
+    "sha256": "1ed64c9bebbd1ec8778b34df9b894f8070101b9e182d2adf45f3ad77c05e6b72"
+  },
+  {
+    "file": "js/collision_sizes.js",
+    "bytes": 1309,
+    "sha256": "c2fbed4c202b8a182b6ac74ff351de17db61671cda3c21b0929537700b8c66a8"
+  },
+  {
+    "file": "js/exp-acess.js",
+    "bytes": 3379,
+    "sha256": "b8190ae1efe5675dbd24b32b5da96f55cf072eaf32cb29ebaa3cb1b1ffa93601"
+  },
+  {
+    "file": "js/exp-brain.js",
+    "bytes": 2504,
+    "sha256": "06cdd283459c47ad46fba7675733ebab02cc4a501d664526addd8b6ba6cec89f"
+  },
+  {
+    "file": "js/exp-content.js",
+    "bytes": 24670,
+    "sha256": "bf873a4bb76211c143323a1b29dcc802aac802ad5791537c76f1c15b0682fc91"
+  },
+  {
+    "file": "js/exp-core.js",
+    "bytes": 25974,
+    "sha256": "771f8764933a4ea98c27a847ca8a82791f8a9b174884c6054f80aad2b4dc5d2f"
+  },
+  {
+    "file": "js/exp-debug.js",
+    "bytes": 3607,
+    "sha256": "13235de66bc75a9d0a28bd103efef36e95d9b4d41df95232f95f5999a7ba4735"
+  },
+  {
+    "file": "js/exp-fx.js",
+    "bytes": 26400,
+    "sha256": "d4bab51e9cd0fe098ebb96df975ead324a7d9d2c9f24231f1489ffc076d619e9"
+  },
+  {
+    "file": "js/exp-i18n-extra.js",
+    "bytes": 12828,
+    "sha256": "8d08deb134852f506ac5a85903a9a3c3ada06db08a00240d27ce6f9e606cb5f3"
+  },
+  {
+    "file": "js/exp-i18n-extra2.js",
+    "bytes": 8701,
+    "sha256": "07b647d82c27624b755d13bf5ce891fd83399032fab504c71c2fec8df1166f2b"
+  },
+  {
+    "file": "js/exp-i18n.js",
+    "bytes": 27879,
+    "sha256": "16fe85207a1ea79791e16ae290bf61392ced8fd34df6ba3e24d4549ff255e6e5"
+  },
+  {
+    "file": "js/exp-modes.js",
+    "bytes": 38920,
+    "sha256": "06c803489704782ea7aca13b94b49d3de9b29b902e0b5faf63874bc9afeacd52"
+  },
+  {
+    "file": "js/exp-multi.js",
+    "bytes": 17321,
+    "sha256": "46695fadc3c2b84f8fc51d9f12deaf4946bf78a820af29c5ac6b89fb8b6d234b"
+  },
+  {
+    "file": "js/exp-music.js",
+    "bytes": 5392,
+    "sha256": "c7f29f29cc8a245e6c03d9189a099b71c9049472d6781f09a8ac1f75752ab2bd"
+  },
+  {
+    "file": "js/exp-shop.js",
+    "bytes": 16049,
+    "sha256": "358c2ea0a9a219f0bebd97d6d1c457e35a924a53b110600861341959660f16b6"
+  },
+  {
+    "file": "js/exp-ui.js",
+    "bytes": 33482,
+    "sha256": "ac0d693f3a95fd8a112bbbab9cf6f911a01e0865ef99ee80248f5722abcdaef6"
+  },
+  {
+    "file": "js/exp-world.js",
+    "bytes": 31370,
+    "sha256": "af694d28c54e2f2319d93ab8688d632fcc8f7492d47dcef56983f0d44d9fc3d1"
+  },
+  {
+    "file": "js/maps.js",
+    "bytes": 2929052,
+    "sha256": "786270454af9d2ee67c228f3ea1cc1abc7bf7ad86ff49fa8fa21491ff916d666"
+  },
+  {
+    "file": "sw.js",
+    "bytes": 5524,
+    "sha256": "bce33752da6b749a1f38f68918425ce28216826d45bde6f9d4bd874e62cd0b57"
+  }
+]

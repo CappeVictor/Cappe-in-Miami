@@ -1,16 +1,8 @@
 # Downloads do Cappe-in-Miami
 
-As versões atuais estão distribuídas em pacotes separados:
+As versões atuais estão organizadas em duas pastas independentes na raiz do repositório:
 
-- `cappe-in-miamiWeb.zip` — Web v76.0, HTML/CSS/JavaScript com renderer Canvas 2D em JavaScript.
-- `cappe-in-miamiRustWasm-v76-preview.zip` — preview híbrido Rust/WebAssembly v76. A migração do renderer está em andamento; rasterização Canvas, efeitos, parte do compositor e interface permanecem em JavaScript.
-- `cappe-in-miamiRustWasm-v75-preview.zip` — preview anterior, mantido como arquivo.
+- [Cappe-in-MiamiWeb/](../Cappe-in-MiamiWeb/) — Web v76.0; [ZIP Web](../Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip).
+- [Cappe-in-MiamiRustWasm/](../Cappe-in-MiamiRustWasm/) — prévia Rust/WASM v76; [ZIP Rust/WASM](../Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v76-preview.zip).
 
-## Como executar
-
-1. Extraia o ZIP escolhido.
-2. Instale Node.js 18 ou superior.
-3. Abra a pasta criada e execute o arquivo `.bat` ao lado de `index.html`: `INICIAR_WEB.bat` para Web ou `INICIAR_EXPERIMENTO_WASM.bat` para Rust/WASM.
-4. Mantenha a janela do servidor aberta enquanto joga.
-
-O ZIP Rust/WASM inclui o módulo `.wasm` compilado; Rust só é necessário para recompilar. A regressão v76 passou em 61/61 e os testes ABI/bridge passaram. Smoke visual Neon não foi validado neste ambiente.
+Baixe somente o ZIP da versão desejada; as duas pastas contêm o projeto completo e instruções. As cópias de download anteriores ficam neste diretório para compatibilidade; a prévia Rust/WASM v75 é arquivo histórico.

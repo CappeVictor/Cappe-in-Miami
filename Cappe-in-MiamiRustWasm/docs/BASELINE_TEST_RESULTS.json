@@ -1,0 +1,120 @@
+[
+  {
+    "name": "Sintaxe de todos os scripts e scripts inline",
+    "status": "PASS"
+  },
+  {
+    "name": "Save parcial v2 preserva progresso e adiciona campos ausentes",
+    "status": "PASS"
+  },
+  {
+    "name": "Migração legada preserva recorde e desbloqueio",
+    "status": "PASS"
+  },
+  {
+    "name": "Save de versão futura não é sobrescrito por esta versão",
+    "status": "FAIL",
+    "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ '{\"v\":3,\"created\":1793827851579,\"saved\":1793827851580,\"xp\":23,\"level\":4,\"sp\":0,\"perks\":{},\"stats\":{\"kills\":77,\"deaths\":0,\"rooms\":0,\"shots\":0,\"hits\":0,\"melee\":0,\"throwHits\":0,\"finishers\":0,\"playSec\":0,\"maxCombo\":0,\"bestScore\":0,\"runs\":0,\"sRanks\":0,\"ssRanks\":0,\"bossKills\":0,\"barrels\":0,\"cameras\":0,\"flawless\":0},\"records\":{},\"ranking\":{},\"ach\":{},\"unl\":[\"test-mask\"],\"bosses\":{},\"weaponsUsed\":{},\"masksUsed\":{},\"flags\":{},\"daily\":{},\"settings\":{\"musVol\":0.4,\"sfxVol\":0.8}}'\n- '{\"v\":3,\"level\":4,\"xp\":23,\"stats\":{\"kills\":77},\"settings\":{\"musVol\":0.4},\"unl\":[\"test-mask\"]}'\n"
+  },
+  {
+    "name": "Principal corrompido recupera backup sem destruí-lo ao salvar",
+    "status": "FAIL",
+    "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ '{broken'\n- '{\"v\":2,\"level\":8,\"xp\":23,\"stats\":{\"kills\":77},\"settings\":{\"musVol\":0.4},\"unl\":[\"test-mask\"]}'\n"
+  },
+  {
+    "name": "Rotação automática mantém o save anterior válido",
+    "status": "PASS"
+  },
+  {
+    "name": "Importação guarda estado atual em memória como backup",
+    "status": "FAIL",
+    "error": "Expected values to be strictly equal:\n\n77 !== 88\n"
+  },
+  {
+    "name": "Importação inválida não altera progresso nem backup",
+    "status": "FAIL",
+    "error": "The expression evaluated to a falsy value:\n\n  assert.ok(exp.importSave(bad))\n"
+  },
+  {
+    "name": "Rejeita coleções, estatísticas, ranking e volumes inválidos",
+    "status": "FAIL",
+    "error": "{\"perks\":null}"
+  },
+  {
+    "name": "Rejeita chaves que alteram protótipos",
+    "status": "FAIL",
+    "error": "The expression evaluated to a falsy value:\n\n  assert.ok(exp.importSave('{\"v\":2,\"level\":3,\"stats\":{},\"__proto__\":{\"polluted\":true}}'))\n"
+  },
+  {
+    "name": "Falha de armazenamento mantém save em memória e informa erro",
+    "status": "FAIL",
+    "error": "The expression evaluated to a falsy value:\n\n  assert.ok(exp.importSave(JSON.stringify(sample(9))))\n"
+  },
+  {
+    "name": "Restaurar backup atualiza memória e disco sem recarregar arma",
+    "status": "FAIL",
+    "error": "exp.restoreBackup is not a function"
+  },
+  {
+    "name": "Backup inválido não substitui o save atual",
+    "status": "FAIL",
+    "error": "exp.restoreBackup is not a function"
+  },
+  {
+    "name": "Falha ao restaurar preserva também o backup de destino",
+    "status": "FAIL",
+    "error": "exp.restoreBackup is not a function"
+  },
+  {
+    "name": "Reset mantém progresso anterior recuperável",
+    "status": "FAIL",
+    "error": "Expected values to be strictly equal:\n\n77 !== 88\n"
+  },
+  {
+    "name": "Dano com efeito visual respeita P1 e P2, colete e vidas",
+    "status": "FAIL",
+    "error": "Expected values to be strictly equal:\n\n1 !== 0\n"
+  },
+  {
+    "name": "Vidas compartilhadas encerram ao cair qualquer jogador",
+    "status": "PASS"
+  },
+  {
+    "name": "P1 usa WASD no multiplayer mesmo com preferência solo por setas",
+    "status": "FAIL",
+    "error": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n    0,\n+   0\n-   -1\n  ]\n"
+  },
+  {
+    "name": "P2 separa soco de tiro e preserva Ctrl Direito e Numpad",
+    "status": "FAIL",
+    "error": "Expected values to be strictly equal:\n\ntrue !== false\n"
+  },
+  {
+    "name": "Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS",
+    "status": "FAIL",
+    "error": "assets/sprites/images/spr18_0.png"
+  },
+  {
+    "name": "Ativação não apaga cache de outros apps nem outras instalações",
+    "status": "FAIL",
+    "error": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n+   'another-app',\n    'cappe-v33.0:/game/',\n+   'cappe-v33.0:/other/',\n+   'cappe-v34.0:/game/'\n  ]\n"
+  },
+  {
+    "name": "Offline abre index em navegação da raiz, inclusive com query dev",
+    "status": "FAIL",
+    "error": "offline"
+  },
+  {
+    "name": "Worker ignora POST, origem externa e caminhos fora do escopo",
+    "status": "FAIL",
+    "error": "interceptação indevida"
+  },
+  {
+    "name": "Navegação BFS contorna obstáculo sem atravessar suas células",
+    "status": "PASS"
+  },
+  {
+    "name": "Navegação retorna null quando os lados estão desconectados",
+    "status": "PASS"
+  }
+]

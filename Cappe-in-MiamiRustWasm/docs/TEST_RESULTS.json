@@ -1,0 +1,230 @@
+[
+  {
+    "name": "Sintaxe de todos os scripts e scripts inline",
+    "status": "PASS"
+  },
+  {
+    "name": "Servidor online: rotas, IDs públicos, reconexão, validação, relay e autorização",
+    "status": "PASS"
+  },
+  {
+    "name": "Lobby online renderiza lista de salas com entrada e lotação seguras",
+    "status": "PASS"
+  },
+  {
+    "name": "Preferências de vídeo e acessibilidade ignoram valores corrompidos",
+    "status": "PASS"
+  },
+  {
+    "name": "Preferências de multiplayer local rejeitam tipos e opções inválidas",
+    "status": "PASS"
+  },
+  {
+    "name": "Save parcial v2 preserva progresso e adiciona campos ausentes",
+    "status": "PASS"
+  },
+  {
+    "name": "Skins cosméticas selecionam e persistem sem alterar progresso",
+    "status": "PASS"
+  },
+  {
+    "name": "Renderer aplica paletas cosméticas e desenha arma também para P2",
+    "status": "PASS"
+  },
+  {
+    "name": "Spawn procedural não deixa a primeira sala vazia nem conclui sem inimigos",
+    "status": "PASS"
+  },
+  {
+    "name": "Spawn de mapa fixo é deslocado para área livre quando coordenada original colide",
+    "status": "PASS"
+  },
+  {
+    "name": "Migração legada preserva recorde e desbloqueio",
+    "status": "PASS"
+  },
+  {
+    "name": "Save de versão futura não é sobrescrito por esta versão",
+    "status": "PASS"
+  },
+  {
+    "name": "Principal corrompido recupera backup sem destruí-lo ao salvar",
+    "status": "PASS"
+  },
+  {
+    "name": "Rotação automática mantém o save anterior válido",
+    "status": "PASS"
+  },
+  {
+    "name": "Importação guarda estado atual em memória como backup",
+    "status": "PASS"
+  },
+  {
+    "name": "Importação inválida não altera progresso nem backup",
+    "status": "PASS"
+  },
+  {
+    "name": "Rejeita coleções, estatísticas, ranking e volumes inválidos",
+    "status": "PASS"
+  },
+  {
+    "name": "Rejeita chaves que alteram protótipos",
+    "status": "PASS"
+  },
+  {
+    "name": "Falha de armazenamento mantém save em memória e informa erro",
+    "status": "PASS"
+  },
+  {
+    "name": "Restaurar backup atualiza memória e disco sem recarregar arma",
+    "status": "PASS"
+  },
+  {
+    "name": "Backup inválido não substitui o save atual",
+    "status": "PASS"
+  },
+  {
+    "name": "Falha ao restaurar preserva também o backup de destino",
+    "status": "PASS"
+  },
+  {
+    "name": "Reset mantém progresso anterior recuperável",
+    "status": "PASS"
+  },
+  {
+    "name": "Dano com efeito visual respeita P1 e P2, colete e vidas",
+    "status": "PASS"
+  },
+  {
+    "name": "Fogo amigo identifica o proprietário e respeita a opção",
+    "status": "PASS"
+  },
+  {
+    "name": "Vidas compartilhadas encerram ao cair qualquer jogador",
+    "status": "PASS"
+  },
+  {
+    "name": "Morte de P1 marca o ator e encerra suas ações de input",
+    "status": "PASS"
+  },
+  {
+    "name": "P2 nasce em posição livre acessível e falha com segurança sem espaço",
+    "status": "PASS"
+  },
+  {
+    "name": "Tiro P2 respeita fireOk/onFire e bloqueia personagem sem armas",
+    "status": "PASS"
+  },
+  {
+    "name": "P2 pode trocar e descartar arma no inventário compartilhado",
+    "status": "PASS"
+  },
+  {
+    "name": "P1 usa WASD no multiplayer mesmo com preferência solo por setas",
+    "status": "PASS"
+  },
+  {
+    "name": "P2 separa soco de tiro e preserva Ctrl Direito e Numpad",
+    "status": "PASS"
+  },
+  {
+    "name": "Recarga automática respeita a preferência e volume mestre limita os dois canais",
+    "status": "PASS"
+  },
+  {
+    "name": "Abas de opções têm vínculos ARIA e navegação por teclado",
+    "status": "PASS"
+  },
+  {
+    "name": "Intensidade do tremor é persistida, limitada e aplicada a coice/tela",
+    "status": "PASS"
+  },
+  {
+    "name": "Reduzir flashes suprime relâmpagos e cintilações de tela",
+    "status": "PASS"
+  },
+  {
+    "name": "Jogar Solo desliga multiplayer persistido e evita criar P2",
+    "status": "PASS"
+  },
+  {
+    "name": "Otimização não força escala 2x nem desenha partículas com saves separados",
+    "status": "PASS"
+  },
+  {
+    "name": "Governador de desempenho usa tempo de quadro real e reduz efeitos sem trocar preferências",
+    "status": "PASS"
+  },
+  {
+    "name": "Janelas quebráveis, perímetro Neon e armas têm integração própria",
+    "status": "PASS"
+  },
+  {
+    "name": "IA cooperativa troca para alvo vivo e captura erros iniciais",
+    "status": "PASS"
+  },
+  {
+    "name": "Spawns cooperativos usam o jogador vivo como referência",
+    "status": "PASS"
+  },
+  {
+    "name": "Aberturas de parede geram portas com colisão e desenho próprios",
+    "status": "PASS"
+  },
+  {
+    "name": "Campanha mantém a primeira fase, bloqueia avanço duplicado e remove reinício por R",
+    "status": "PASS"
+  },
+  {
+    "name": "Allowlist de mapas, títulos limpos e progressão narrativa sem referências excluídas",
+    "status": "PASS"
+  },
+  {
+    "name": "Mapas fixos permitidos carregam spawn livre, colisões e saída dentro do mapa",
+    "status": "PASS"
+  },
+  {
+    "name": "Grades permitidas carregam spawn, inimigos, colisões e saída válidos",
+    "status": "PASS"
+  },
+  {
+    "name": "Save de versão futura expõe modo protegido na interface",
+    "status": "PASS"
+  },
+  {
+    "name": "Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS",
+    "status": "PASS"
+  },
+  {
+    "name": "Ativação não apaga cache de outros apps nem outras instalações",
+    "status": "PASS"
+  },
+  {
+    "name": "Offline abre index em navegação da raiz, inclusive com query dev",
+    "status": "PASS"
+  },
+  {
+    "name": "Worker ignora POST, origem externa e caminhos fora do escopo",
+    "status": "PASS"
+  },
+  {
+    "name": "Navegação BFS contorna obstáculo sem atravessar suas células",
+    "status": "PASS"
+  },
+  {
+    "name": "Navegação retorna null quando os lados estão desconectados",
+    "status": "PASS"
+  },
+  {
+    "name": "Barreira do mundo impede sair do mapa e bloqueia coordenadas inválidas",
+    "status": "PASS"
+  },
+  {
+    "name": "Spawns de todas as salas Neon jogáveis ficam dentro da borda segura",
+    "status": "PASS"
+  },
+  {
+    "name": "buildNeonFloor mantém spawn, colisões e saída válidos nos 61 mapas Neon permitidos",
+    "status": "PASS"
+  }
+]
