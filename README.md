@@ -4,10 +4,11 @@ Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador b
 
 ## Downloads — pacotes separados
 
-- [Cappe-in-Miami Web (HTML, CSS e JavaScript)](downloads/cappe-in-miamiWeb.zip): versão Web independente, com launcher e arquivos necessários.
-- [Cappe-in-Miami Rust/WASM v75 — prévia](downloads/cappe-in-miamiRustWasm-v75-preview.zip): pacote híbrido experimental. A migração do renderer ainda não está completa; o Canvas, os efeitos, parte do compositor e a interface continuam usando JavaScript.
+- [Cappe-in-Miami Web v76.0 (HTML, CSS e JavaScript)](downloads/cappe-in-miamiWeb.zip): build independente mais recente, com renderer Canvas em JavaScript.
+- [Cappe-in-Miami Rust/WASM v76.0 — prévia](downloads/cappe-in-miamiRustWasm-v76-preview.zip): pacote híbrido experimental baseado no conteúdo v55. A migração do renderer continua incompleta; Canvas, efeitos, parte do compositor e interface ainda usam JavaScript.
+- [Prévia Rust/WASM v75.0 anterior](downloads/cappe-in-miamiRustWasm-v75-preview.zip).
 
-Cada ZIP é distribuído separadamente e inclui instruções de execução. Consulte [downloads/README.md](downloads/README.md).
+A raiz do repositório continua sendo a versão de jogo v55.0; as duas distribuições mais recentes ficam separadas nos ZIPs, cada um com seus arquivos e instruções. Consulte [downloads/README.md](downloads/README.md).
 
 Na tela de escolha de máscara, selecione uma skin cosmética. Ela altera apenas as cores do traje e é salva em `settings.skin`, preservando saves v2 e os atributos dos personagens. As armas receberam contorno, brilhos e detalhes de material; no cooperativo local, P2 também exibe a arma compartilhada.
 
