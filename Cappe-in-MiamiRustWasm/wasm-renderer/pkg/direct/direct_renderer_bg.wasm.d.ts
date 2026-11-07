@@ -7,8 +7,10 @@ export const createTextImage: (a: any, b: number, c: number, d: number, e: numbe
 export const drawAlarmText: (a: any, b: any, c: number, d: number) => [number, number, number];
 export const drawBatchCommands: (a: any, b: any, c: any, d: any, e: any) => [number, number, number];
 export const drawBloodSplatter: (a: any, b: number, c: number, d: number, e: number, f: any, g: any, h: any) => [number, number, number];
+export const drawBullets: (a: any, b: any, c: any, d: any) => [number, number, number];
 export const drawCanvasImage: (a: any, b: any, c: number, d: number) => [number, number, number];
 export const drawCanvasLayer: (a: any, b: any, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number) => [number, number, number];
+export const drawColorGrade: (a: any, b: number, c: number) => [number, number, number];
 export const drawComboText: (a: any, b: any, c: number, d: number) => [number, number, number];
 export const drawCorpses: (a: any, b: any, c: any) => [number, number, number];
 export const drawDarkOverlay: (a: any, b: any, c: any, d: any, e: any, f: any, g: any) => [number, number, number];
@@ -17,6 +19,7 @@ export const drawDebugWorld: (a: any, b: any, c: number, d: any, e: number, f: n
 export const drawDust: (a: any, b: any, c: number) => [number, number, number];
 export const drawEnemyShadows: (a: any, b: any, c: number, d: number) => [number, number, number];
 export const drawExplosionScorch: (a: any, b: number, c: number) => [number, number, number];
+export const drawFinalOverlays: (a: any, b: number, c: number, d: number, e: number, f: number) => [number, number, number];
 export const drawFog: (a: any, b: any, c: any, d: number, e: number, f: number) => [number, number, number];
 export const drawFx: (a: any, b: any, c: any) => [number, number, number];
 export const drawFxOverlays: (a: any, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number];

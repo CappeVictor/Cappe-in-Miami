@@ -1,4 +1,6 @@
 # Catálogo observado no código
+## Preview Rust/WASM local v176
+Gradação de cor e overlays finais agora usam o painter Rust direto nos casos cobertos. Os valores e a ordem das operações são preservados; o dispatcher Canvas segue como fallback. Paridade sintética RGBA exata em Chrome 156.
 ## Preview Rust/WASM local v169
 Composição de escuridão/lanterna passa pelo módulo Rust direto; validação do comando legado corrigida para aceitar ângulo zero e flags booleanas. Chrome: paridade RGBA exata; sem benchmark.
 ## Preview Rust/WASM local v168

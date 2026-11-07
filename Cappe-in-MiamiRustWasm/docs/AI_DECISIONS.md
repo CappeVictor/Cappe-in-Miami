@@ -329,3 +329,6 @@ Reutilizar a seleção/layout calculados no WASM legado e passar a imagem já es
 ## D109 — v175.0 — Rasterizar projéteis com sprites no Rust
 Manter projeção e escolha do sprite no WASM legado, passar o lote e as imagens existentes ao módulo WebSys para desenhar por ordem. O fallback Canvas é mantido. Chrome 156 confirmou igualdade RGBA; regressões 82/82. Sem benchmark.
 
+## D110 — v176.0 — Rasterizar composição final pelo painter Rust direto
+Preservar os passes Canvas existentes de gradação soft-light/overlay e fade/flash, movendo as chamadas de composição e fillRect para Rust/WebSys. JS continua entregando parâmetros; fallback legado continua disponível. Paridade RGBA exata em Chrome 156 e estado Canvas restaurado nos cenários sintéticos; sem benchmark.
+

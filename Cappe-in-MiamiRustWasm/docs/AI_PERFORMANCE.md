@@ -1,3 +1,6 @@
+## v176 — composição de tela
+Gradação e fade/flash executam as mesmas duas chamadas de composição via painter WebSys/Rust. O trabalho efetivo por pixel e o número de passes permanecem os mesmos; tempo de quadro, CPU/GPU e memória não foram medidos, portanto não se afirma ganho de desempenho.
+
 ## v169.0 — dark overlay direto; sem benchmark
 O recorte de escuridão/lanterna usa Rust para rasterizar os dois contextos Canvas; paridade RGBA exata em Chrome. Não foram medidos frame time, CPU, memória ou FPS.
 

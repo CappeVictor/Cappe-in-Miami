@@ -117,7 +117,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v175.0-bullet-painter');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v176.0-screen-compositing');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     const wasm=await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm');assert.equal(wasm.status,200);assert.equal(wasm.headers['content-type'],'application/wasm');assert.ok(wasm.body.length>0);
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -309,6 +309,8 @@ async function run() {
     assert.match(bridge,/state\.direct\.drawAlarmText\(batch\.context, commands, label\)/);assert.match(rust,/pub fn draw_alarm_text\([\s\S]*?set_font\("bold 14px Orbitron, sans-serif"\)[\s\S]*?fill_text\(label/);
     assert.match(bridge,/state\.direct\.drawHudImage\(batch\.context, image, commands\)/);assert.match(rust,/pub fn draw_hud_image\([\s\S]*?supported_image\(image\)[\s\S]*?draw_image_at\(context, image/);
     assert.match(bridge,/state\.direct\.drawBullets\(batch\.context, commands, batch\.mine, batch\.foe\)/);assert.match(rust,/pub fn draw_bullets\([\s\S]*?supported_image\(mine\)[\s\S]*?draw_image_at\(context, image/);
+    assert.match(bridge,/state\.direct\.drawColorGrade\(context, width, height\)/);assert.match(rust,/pub fn draw_color_grade\([\s\S]*?set_global_composite_operation\("soft-light"\)[\s\S]*?set_global_composite_operation\("overlay"\)/);
+    assert.match(bridge,/state\.direct\.drawFinalOverlays\(context, width, height, fade, flash, flashEnabled\)/);assert.match(rust,/pub fn draw_final_overlays\([\s\S]*?rgba\(8,0,20,\{fade\}\)[\s\S]*?rgba\(255,46,147/);
     assert.match(html,/wasmRenderer\.setCanvasImageSmoothing\(g, false\)/);assert.match(bridge,/state\.direct\.setCanvasImageSmoothing\(context, enabled\)/);assert.match(rust,/pub fn set_canvas_image_smoothing\([\s\S]*?set_image_smoothing_enabled\(enabled\)/);
     assert.match(fx,/renderer\.createTextImage\(k, s, font, col, false\)/);assert.match(html,/renderer\.createTextImage\(k, s, font, c, true\)/);assert.match(bridge,/state\.direct\.createTextImage\(canvas, text, font, color, outlined\)/);assert.match(rust,/pub fn create_text_image\([\s\S]*?measure_text\(text\)[\s\S]*?fill_text\(text, 2\.0, 17\.0\)/);assert.match(rust,/stroke_text\(text, 6\.0, baseline\)/);
     assert.match(rust,/pub fn draw_batch_commands\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array[\s\S]*?JsValue/);assert.match(bridge,/state\.direct\.drawBatchCommands\(batch\.context, commands, FURNITURE_COLORS, ACTOR_COLORS, batch\)/);
@@ -884,7 +886,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v175.0-bullet-painter');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v176.0-screen-compositing');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(list.includes('wasm-renderer/pkg/renderer.wasm'));

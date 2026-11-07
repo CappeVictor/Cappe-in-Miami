@@ -1,8 +1,11 @@
 # Migração do renderer gráfico para Rust/WASM
 
-## Etapa atual — preview local v175, conversão parcial
+## v176.0 — gradação e overlays de tela
+Os preenchimentos de color grade e fade/flash foram conectados ao painter WebSys direto; o host JS ainda fornece os parâmetros do frame. O teste Chrome compara RGBA contra as operações Canvas originais, exige zero canais diferentes e verifica restauração de alpha/composite. Fallback legado segue ativo; essa etapa não mede desempenho nem completa a migração do renderer.
 
-O callback de projéteis envia posições calculadas e o sprite correspondente ao painter Rust direto para drawImage. A projeção e seleção por proprietário seguem no WASM legado; callback Canvas continua como fallback. Chrome 156 confirmou chamada integrada e paridade RGBA exata. Build direta: 156.945 bytes WASM + 40.209 bytes glue; regressões 82/82. Sem campanha completa, revisão visual ampla ou benchmark.
+## Etapa atual — preview local v176, conversão parcial
+
+Os passes de gradação e fade/flash enviam dimensões e valores do frame ao painter Rust direto. Ordem e estilo são preservados; o dispatcher antigo continua como fallback. Chrome 156 confirmou paridade RGBA exata nas cenas sintéticas. Build direta: 158.600 bytes WASM + 41.212 bytes glue; regressões 82/82. Sem campanha completa, revisão visual ampla ou benchmark.
 
 ## Etapa atual — preview local v174, conversão parcial
 

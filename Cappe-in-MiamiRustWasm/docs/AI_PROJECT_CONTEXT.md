@@ -1,5 +1,5 @@
 # Cappe-in-Miami — contexto persistente
-Atualizado em 07/11/2026. Iteração de renderer local: preview Rust/WASM v175.0; a base de gameplay continua v55.0.
+Atualizado em 07/11/2026. Iteração de renderer local: preview Rust/WASM v176.0; a base de gameplay continua v55.0. Os passes de color grade e fade/flash agora chamam o painter Rust direto; migração ainda híbrida.
 
 ## Identidade e restrições
 Ação top-down em HTML, CSS e JavaScript, Canvas 2D e Web Audio. Preservar identidade, conteúdo, mapas, saves e recursos existentes. Objetivo: evolução incremental mensurável; referência de 60 FPS / 16,67 ms, sem alegar resultados sem medição.

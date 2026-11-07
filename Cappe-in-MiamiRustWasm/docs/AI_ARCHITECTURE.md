@@ -1,4 +1,7 @@
-# Arquitetura real — preview local v175.0
+# Arquitetura real — preview local v176.0
+
+## Preview Rust/WASM local v176.0 — composição final da tela
+Os passes existentes de gradação `soft-light`/`overlay` e os retângulos de fade/flash agora chamam diretamente o painter Rust/WebSys. JS ainda fornece dimensões e valores do frame; Rust aplica o mesmo estilo, ordem, cores e `save/restore`. O dispatcher Canvas antigo segue como fallback.
 
 ## Preview Rust/WASM local v175.0 — projéteis
 O WASM legado calcula posição de tela e seleção de sprite do proprietário. O callback envia comandos de três números e imagens existentes ao painter Rust, que rasteriza os projéteis com drawImage; fallback Canvas permanece.

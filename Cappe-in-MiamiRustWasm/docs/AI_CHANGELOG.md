@@ -1,3 +1,7 @@
+## Preview local v176.0 — 07/11/2026
+- Gradação de cor e overlays finais de fade/flash passaram a chamar o painter Rust direto, preservando ordem, cores, dimensões e estado do Canvas.
+- Chrome 156 confirmou callback integrado e paridade RGBA exata nos cenários cobertos; regressões 82/82. Sem benchmark ou validação visual ampla.
+
 ## Preview local v169.0 — 07/11/2026
 - Dark overlay de lanterna/apagão agora limpa, recorta e compõe por chamadas Canvas diretas do Rust.
 - Corrigida a validação do WASM legado: tamanho de tela/zoom são as dimensões positivas; ângulo aceita zero e blackout/fire flash aceitam flags 0/1.

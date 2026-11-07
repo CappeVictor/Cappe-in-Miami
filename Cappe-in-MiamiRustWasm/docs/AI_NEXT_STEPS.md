@@ -1,4 +1,6 @@
-# Próximas ações — preview local v175.0
+# Próximas ações — preview local v176.0
+## Migração integral do renderer — pendente
+- v176 moveu os passes de gradação de cor e overlays finais do JavaScript para desenho direto via Rust/WebSys, mantendo a ordem e o save/restore do Canvas. Paridade sintética RGBA exata; regressões 82/82. Sem benchmark ou inspeção visual ampla.
 ## Migração integral do renderer — pendente
 1. Auditar e portar callbacks Canvas restantes, incluindo pickups; validar shells, muzzle/impacto, fog/lights/dark em gameplay real.
 2. Continuar o módulo direto nas rotas de sprites, mundo, HUD restante e expansões; ImageData, clearRect, imagens cacheadas, mapas geométricos, sangue/cadáveres, poeira/faíscas, labels de inimigos, móveis, atores, jogadores/inimigos, armas, fantasmas e aura agora usam WebSys em casos cobertos, sem benchmark. Manter o caminho antigo até cada camada ter paridade e smoke de jogo.

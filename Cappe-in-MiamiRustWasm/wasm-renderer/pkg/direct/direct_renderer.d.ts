@@ -40,6 +40,11 @@ export function drawCanvasImage(context: CanvasRenderingContext2D, image: HTMLCa
 export function drawCanvasLayer(context: CanvasRenderingContext2D, image: HTMLCanvasElement, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number, alpha: number): boolean;
 
 /**
+ * Applies the two existing full-screen color-grade passes directly through Rust/WASM.
+ */
+export function drawColorGrade(context: CanvasRenderingContext2D, width: number, height: number): boolean;
+
+/**
  * Draws the outlined combo multiplier using the browser's current font rasterizer.
  */
 export function drawComboText(context: CanvasRenderingContext2D, commands: Float64Array, label: string): boolean;
@@ -78,6 +83,11 @@ export function drawEnemyShadows(context: CanvasRenderingContext2D, commands: Fl
  * Paints the two persistent scorch circles left by an exploding barrel.
  */
 export function drawExplosionScorch(context: CanvasRenderingContext2D, x: number, y: number): boolean;
+
+/**
+ * Draws the existing end-of-frame fade and optional flash passes through Rust/WASM.
+ */
+export function drawFinalOverlays(context: CanvasRenderingContext2D, width: number, height: number, fade: number, flash: number, flash_enabled: boolean): boolean;
 
 /**
  * Rasterizes the already-positioned fog sprites without routing drawImage through host JS.
@@ -185,6 +195,7 @@ export interface InitOutput {
     readonly drawBullets: (a: any, b: any, c: any, d: any) => [number, number, number];
     readonly drawCanvasImage: (a: any, b: any, c: number, d: number) => [number, number, number];
     readonly drawCanvasLayer: (a: any, b: any, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number) => [number, number, number];
+    readonly drawColorGrade: (a: any, b: number, c: number) => [number, number, number];
     readonly drawComboText: (a: any, b: any, c: number, d: number) => [number, number, number];
     readonly drawCorpses: (a: any, b: any, c: any) => [number, number, number];
     readonly drawDarkOverlay: (a: any, b: any, c: any, d: any, e: any, f: any, g: any) => [number, number, number];
@@ -193,6 +204,7 @@ export interface InitOutput {
     readonly drawDust: (a: any, b: any, c: number) => [number, number, number];
     readonly drawEnemyShadows: (a: any, b: any, c: number, d: number) => [number, number, number];
     readonly drawExplosionScorch: (a: any, b: number, c: number) => [number, number, number];
+    readonly drawFinalOverlays: (a: any, b: number, c: number, d: number, e: number, f: number) => [number, number, number];
     readonly drawFog: (a: any, b: any, c: any, d: number, e: number, f: number) => [number, number, number];
     readonly drawFx: (a: any, b: any, c: any) => [number, number, number];
     readonly drawFxOverlays: (a: any, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number];

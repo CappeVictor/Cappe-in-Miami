@@ -103,6 +103,8 @@
   state.directAlarmTextCalls = 0;
   state.directHudImageCalls = 0;
   state.directBulletCalls = 0;
+  state.directColorGradeCalls = 0;
+  state.directFinalOverlayCalls = 0;
   state.fxCommands = 0;
   state.directDustCommands = 0;
   state.directSparkFrames = 0;
@@ -1320,6 +1322,24 @@
             return drawn === true;
           } catch (error) { state.directError = String(error && error.message || error); return false; }
         };
+        state.drawColorGradeDirect = (context, width, height) => {
+          if (!state.active || !state.directReady || !state.direct || !state.direct.drawColorGrade || !context
+            || !Number.isFinite(width) || !Number.isFinite(height)) return false;
+          try {
+            const drawn = withCanvasBypass(() => state.direct.drawColorGrade(context, width, height));
+            if (drawn) state.directColorGradeCalls++;
+            return drawn === true;
+          } catch (error) { state.directError = String(error && error.message || error); return false; }
+        };
+        state.drawFinalOverlaysDirect = (context, width, height, fade, flash, flashEnabled) => {
+          if (!state.active || !state.directReady || !state.direct || !state.direct.drawFinalOverlays || !context
+            || ![width, height, fade, flash].every(Number.isFinite) || typeof flashEnabled !== 'boolean') return false;
+          try {
+            const drawn = withCanvasBypass(() => state.direct.drawFinalOverlays(context, width, height, fade, flash, flashEnabled));
+            if (drawn) state.directFinalOverlayCalls++;
+            return drawn === true;
+          } catch (error) { state.directError = String(error && error.message || error); return false; }
+        };
         state.drawDebugHud = (context, width, height, showPanel, lines, showErrors, errors) => {
           if (!state.active || !state.directReady || !state.direct || !state.direct.drawDebugHud || !context
             || !Number.isFinite(width) || !Number.isFinite(height) || typeof showPanel !== 'boolean' || typeof showErrors !== 'boolean'
@@ -1848,6 +1868,7 @@
         return true;
       };
       state.drawColorGrade = (context, width, height) => {
+        if (state.drawColorGradeDirect && state.drawColorGradeDirect(context, width, height)) return true;
         if (!state.active || !wasm.exports.draw_color_grade) return false;
         const input = new Float64Array(wasm.exports.memory.buffer, wasm.exports.color_grade_input_ptr(), 2);
         input.set([width, height]);
@@ -1859,6 +1880,7 @@
         return true;
       };
       state.drawFinalOverlays = (context, width, height, fade, flash, flashEnabled) => {
+        if (state.drawFinalOverlaysDirect && state.drawFinalOverlaysDirect(context, width, height, fade, flash, flashEnabled)) return true;
         if (!state.active || !wasm.exports.draw_final_overlays) return false;
         const input = new Float64Array(wasm.exports.memory.buffer, wasm.exports.final_overlay_input_ptr(), 5);
         input.set([width, height, fade, flash, flashEnabled ? 1 : 0]);

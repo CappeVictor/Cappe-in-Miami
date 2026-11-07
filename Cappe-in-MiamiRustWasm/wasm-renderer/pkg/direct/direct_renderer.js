@@ -166,6 +166,21 @@ export function drawCanvasLayer(context, image, sx, sy, sw, sh, dx, dy, dw, dh, 
 }
 
 /**
+ * Applies the two existing full-screen color-grade passes directly through Rust/WASM.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} width
+ * @param {number} height
+ * @returns {boolean}
+ */
+export function drawColorGrade(context, width, height) {
+    const ret = wasm.drawColorGrade(context, width, height);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
  * Draws the outlined combo multiplier using the browser's current font rasterizer.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} commands
@@ -300,6 +315,24 @@ export function drawEnemyShadows(context, commands, offset, count) {
  */
 export function drawExplosionScorch(context, x, y) {
     const ret = wasm.drawExplosionScorch(context, x, y);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Draws the existing end-of-frame fade and optional flash passes through Rust/WASM.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} width
+ * @param {number} height
+ * @param {number} fade
+ * @param {number} flash
+ * @param {boolean} flash_enabled
+ * @returns {boolean}
+ */
+export function drawFinalOverlays(context, width, height, fade, flash, flash_enabled) {
+    const ret = wasm.drawFinalOverlays(context, width, height, fade, flash, flash_enabled);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }

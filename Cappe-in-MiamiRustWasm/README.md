@@ -1,8 +1,8 @@
-# Cappe-in-Miami — preview local Rust/WASM v175.0
+# Cappe-in-Miami — preview local Rust/WASM v176.0
 
 ## Experimento local Rust/WASM
 
-Esta cópia contém um modo opcional de migração do renderer: execute INICIAR_EXPERIMENTO_WASM.bat com Node.js 18+ ao lado de index.html. v175 moveu o desenho de projéteis para Rust direto; v174 moveu imagens HUD, v173 o rótulo do alarme. Chrome 156 confirmou paridade RGBA exata nos casos cobertos; regressões 82/82. Módulo direto: 156.945 bytes WASM + glue de 40.209 bytes. Migração parcial, sem benchmark ou validação visual ampla. Consulte docs/WASM_RENDERER_MIGRATION.md.
+Esta cópia contém um modo opcional de migração do renderer: execute INICIAR_EXPERIMENTO_WASM.bat com Node.js 18+ ao lado de index.html. v176 moveu para Rust direto os passes de gradação de cor e overlays finais de fade/flash; v175 moveu projéteis. Chrome 156 confirmou paridade RGBA exata nos casos cobertos; regressões 82/82. Módulo direto: 158.600 bytes WASM + glue de 41.212 bytes. Migração parcial, sem benchmark ou validação visual ampla. Consulte docs/WASM_RENDERER_MIGRATION.md.
 
 Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
 

@@ -673,6 +673,59 @@ pub fn draw_bullets(context: &CanvasRenderingContext2d, commands: &Float64Array,
     Ok(count as i32)
 }
 
+/// Applies the two existing full-screen color-grade passes directly through Rust/WASM.
+#[wasm_bindgen(js_name = drawColorGrade)]
+pub fn draw_color_grade(context: &CanvasRenderingContext2d, width: f64, height: f64) -> Result<bool, JsValue> {
+    if !width.is_finite() || !height.is_finite() || width <= 0.0 || height <= 0.0 || width > 8192.0 || height > 8192.0 {
+        return Ok(false);
+    }
+    context.save();
+    let drawn = (|| -> Result<(), JsValue> {
+        context.set_global_composite_operation("soft-light")?;
+        context.set_fill_style_str("rgba(255, 80, 140, 0.07)");
+        context.fill_rect(0.0, 0.0, width, height);
+        context.set_global_composite_operation("overlay")?;
+        context.set_fill_style_str("rgba(40, 200, 220, 0.04)");
+        context.fill_rect(0.0, 0.0, width, height);
+        Ok(())
+    })();
+    context.restore();
+    drawn?;
+    Ok(true)
+}
+
+/// Draws the existing end-of-frame fade and optional flash passes through Rust/WASM.
+#[wasm_bindgen(js_name = drawFinalOverlays)]
+pub fn draw_final_overlays(
+    context: &CanvasRenderingContext2d,
+    width: f64,
+    height: f64,
+    fade: f64,
+    flash: f64,
+    flash_enabled: bool,
+) -> Result<bool, JsValue> {
+    if !width.is_finite() || !height.is_finite() || !fade.is_finite() || !flash.is_finite()
+        || width <= 0.0 || height <= 0.0 || width > 8192.0 || height > 8192.0 || fade < 0.0 || flash < 0.0
+    {
+        return Ok(false);
+    }
+    context.save();
+    let drawn = (|| -> Result<(), JsValue> {
+        if fade > 0.0 {
+            context.set_fill_style_str(&format!("rgba(8,0,20,{fade})"));
+            context.fill_rect(0.0, 0.0, width, height);
+        }
+        if flash > 0.0 && flash_enabled {
+            context.set_fill_style_str(&format!("rgba(255,46,147,{})", flash * 0.5));
+            context.fill_rect(0.0, 0.0, width, height);
+        }
+        Ok(())
+    })();
+    context.restore();
+    drawn?;
+    Ok(true)
+}
+
 fn batch_prop(batch: &JsValue, key: &str) -> Result<JsValue, JsValue> {
     Reflect::get(batch, &JsValue::from_str(key))
 }
