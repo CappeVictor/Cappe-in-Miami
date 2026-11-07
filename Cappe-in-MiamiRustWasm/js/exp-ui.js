@@ -198,9 +198,26 @@
     if (cv.width !== nw || cv.height !== nh) { cv.width = nw; cv.height = nh; }
     cv.style.imageRendering = 'auto';
     hiK = k;
+    const smooth = !!CFG.aa, quality = smooth ? (CFG.gfx === 'ultra' ? 2 : 1) : 0;
+    const renderer = window.HM_WASM_RENDERER;
+    if (!(renderer && renderer.setupCanvas && renderer.setupCanvas(ctx, hiK, smooth, quality, true))) {
+      ctx.setTransform(hiK, 0, 0, hiK, 0, 0);
+      ctx.imageSmoothingEnabled = smooth;
+      ctx.imageSmoothingQuality = quality === 2 ? 'high' : quality === 1 ? 'medium' : 'low';
+    }
   }
   const _draw = draw;
-  draw = function () { ctx.setTransform(hiK, 0, 0, hiK, 0, 0); ctx.imageSmoothingEnabled = !!CFG.aa; ctx.imageSmoothingQuality = CFG.aa ? (CFG.gfx === 'ultra' ? 'high' : 'medium') : 'low'; _draw(); if (EXP.overlay) EXP.overlay(ctx); };
+  draw = function () {
+    const smooth = !!CFG.aa, quality = smooth ? (CFG.gfx === 'ultra' ? 2 : 1) : 0;
+    const renderer = window.HM_WASM_RENDERER;
+    if (!(renderer && renderer.setupCanvas && renderer.setupCanvas(ctx, hiK, smooth, quality))) {
+      ctx.setTransform(hiK, 0, 0, hiK, 0, 0);
+      ctx.imageSmoothingEnabled = smooth;
+      ctx.imageSmoothingQuality = quality === 2 ? 'high' : quality === 1 ? 'medium' : 'low';
+    }
+    _draw();
+    if (EXP.overlay) EXP.overlay(ctx);
+  };
 
   // ---------- 2) tamanho da tela ----------
   const SIZES = {
@@ -260,12 +277,33 @@
   EXP.drawHUD = function (g) {
     _drawHUD(g);
     if (st !== 'paused') return;
-    // escurece de novo para apagar o texto de pausa original, depois desenha os botões
+    const hover = (typeof mouse !== 'undefined' && mouse.x !== undefined) ? mouse : null;
+    const hoverIndex = hover ? BTN.findIndex(button => {
+      const box = boxOf(button);
+      return hover.x >= box.x && hover.x <= box.x + box.w && hover.y >= box.y && hover.y <= box.y + box.h;
+    }) : -1;
+    const pauseRenderer = window.HM_WASM_RENDERER;
+    if (pauseRenderer && pauseRenderer.drawPauseUiDirect && pauseRenderer.drawPauseUiDirect(g, W, H, hoverIndex)) return;
+    if (pauseRenderer && pauseRenderer.drawPauseUi && pauseRenderer.drawPauseUi(g, W, H, hoverIndex)) {
+      const entries = [{ text: 'PAUSADO', x: W / 2, y: H / 2 - 40, color: '#ff2e93', font: '64px Impact, sans-serif', align: 'center' }];
+      for (const button of BTN) {
+        const box = boxOf(button);
+        entries.push({ text: button.label, x: W / 2, y: box.y + box.h / 2 + 1, color: button.col, font: 'bold 22px Impact, sans-serif', align: 'center' });
+      }
+      const paintPauseText = (text, x, y, color, font, align) => {
+        g.save(); g.fillStyle = color; g.font = font; g.textAlign = align;
+        g.textBaseline = text === 'PAUSADO' ? 'alphabetic' : 'middle'; g.fillText(text, x, y); g.restore();
+      };
+      const textDrawn = pauseRenderer.drawHudTexts(entries, paintPauseText, g);
+      if (!textDrawn) for (const entry of entries) paintPauseText(entry.text, entry.x, entry.y, entry.color, entry.font, entry.align);
+      return;
+    }
+
+    // O painter Canvas original continua disponível se o batch Rust não aceitar os dados.
     g.save();
     g.fillStyle = 'rgba(5,0,18,.78)'; g.fillRect(0, 0, W, H);
     g.textAlign = 'center';
     g.fillStyle = '#ff2e93'; g.font = '64px Impact, sans-serif'; g.fillText('PAUSADO', W / 2, H / 2 - 40);
-    const hover = (typeof mouse !== 'undefined' && mouse.x !== undefined) ? mouse : null;
     for (const b of BTN) {
       const bx = boxOf(b);
       const over = hover && hover.x >= bx.x && hover.x <= bx.x + bx.w && hover.y >= bx.y && hover.y <= bx.y + bx.h;

@@ -11,6 +11,10 @@
   const DEAL_TIME = 4, FALL_TIME = 0.6, CARD_R = 24, PRICE_STEP = 0.06;
   const REROLL_BASE = 40, REROLL_PER_30S = 10;
   const ROW_Y = -95, ROW_X = 125, REROLL_Y = 62;
+  const creditHudEntry = [{ text: '', x: 34, y: 156, color: '#ffd23f', font: 'bold 18px Impact, sans-serif', align: 'left' }];
+  const dealerTextBatch = [];
+  let bubbleCacheText = null, bubbleCacheFont = '', bubbleCacheWidth = 0, bubbleCacheLines = [];
+  let bubbleMeasureContext = null, bubbleMeasureFont = '';
 
   const ITEMS = [
     { id: 'municao', nome: 'Munição', preco: 25, desc: 'Recarrega a arma atual.' },
@@ -246,64 +250,98 @@
   // ----- desenho -----
   const toScr = (x, y) => { const z = CFG.zoom; return [(x - cam.x - W / 2) * z + W / 2, (y - cam.y - H / 2) * z + H / 2]; };
 
+  function queueDealerText(text, x, y, color, font, alpha = 1, absoluteAlpha = false) {
+    const i = dealerTextBatch.length, entry = dealerTextBatch[i] || (dealerTextBatch[i] = {});
+    entry.text = text; entry.x = x; entry.y = y; entry.color = color; entry.font = font;
+    entry.align = 'center'; entry.alpha = alpha; entry.absoluteAlpha = absoluteAlpha;
+    dealerTextBatch.length = i + 1;
+  }
+  function flushDealerText(g) {
+    if (!dealerTextBatch.length) return;
+    const renderer = window.HM_WASM_RENDERER;
+    let rendered = false;
+    try { rendered = !!(renderer && renderer.drawRawHudTexts && renderer.drawRawHudTexts(dealerTextBatch, g)); }
+    catch (error) { console.warn('[Cappe WASM] texto da loja usou fallback Canvas.', error); }
+    if (!rendered) for (const entry of dealerTextBatch) {
+      g.save();
+      if (entry.absoluteAlpha) g.globalAlpha = entry.alpha;
+      else if (entry.alpha !== 1) g.globalAlpha *= entry.alpha;
+      g.fillStyle = entry.color; g.font = entry.font; g.textAlign = entry.align;
+      g.fillText(entry.text, entry.x, entry.y); g.restore();
+    }
+    dealerTextBatch.length = 0;
+  }
+
   function wrapText(g, txt, maxW) {
+    const font = 'bold 13px Impact, sans-serif';
+    const fontKey = font + '|' + (document.fonts ? document.fonts.status : 'unknown');
+    if (txt === bubbleCacheText && fontKey === bubbleCacheFont && maxW === bubbleCacheWidth) return bubbleCacheLines;
+    if (!bubbleMeasureContext) bubbleMeasureContext = document.createElement('canvas').getContext('2d');
+    if (bubbleMeasureContext && bubbleMeasureFont !== font) { bubbleMeasureContext.font = font; bubbleMeasureFont = font; }
     const words = txt.split(' '), lines = []; let cur = '';
-    for (const w of words) { const t = cur ? cur + ' ' + w : w; if (g.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; }
+    for (const w of words) { const t = cur ? cur + ' ' + w : w; if ((bubbleMeasureContext ? bubbleMeasureContext.measureText(t) : g.measureText(t)).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; }
     if (cur) lines.push(cur);
-    return lines;
+    bubbleCacheText = txt; bubbleCacheFont = fontKey; bubbleCacheWidth = maxW; bubbleCacheLines = lines;
+    return bubbleCacheLines;
   }
 
   function drawBubble(g, x, y, txt) {
-    g.save(); g.font = 'bold 13px Impact, sans-serif';
     const lines = wrapText(g, txt, 190), lh = 16, w = 210, h = lines.length * lh + 14;
     const bx = x - w / 2, by = y - h - 12;
-    g.fillStyle = 'rgba(255,255,255,.95)'; g.fillRect(bx, by, w, h);
-    g.beginPath(); g.moveTo(x - 6, by + h); g.lineTo(x + 6, by + h); g.lineTo(x, by + h + 9); g.fill();
-    g.fillStyle = '#2d0f5c'; g.textAlign = 'center';
-    lines.forEach((ln, i) => g.fillText(ln, x, by + 19 + i * lh));
-    g.restore();
+    const renderer = window.HM_WASM_RENDERER;
+    let panelDrawn = false;
+    try { panelDrawn = !!(renderer && renderer.drawShopPanel && renderer.drawShopPanel(g, [0, x, by, w, h, 22, 0])); }
+    catch (error) { console.warn('[Cappe WASM] balão da loja usou fallback Canvas.', error); }
+    if (!panelDrawn) {
+      g.save(); g.fillStyle = 'rgba(255,255,255,.95)'; g.fillRect(bx, by, w, h);
+      g.beginPath(); g.moveTo(x - 6, by + h); g.lineTo(x + 6, by + h); g.lineTo(x, by + h + 9); g.fill(); g.restore();
+    }
+    lines.forEach((ln, i) => queueDealerText(ln, x, by + 19 + i * lh, '#2d0f5c', 'bold 13px Impact, sans-serif'));
+    flushDealerText(g);
   }
 
   function drawCard(g, c) {
     const [cx, cy0] = toScr(c.x, c.y);
     const near = !c.sold && hyp(c.x - P.x, c.y - P.y) < 110;
     const cy = cy0 + (c.sold ? 0 : Math.sin(SH.t * 4 + c.x) * 1.5);
-    g.save(); g.textAlign = 'center';
     if (c.sold) {
-      g.globalAlpha = Math.max(0, c.stamp / 0.4);
-      g.font = 'bold 18px Impact, sans-serif'; g.fillStyle = c.slot.cor;
-      g.fillText('VENDIDO', cx, cy + 6);
-      g.restore(); return;
+      const alpha = Math.max(0, c.stamp / 0.4);
+      queueDealerText('VENDIDO', cx, cy + 6, c.slot.cor, 'bold 18px Impact, sans-serif', alpha, true);
+      flushDealerText(g); return;
     }
     const flick = c.cool > 0 && Math.floor(performance.now() / 60) % 2 === 0;
     const w = 112, h = 54;
-    g.fillStyle = 'rgba(12,4,28,.92)'; g.fillRect(cx - w / 2, cy - h / 2, w, h);
-    g.strokeStyle = flick ? '#ffffff' : c.slot.cor; g.lineWidth = 3;
-    g.strokeRect(cx - w / 2 + 1.5, cy - h / 2 + 1.5, w - 3, h - 3);
-    g.font = 'bold 11px Impact, sans-serif'; g.fillStyle = c.slot.cor;
-    g.fillText(c.cat, cx, cy - h / 2 + 15);
-    const it = itemOf(c.id), price = priceOf(it), can = SH.cred >= price;
-    g.font = 'bold 14px Impact, sans-serif'; g.fillStyle = '#ffffff';
-    g.fillText(it.nome, cx, cy + 4);
-    g.fillStyle = can ? '#ffd23f' : '#777777';
-    g.fillText(price + ' cr', cx, cy + 21);
-    if (near && it.desc) {
-      g.font = 'bold 12px Impact, sans-serif'; g.fillStyle = '#e8d9ff';
-      g.fillText(it.desc, cx, cy + h / 2 + 14);
+    let panelDrawn = false;
+    const renderer = window.HM_WASM_RENDERER;
+    try { panelDrawn = !!(renderer && renderer.drawShopPanel && renderer.drawShopPanel(g, [1, cx, cy, w, h, 24, flick ? 1 : 0], c.slot.cor)); }
+    catch (error) { console.warn('[Cappe WASM] card da loja usou fallback Canvas.', error); }
+    if (!panelDrawn) {
+      g.save(); g.fillStyle = 'rgba(12,4,28,.92)'; g.fillRect(cx - w / 2, cy - h / 2, w, h);
+      g.strokeStyle = flick ? '#ffffff' : c.slot.cor; g.lineWidth = 3;
+      g.strokeRect(cx - w / 2 + 1.5, cy - h / 2 + 1.5, w - 3, h - 3); g.restore();
     }
-    g.restore();
+    const it = itemOf(c.id), price = priceOf(it), can = SH.cred >= price;
+    queueDealerText(c.cat, cx, cy - h / 2 + 15, c.slot.cor, 'bold 11px Impact, sans-serif');
+    queueDealerText(it.nome, cx, cy + 4, '#ffffff', 'bold 14px Impact, sans-serif');
+    queueDealerText(price + ' cr', cx, cy + 21, can ? '#ffd23f' : '#777777', 'bold 14px Impact, sans-serif');
+    if (near && it.desc) queueDealerText(it.desc, cx, cy + h / 2 + 14, '#e8d9ff', 'bold 12px Impact, sans-serif');
+    flushDealerText(g);
   }
 
   function drawReroll(g, r) {
     const [cx, cy] = toScr(r.x, r.y), free = SH.freeLeft > 0, cost = rerollCost(), can = free || SH.cred >= cost;
     const w = 112, h = 40;
-    g.save(); g.textAlign = 'center';
-    g.fillStyle = 'rgba(12,4,28,.92)'; g.fillRect(cx - w / 2, cy - h / 2, w, h);
-    g.strokeStyle = '#ffd23f'; g.lineWidth = 3; g.strokeRect(cx - w / 2 + 1.5, cy - h / 2 + 1.5, w - 3, h - 3);
-    g.font = 'bold 14px Impact, sans-serif'; g.fillStyle = '#ffffff'; g.fillText('REROLAR', cx, cy - 2);
-    g.font = 'bold 12px Impact, sans-serif'; g.fillStyle = free ? '#19f0e6' : (can ? '#ffd23f' : '#777777');
-    g.fillText(free ? 'GRÁTIS' : cost + ' cr', cx, cy + 14);
-    g.restore();
+    let panelDrawn = false;
+    const renderer = window.HM_WASM_RENDERER;
+    try { panelDrawn = !!(renderer && renderer.drawShopPanel && renderer.drawShopPanel(g, [2, cx, cy, w, h, 18, 0])); }
+    catch (error) { console.warn('[Cappe WASM] reroll da loja usou fallback Canvas.', error); }
+    if (!panelDrawn) {
+      g.save(); g.fillStyle = 'rgba(12,4,28,.92)'; g.fillRect(cx - w / 2, cy - h / 2, w, h);
+      g.strokeStyle = '#ffd23f'; g.lineWidth = 3; g.strokeRect(cx - w / 2 + 1.5, cy - h / 2 + 1.5, w - 3, h - 3); g.restore();
+    }
+    queueDealerText('REROLAR', cx, cy - 2, '#ffffff', 'bold 14px Impact, sans-serif');
+    queueDealerText(free ? 'GRÁTIS' : cost + ' cr', cx, cy + 14, free ? '#19f0e6' : (can ? '#ffd23f' : '#777777'), 'bold 12px Impact, sans-serif');
+    flushDealerText(g);
   }
 
   // Madame Piranha: vestido rosa, chapéu com penas amarelas e dentes de piranha
@@ -313,20 +351,31 @@
     const k = d.fall > 0 ? d.fall / FALL_TIME : 0;
     const bob = d.fall > 0 ? 0 : Math.sin(SH.t * 3) * 1.5;
     const sy = gy - k * 140 + bob;
-    g.save(); g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(gx, gy + 10, 13 - k * 4, 6 - k * 2, 0, 0, 6.2832); g.fill(); g.restore();
-    g.save(); g.translate(gx, sy); g.scale(d.face || 1, 1);
-    g.fillStyle = '#ff5fa2'; g.beginPath(); g.moveTo(-11, -4); g.lineTo(11, -4); g.lineTo(15, 14); g.lineTo(-15, 14); g.closePath(); g.fill();
-    g.fillStyle = '#f3c9a0'; g.beginPath(); g.arc(0, -12, 8, 0, 6.2832); g.fill();
-    g.fillStyle = '#1b1b1b'; g.fillRect(-4, -13, 2, 2); g.fillRect(2, -13, 2, 2);
-    g.fillStyle = '#ffffff'; g.fillRect(-4, -7, 8, 2);
-    g.fillStyle = '#ffd23f'; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(-10 + i * 6, -20); g.lineTo(-7 + i * 6, -30); g.lineTo(-4 + i * 6, -20); g.fill(); }
-    g.fillStyle = '#2d0f5c'; g.fillRect(-12, -21, 24, 4);
-    g.restore();
+    const renderer = window.HM_WASM_RENDERER;
+    let dealerDrawn = false;
+    try {
+      dealerDrawn = !!(renderer && renderer.drawShopDealer && renderer.drawShopDealer(g, [
+        gx, gy, k, bob, d.face || 1, Math.max(0, SH.timer / DEAL_TIME), SH.timer < 1.2 ? 1 : 0, d.fall > 0 ? 1 : 0
+      ]));
+    } catch (error) { console.warn('[Cappe WASM] desenho da Madame Piranha usou fallback Canvas.', error); }
+    if (!dealerDrawn) {
+      g.save(); g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(gx, gy + 10, 13 - k * 4, 6 - k * 2, 0, 0, 6.2832); g.fill(); g.restore();
+      g.save(); g.translate(gx, sy); g.scale(d.face || 1, 1);
+      g.fillStyle = '#ff5fa2'; g.beginPath(); g.moveTo(-11, -4); g.lineTo(11, -4); g.lineTo(15, 14); g.lineTo(-15, 14); g.closePath(); g.fill();
+      g.fillStyle = '#f3c9a0'; g.beginPath(); g.arc(0, -12, 8, 0, 6.2832); g.fill();
+      g.fillStyle = '#1b1b1b'; g.fillRect(-4, -13, 2, 2); g.fillRect(2, -13, 2, 2);
+      g.fillStyle = '#ffffff'; g.fillRect(-4, -7, 8, 2);
+      g.fillStyle = '#ffd23f'; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(-10 + i * 6, -20); g.lineTo(-7 + i * 6, -30); g.lineTo(-4 + i * 6, -20); g.fill(); }
+      g.fillStyle = '#2d0f5c'; g.fillRect(-12, -21, 24, 4);
+      g.restore();
+    }
     if (d.fall <= 0) {
-      g.save(); g.strokeStyle = SH.timer < 1.2 ? '#ff2e93' : '#ffd23f'; g.lineWidth = 3;
-      g.beginPath(); g.arc(gx, gy + 6, 30, -1.5708, -1.5708 + 6.2832 * Math.max(0, SH.timer / DEAL_TIME)); g.stroke(); g.restore();
-      g.save(); g.textAlign = 'center'; g.font = 'bold 12px Impact, sans-serif'; g.fillStyle = '#ffffff';
-      g.fillText('MADAME PIRANHA', gx, sy - 36); g.restore();
+      if (!dealerDrawn) {
+        g.save(); g.strokeStyle = SH.timer < 1.2 ? '#ff2e93' : '#ffd23f'; g.lineWidth = 3;
+        g.beginPath(); g.arc(gx, gy + 6, 30, -1.5708, -1.5708 + 6.2832 * Math.max(0, SH.timer / DEAL_TIME)); g.stroke(); g.restore();
+      }
+      queueDealerText('MADAME PIRANHA', gx, sy - 36, '#ffffff', 'bold 12px Impact, sans-serif');
+      flushDealerText(g);
       if (SH.bubble) drawBubble(g, gx, sy - 40, SH.bubble.txt);
       SH.cards.forEach(c => drawCard(g, c));
       drawReroll(g, SH.reroll);
@@ -336,8 +385,12 @@
   EXP.overlay = function (g) {
     if (SH.dealer && (st === 'play' || st === 'paused')) drawDealer(g);
     if (st === 'play') {
-      g.save(); g.textAlign = 'left'; g.font = 'bold 18px Impact, sans-serif'; g.fillStyle = '#ffd23f';
-      g.fillText('CRÉDITOS ' + SH.cred, 34, 156); g.restore();
+      creditHudEntry[0].text = 'CRÉDITOS ' + SH.cred;
+      const renderer = window.HM_WASM_RENDERER;
+      if (!(renderer && renderer.drawRawHudTexts && renderer.drawRawHudTexts(creditHudEntry, g))) {
+        g.save(); g.textAlign = 'left'; g.font = 'bold 18px Impact, sans-serif'; g.fillStyle = '#ffd23f';
+        g.fillText(creditHudEntry[0].text, 34, 156); g.restore();
+      }
     }
   };
 })();

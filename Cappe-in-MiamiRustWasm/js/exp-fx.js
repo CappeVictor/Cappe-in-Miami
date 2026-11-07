@@ -5,6 +5,7 @@
 (function () {
   'use strict';
   const EXP = window.EXP, rnd = Math.random, TAU = Math.PI * 2;
+  const weatherLabelImages = [null, null, null, null, null];
 
   // ================= CLIMA =================
   const KINDS = ['neon', 'chuva', 'neblina', 'poeira', 'fumaca'];
@@ -15,27 +16,55 @@
   for (let i = 0; i < 6; i++) FX.lights.push({ x: 0, y: 0, r: 150, c: '255,46,147', p: 0, on: false });
   const LCOL = ['255,46,147', '25,240,230', '176,107,255', '255,210,63', '255,106,26'];
 
-  // sprite de névoa pré-renderizado uma única vez
-  const fogSpr = document.createElement('canvas'); fogSpr.width = 512; fogSpr.height = 256;
-  (function () { const g = fogSpr.getContext('2d'); for (let i = 0; i < 9; i++) { const x = 60 + rnd() * 392, y = 50 + rnd() * 156, r = 60 + rnd() * 90, gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 512, 256); } })();
+  // Mantém a sequência aleatória original e gera os pixels da névoa no Rust quando disponível.
+  const fogRings = Array.from({ length: 9 }, () => [60 + rnd() * 392, 50 + rnd() * 156, 60 + rnd() * 90]);
+  let fogSpr = null, fogSpriteMode = null;
+  function ensureFogSprite() {
+    const renderer = window.HM_WASM_RENDERER, useWasm = !!(renderer && renderer.active && renderer.createFogSprite);
+    if (fogSpr && fogSpriteMode === useWasm) return fogSpr;
+    const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 256;
+    if (useWasm) {
+      try { if (renderer.createFogSprite(canvas, fogRings)) { fogSpr = canvas; fogSpriteMode = true; return fogSpr; } }
+      catch (error) { console.warn('[Cappe WASM] sprite de névoa usou fallback Canvas.', error); }
+    }
+    const g = canvas.getContext('2d');
+    for (const [x, y, r] of fogRings) {
+      const gradient = g.createRadialGradient(x, y, 0, x, y, r);
+      gradient.addColorStop(0, 'rgba(255,255,255,.55)'); gradient.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = gradient; g.fillRect(0, 0, 512, 256);
+    }
+    fogSpr = canvas; fogSpriteMode = useWasm; return fogSpr;
+  }
   // [otimização] camada de escuridão em meia resolução (bordas suaves, 4x menos pixels para preencher); coordenadas seguem em 960x600
   const dk = document.createElement('canvas'); dk.width = 480; dk.height = 300; const dg = dk.getContext('2d'); dg.setTransform(.5, 0, 0, .5, 0, 0);
   // [otimização] gradientes pré-renderizados uma única vez (antes: 3 createRadialGradient por quadro + 1 por luz)
   function glowSprite(rgb, r, a0) {
     const c = document.createElement('canvas'); c.width = c.height = Math.ceil(r * 2);
+    const radialRenderer = window.HM_WASM_RENDERER;
+    try { if (radialRenderer && radialRenderer.active && radialRenderer.createRadialSprite && radialRenderer.createRadialSprite(c, rgb, r, a0)) return c; }
+    catch (error) { console.warn('[Cappe WASM] sprite radial usou fallback Canvas.', error); }
     const g = c.getContext('2d'), gr = g.createRadialGradient(r, r, 0, r, r, r);
     gr.addColorStop(0, 'rgba(' + rgb + ',' + a0 + ')'); gr.addColorStop(1, 'rgba(' + rgb + ',0)');
     g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height); return c;
   }
-  const LAMP = { core: glowSprite('0,0,0', 150, 1), far: glowSprite('0,0,0', 330, .95), flash: glowSprite('0,0,0', 260, 1) };
-  const FLASH_SPR = glowSprite('255,220,120', 90, .5);
+  let LAMP = null, FLASH_SPR = null, radialAssetMode = null;
+  function ensureGlowAssets() {
+    const renderer = window.HM_WASM_RENDERER, useWasm = !!(renderer && renderer.active && renderer.createRadialSprite);
+    if (LAMP && FLASH_SPR && radialAssetMode === useWasm) return;
+    LAMP = { core: glowSprite('0,0,0', 150, 1), far: glowSprite('0,0,0', 330, .95), flash: glowSprite('0,0,0', 260, 1) };
+    FLASH_SPR = glowSprite('255,220,120', 90, .5);
+    radialAssetMode = useWasm;
+  }
 
   // [otimização] texto simples guardado como imagem (antes: fillText + toUpperCase a cada quadro)
   const TT = new Map();
   function textImg(s, font, col) {
     const key = font + '|' + col + '|' + s; let t = TT.get(key); if (t) return t;
-    const k = document.createElement('canvas'), g = k.getContext('2d'); g.font = font;
-    k.width = Math.ceil(g.measureText(s).width) + 4; k.height = 24; g.font = font; g.fillStyle = col; g.textBaseline = 'alphabetic'; g.fillText(s, 2, 17);
+    const k = document.createElement('canvas'), renderer = window.HM_WASM_RENDERER;
+    if (!(renderer && renderer.createTextImage && renderer.createTextImage(k, s, font, col, false))) {
+      const g = k.getContext('2d'); g.font = font;
+      k.width = Math.ceil(g.measureText(s).width) + 4; k.height = 24; g.font = font; g.fillStyle = col; g.textBaseline = 'alphabetic'; g.fillText(s, 2, 17);
+    }
     if (TT.size > 80) TT.clear(); TT.set(key, t = k); return t;
   }
   function hashStr(s) { let h = 7; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
@@ -72,65 +101,150 @@
   // ================= DESENHO (espaço da tela) =================
   EXP.drawFx = function (g) {
     if (!P) return; const now = performance.now(), W_ = W, H_ = H;
+    ensureGlowAssets();
     // neblina / fumaça: sprite grande em deriva lenta
-    if ((FX.kind === 'neblina' || FX.kind === 'fumaca') && (!EXP.perfTier || EXP.perfTier < 2)) {
-      const smoke = FX.kind === 'fumaca'; g.save(); g.globalAlpha = smoke ? .16 : .13; g.globalCompositeOperation = smoke ? 'source-over' : 'lighter';
-      for (let i = 0; i < 3; i++) { const ox = ((now / (60 + i * 25) + i * 330) % 1400) - 440, oy = (smoke ? -(now / 90 % 120) : 0) + i * 170 - 40; g.drawImage(fogSpr, ox, oy, 920, 460); }
-      g.restore();
+    if (FX.kind === 'neblina' || FX.kind === 'fumaca') {
+      const smoke = FX.kind === 'fumaca', fogRenderer = window.HM_WASM_RENDERER, fogImage = ensureFogSprite();
+      const fogDrawn = fogRenderer && fogRenderer.drawFog && fogRenderer.drawFog(g, fogImage, now, smoke, EXP.perfTier || 0);
+      if (!fogDrawn && (!EXP.perfTier || EXP.perfTier < 2)) {
+        g.save(); g.globalAlpha = smoke ? .16 : .13; g.globalCompositeOperation = smoke ? 'source-over' : 'lighter';
+        for (let i = 0; i < 3; i++) { const ox = ((now / (60 + i * 25) + i * 330) % 1400) - 440, oy = (smoke ? -(now / 90 % 120) : 0) + i * 170 - 40; g.drawImage(fogImage, ox, oy, 920, 460); }
+        g.restore();
+      }
     }
     if (FX.kind === 'poeira') {
-      g.save(); g.fillStyle = 'rgba(255,230,190,.55)'; const dt = 1 / 60;
-      for (const m of FX.motes) { m.x += m.vx * dt + Math.sin(now / 900 + m.p) * .15; m.y += m.vy * dt; if (m.y < -4) { m.y = H_ + 4; m.x = rnd() * W_; } if (m.x < -4) m.x = W_ + 4; if (m.x > W_ + 4) m.x = -4; g.globalAlpha = .25 + .35 * Math.abs(Math.sin(now / 700 + m.p)); g.fillRect(m.x, m.y, m.r, m.r); }
-      g.restore();
+      const moteRenderer = window.HM_WASM_RENDERER, canDrawMotes = moteRenderer && moteRenderer.drawWeatherMotes;
+      let motesUpdated = false, motesDrawn = false;
+      if (canDrawMotes) {
+        const dt = 1 / 60;
+        for (const m of FX.motes) {
+          m.x += m.vx * dt + Math.sin(now / 900 + m.p) * .15; m.y += m.vy * dt;
+          if (m.y < -4) { m.y = H_ + 4; m.x = rnd() * W_; }
+          if (m.x < -4) m.x = W_ + 4; if (m.x > W_ + 4) m.x = -4;
+        }
+        motesUpdated = true;
+        motesDrawn = moteRenderer.drawWeatherMotes(g, FX.motes, now);
+      }
+      if (!motesDrawn) {
+        g.save(); g.fillStyle = 'rgba(255,230,190,.55)'; const dt = 1 / 60;
+        for (const m of FX.motes) {
+          if (!motesUpdated) {
+            m.x += m.vx * dt + Math.sin(now / 900 + m.p) * .15; m.y += m.vy * dt;
+            if (m.y < -4) { m.y = H_ + 4; m.x = rnd() * W_; }
+            if (m.x < -4) m.x = W_ + 4; if (m.x > W_ + 4) m.x = -4;
+          }
+          g.globalAlpha = .25 + .35 * Math.abs(Math.sin(now / 700 + m.p)); g.fillRect(m.x, m.y, m.r, m.r);
+        }
+        g.restore();
+      }
     }
     if (FX.kind === 'chuva') {
-      g.save(); g.strokeStyle = 'rgba(170,210,255,.38)'; g.lineWidth = 1; g.beginPath(); const dt = 1 / 60;
       const step = EXP.perfTier >= 1 ? 2 : 1;
-      for (let ri = 0; ri < FX.rain.length; ri += step) { const d = FX.rain[ri]; d.y += d.v * dt; d.x -= d.v * .18 * dt; if (d.y > H_) { d.y = -20; d.x = rnd() * (W_ + 200); } g.moveTo(d.x, d.y); g.lineTo(d.x - d.l * .18, d.y + d.l); }
-      g.stroke(); g.restore();
-      if (FX.bolt > 0 && !CFG.noflash) { g.fillStyle = 'rgba(220,235,255,' + (FX.bolt * .35) + ')'; g.fillRect(0, 0, W_, H_); }
+      const rainRenderer = window.HM_WASM_RENDERER, canDrawRain = rainRenderer && rainRenderer.drawRain;
+      let rainUpdated = false, rainDrawn = false;
+      if (canDrawRain) {
+        const dt = 1 / 60;
+        for (let ri = 0; ri < FX.rain.length; ri += step) {
+          const d = FX.rain[ri]; d.y += d.v * dt; d.x -= d.v * .18 * dt;
+          if (d.y > H_) { d.y = -20; d.x = rnd() * (W_ + 200); }
+        }
+        rainUpdated = true;
+        rainDrawn = rainRenderer.drawRain(g, FX.rain, step);
+      }
+      if (!rainDrawn) {
+        g.save(); g.strokeStyle = 'rgba(170,210,255,.38)'; g.lineWidth = 1; g.beginPath(); const dt = 1 / 60;
+        for (let ri = 0; ri < FX.rain.length; ri += step) {
+          const d = FX.rain[ri];
+          if (!rainUpdated) { d.y += d.v * dt; d.x -= d.v * .18 * dt; if (d.y > H_) { d.y = -20; d.x = rnd() * (W_ + 200); } }
+          g.moveTo(d.x, d.y); g.lineTo(d.x - d.l * .18, d.y + d.l);
+        }
+        g.stroke(); g.restore();
+      }
     }
-    // pisca neon sutil
-    if (FX.flick > 0 && !CFG.noflash) { g.fillStyle = 'rgba(255,46,147,' + FX.flick * .35 + ')'; g.fillRect(0, 0, W_, H_); }
+    // clarão de chuva e pisca neon: o Rust preserva a ordem; o painter JS é fallback.
+    const fxOverlayRenderer = window.HM_WASM_RENDERER, canDrawFxOverlays = fxOverlayRenderer && fxOverlayRenderer.drawFxOverlays;
+    const stormFlash = FX.kind === 'chuva' ? FX.bolt : 0;
+    const hasScreenFlash = stormFlash > 0 || FX.flick > 0;
+    const flashBatchDrawn = hasScreenFlash && canDrawFxOverlays && fxOverlayRenderer.drawFxOverlays(g, 0, W_, H_, now, stormFlash, FX.flick, !CFG.noflash);
+    if (!flashBatchDrawn) {
+      if (stormFlash > 0 && !CFG.noflash) { g.fillStyle = 'rgba(220,235,255,' + (stormFlash * .35) + ')'; g.fillRect(0, 0, W_, H_); }
+      if (FX.flick > 0 && !CFG.noflash) { g.fillStyle = 'rgba(255,46,147,' + FX.flick * .35 + ')'; g.fillRect(0, 0, W_, H_); }
+    }
     // apagão / modo escuro: lanterna ao redor do jogador
     const dark = EXP.dark || EXP.world.blackout > 0;
     if (dark) {
       const zoom = CFG.zoom, sx = (P.x - cam.x - W_ / 2) * zoom + W_ / 2, sy = (P.y - cam.y - H_ / 2) * zoom + H_ / 2;
-      dg.globalCompositeOperation = 'source-over'; dg.clearRect(0, 0, 960, 600); dg.fillStyle = EXP.world.blackout > 0 ? 'rgba(2,0,10,.95)' : 'rgba(3,0,12,.88)'; dg.fillRect(0, 0, 960, 600);
-      dg.globalCompositeOperation = 'destination-out';
-      const rc = 150 * zoom, rf = 330 * zoom;
-      dg.drawImage(LAMP.core, sx - rc, sy - rc, rc * 2, rc * 2);                                              // luz ao redor do jogador
-      dg.save(); dg.beginPath(); dg.moveTo(sx, sy); dg.arc(sx, sy, rf, P.a - .38, P.a + .38); dg.closePath(); dg.clip();   // cone da lanterna
-      dg.drawImage(LAMP.far, sx - rf, sy - rf, rf * 2, rf * 2); dg.restore();
-      if (P.fireFlash > 0) { const rl = 260 * zoom; dg.drawImage(LAMP.flash, sx - rl, sy - rl, rl * 2, rl * 2); }
-      g.drawImage(dk, 0, 0, 960, 600);
+      const darkRenderer = window.HM_WASM_RENDERER, darkBatchDrawn = darkRenderer && darkRenderer.drawDarkOverlay
+        && darkRenderer.drawDarkOverlay(dg, g, dk, LAMP, P.x, P.y, cam.x, cam.y, W_, H_, zoom, P.a, EXP.world.blackout > 0, P.fireFlash > 0);
+      if (!darkBatchDrawn) {
+        dg.globalCompositeOperation = 'source-over'; dg.clearRect(0, 0, 960, 600); dg.fillStyle = EXP.world.blackout > 0 ? 'rgba(2,0,10,.95)' : 'rgba(3,0,12,.88)'; dg.fillRect(0, 0, 960, 600);
+        dg.globalCompositeOperation = 'destination-out';
+        const rc = 150 * zoom, rf = 330 * zoom;
+        dg.drawImage(LAMP.core, sx - rc, sy - rc, rc * 2, rc * 2);                                              // luz ao redor do jogador
+        dg.save(); dg.beginPath(); dg.moveTo(sx, sy); dg.arc(sx, sy, rf, P.a - .38, P.a + .38); dg.closePath(); dg.clip();   // cone da lanterna
+        dg.drawImage(LAMP.far, sx - rf, sy - rf, rf * 2, rf * 2); dg.restore();
+        if (P.fireFlash > 0) { const rl = 260 * zoom; dg.drawImage(LAMP.flash, sx - rl, sy - rl, rl * 2, rl * 2); }
+        g.drawImage(dk, 0, 0, 960, 600);
+      }
     }
     // alarme
-    if (EXP.world.alarmT > 0) { g.fillStyle = 'rgba(255,30,60,' + (.06 + .07 * Math.sin(now / 110)) + ')'; g.fillRect(0, 0, W_, H_); g.fillStyle = 'rgba(255,60,90,.9)'; g.font = 'bold 14px Orbitron, sans-serif'; g.textAlign = 'center'; g.fillText('ALARME ATIVO · ' + EXP.world.alarmT.toFixed(0) + ' s', W_ / 2, 24); }
+    if (EXP.world.alarmT > 0) {
+      const alarmDrawn = canDrawFxOverlays && fxOverlayRenderer.drawFxOverlays(g, 1, W_, H_, now, EXP.world.alarmT, 0, true);
+      if (!alarmDrawn) { g.fillStyle = 'rgba(255,30,60,' + (.06 + .07 * Math.sin(now / 110)) + ')'; g.fillRect(0, 0, W_, H_); }
+      const alarmTextRenderer = window.HM_WASM_RENDERER;
+      if (!(alarmTextRenderer && alarmTextRenderer.drawAlarmText && alarmTextRenderer.drawAlarmText(g, EXP.world.alarmT, W_))) {
+        g.fillStyle = 'rgba(255,60,90,.9)'; g.font = 'bold 14px Orbitron, sans-serif'; g.textAlign = 'center'; g.fillText('ALARME ATIVO · ' + EXP.world.alarmT.toFixed(0) + ' s', W_ / 2, 24);
+      }
+    }
     // ambiente atual (canto)
-    if (st === 'play' && EXP.weather) { g.drawImage(textImg(EXP.weather.toUpperCase() + (EXP.world.blackout > 0 ? ' · APAGÃO' : ''), '12px Orbitron, sans-serif', 'rgba(25,240,230,.55)'), 32, H_ - 25); }
+    if (st === 'play' && EXP.weather) {
+      const weatherRenderer = window.HM_WASM_RENDERER;
+      const label = EXP.weather.toUpperCase() + (EXP.world.blackout > 0 ? ' · APAGÃO' : '');
+      const weatherLabel = textImg(label, '12px Orbitron, sans-serif', 'rgba(25,240,230,.55)');
+      weatherLabelImages[4] = weatherLabel;
+      if (!(weatherRenderer && weatherRenderer.drawCanvasImage && weatherRenderer.drawCanvasImage(g, weatherLabel, 32, H_ - 25))
+        && !(weatherRenderer && weatherRenderer.drawHudImage && weatherRenderer.drawHudImage(g, 3, W_, H_, false, true, weatherLabelImages))) g.drawImage(weatherLabel, 32, H_ - 25);
+    }
     // transição cinematográfica: barras e fade
-    if (FX.cine > 0) { const k = FX.cine / 1.3, bh = 78 * Math.min(1, k * 1.6); g.fillStyle = '#000'; g.fillRect(0, 0, W_, bh); g.fillRect(0, H_ - bh, W_, bh); }
+    if (FX.cine > 0) {
+      const cinemaDrawn = canDrawFxOverlays && fxOverlayRenderer.drawFxOverlays(g, 2, W_, H_, now, FX.cine, 0, true);
+      if (!cinemaDrawn) { const k = FX.cine / 1.3, bh = 78 * Math.min(1, k * 1.6); g.fillStyle = '#000'; g.fillRect(0, 0, W_, bh); g.fillRect(0, H_ - bh, W_, bh); }
+    }
   };
 
   // luzes aditivas e brilho de disparo, em espaço de mundo (chamado dentro da câmera)
   const _drawWorld = EXP.drawWorld;
   EXP.drawWorld = function (g) {
+    ensureGlowAssets();
     _drawWorld(g);
     EXP.glassDraw(g);
-    const now = performance.now(); g.save(); g.globalCompositeOperation = 'lighter';
-    const dim = EXP.dark || EXP.world.blackout > 0 ? .4 : 1;
-    const lightStep = EXP.perfTier >= 1 ? 2 : 1;
-    for (let li = 0; li < FX.lights.length; li += lightStep) { const L = FX.lights[li];
+    const now = performance.now(), dim = EXP.dark || EXP.world.blackout > 0 ? .4 : 1;
+    const lightStep = EXP.perfTier >= 1 ? 2 : 1, hasFireFlash = !!(P && P.fireFlash > 0), hasRainReflection = FX.kind === 'chuva' && !!P;
+    const worldLightRenderer = window.HM_WASM_RENDERER, canDrawWorldLights = worldLightRenderer && worldLightRenderer.drawWorldLights;
+    let hasEnabledLight = false;
+    for (let li = 0; li < FX.lights.length; li++) {
+      const L = FX.lights[li];
       if (!L.on) continue;
-      if (!L.spr || L.sprR !== L.r || L.sprC !== L.c) { L.spr = glowSprite(L.c, L.r, 1); L.sprR = L.r; L.sprC = L.c; }   // sprite guardado na própria luz
-      const p = .55 + .45 * Math.sin(now / 520 + L.p), fl = FX.kind === 'neon' && Math.sin(now / 90 + L.p * 9) > .97 ? .4 : 1;
-      g.globalAlpha = .22 * p * fl * dim; g.drawImage(L.spr, L.x - L.r, L.y - L.r, L.r * 2, L.r * 2);   // intensidade vira alpha
+      hasEnabledLight = true;
+      if (canDrawWorldLights && (!L.spr || L.sprR !== L.r || L.sprC !== L.c)) { L.spr = glowSprite(L.c, L.r, 1); L.sprR = L.r; L.sprC = L.c; }
     }
-    if (P && P.fireFlash > 0) { g.globalAlpha = 1; g.drawImage(FLASH_SPR, P.x - 90, P.y - 90, 180, 180); }
-    g.restore();
-    // reflexo: brilho fraco sob jogador em dias de chuva
-    if (FX.kind === 'chuva' && P) { g.save(); g.globalAlpha = .12; g.fillStyle = '#9ad1ff'; g.beginPath(); g.ellipse(P.x, P.y + 14, 14, 5, 0, 0, TAU); g.fill(); g.restore(); }
+    const worldLightBatchDrawn = canDrawWorldLights && (hasEnabledLight || hasFireFlash || hasRainReflection)
+      && worldLightRenderer.drawWorldLights(g, FX.lights, now, dim, FX.kind === 'neon', lightStep,
+        P ? P.x : 0, P ? P.y : 0, hasFireFlash, hasRainReflection, FLASH_SPR);
+    if (!worldLightBatchDrawn && !hasEnabledLight && !hasFireFlash && !hasRainReflection) return;
+    if (!worldLightBatchDrawn) {
+      g.save(); g.globalCompositeOperation = 'lighter';
+      for (let li = 0; li < FX.lights.length; li += lightStep) { const L = FX.lights[li];
+        if (!L.on) continue;
+        if (!L.spr || L.sprR !== L.r || L.sprC !== L.c) { L.spr = glowSprite(L.c, L.r, 1); L.sprR = L.r; L.sprC = L.c; }
+        const p = .55 + .45 * Math.sin(now / 520 + L.p), fl = FX.kind === 'neon' && Math.sin(now / 90 + L.p * 9) > .97 ? .4 : 1;
+        g.globalAlpha = .22 * p * fl * dim; g.drawImage(L.spr, L.x - L.r, L.y - L.r, L.r * 2, L.r * 2);
+      }
+      if (hasFireFlash) { g.globalAlpha = 1; g.drawImage(FLASH_SPR, P.x - 90, P.y - 90, 180, 180); }
+      g.restore();
+      // reflexo: brilho fraco sob jogador em dias de chuva
+      if (hasRainReflection) { g.save(); g.globalAlpha = .12; g.fillStyle = '#9ad1ff'; g.beginPath(); g.ellipse(P.x, P.y + 14, 14, 5, 0, 0, TAU); g.fill(); g.restore(); }
+    }
   };
 
   // ================= ÁUDIO =================
@@ -318,8 +432,22 @@
     EXP.glassBurst(cx, cy, dx, dy); EXP.sfx('glass'); triggerScreenShake(4, .1);
     emitNoise(cx, cy, 200, 'glass');
     try {                                                              // vestígio no chão onde havia o vidro
-      const f = fl.getContext('2d'); f.fillStyle = 'rgba(160,230,255,.10)'; f.fillRect(gl.x, gl.y, gl.w, gl.h);
-      for (let i = 0; i < 9; i++) { f.fillStyle = 'rgba(220,250,255,' + (.25 + rnd() * .35) + ')'; const sx = gl.x + rnd() * gl.w, sy = gl.y + rnd() * gl.h; f.beginPath(); f.moveTo(sx, sy); f.lineTo(sx + 2 + rnd() * 4, sy + rnd() * 3); f.lineTo(sx + rnd() * 3, sy + 2 + rnd() * 4); f.fill(); }
+      const trace = new Float64Array(9 * 7);
+      for (let i = 0; i < 9; i++) {
+        const offset = i * 7, alpha = .25 + rnd() * .35, sx = gl.x + rnd() * gl.w, sy = gl.y + rnd() * gl.h;
+        trace[offset] = alpha; trace[offset + 1] = sx; trace[offset + 2] = sy;
+        trace[offset + 3] = sx + 2 + rnd() * 4; trace[offset + 4] = sy + rnd() * 3;
+        trace[offset + 5] = sx + rnd() * 3; trace[offset + 6] = sy + 2 + rnd() * 4;
+      }
+      const f = fl.getContext('2d'), glassTraceRenderer = window.HM_WASM_RENDERER;
+      if (!(glassTraceRenderer && glassTraceRenderer.drawGlassBreakTrace && glassTraceRenderer.drawGlassBreakTrace(f, gl.x, gl.y, gl.w, gl.h, trace))) {
+        f.fillStyle = 'rgba(160,230,255,.10)'; f.fillRect(gl.x, gl.y, gl.w, gl.h);
+        for (let offset = 0; offset < trace.length; offset += 7) {
+          f.fillStyle = 'rgba(220,250,255,' + trace[offset] + ')'; f.beginPath();
+          f.moveTo(trace[offset + 1], trace[offset + 2]); f.lineTo(trace[offset + 3], trace[offset + 4]);
+          f.lineTo(trace[offset + 5], trace[offset + 6]); f.fill();
+        }
+      }
     } catch (e) {}
     if (EXP.run) addScore(25);
   }
@@ -341,6 +469,8 @@
   };
   EXP.glassDraw = function (g) {
     const now = performance.now();
+    const glassRenderer = window.HM_WASM_RENDERER;
+    if (glassRenderer && glassRenderer.drawGlass && glassRenderer.drawGlass(g, EXP.glass.list, SH, now, g.globalAlpha)) return;
     for (const gl of EXP.glass.list) {
       g.fillStyle = 'rgba(110,225,255,.26)'; g.fillRect(gl.x, gl.y, gl.w, gl.h);
       g.strokeStyle = 'rgba(210,255,255,.8)'; g.lineWidth = 2; g.strokeRect(gl.x + 1, gl.y + 1, gl.w - 2, gl.h - 2);

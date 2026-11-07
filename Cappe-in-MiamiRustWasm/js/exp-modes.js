@@ -459,15 +459,25 @@
 
   // ================= HUD DOS MODOS =================
   const T = (s, x, y, c, f, al) => tx(s, x, y, c, f, al);
+  const drawModeHudText = (g, entry) => {
+    const renderer = window.HM_WASM_RENDERER;
+    const drawn = renderer && renderer.drawHudTexts && renderer.drawHudTexts([entry],
+      (text, x, textY, color, font, align) => T(text, x, textY, color, font, align), g);
+    if (!drawn) T(entry.text, entry.x, entry.y, entry.color, entry.font, entry.align || 'left');
+  };
   EXP.drawHUD = function (g) {
     const r = EXP.run, m = r && MODES[r.id];
     if (P && st !== 'dead') {
       // pente / recarga
       const M = EXP.mag;
       if (M.max) {
-        T('PENTE ' + M.left + ' / ' + Math.max(0, ammo - M.left), 34, 138, M.rt > 0 ? '#ff9ac8' : '#ffd23f', 'bold 18px Impact, sans-serif');
-        if (M.rt > 0) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(34, 146, 160, 8); g.fillStyle = '#ff9ac8'; g.fillRect(34, 146, 160 * (1 - M.rt / M.rtMax), 8); T('RECARREGANDO', 34 + 170, 154, '#ff9ac8', 'bold 14px Impact, sans-serif'); }
-        else if (M.left <= Math.ceil(M.max * .25) && ammo > M.left) T('C · RECARREGAR', 34 + 150, 138, '#fff', '13px Impact, sans-serif');
+        drawModeHudText(g, { text: 'PENTE ' + M.left + ' / ' + Math.max(0, ammo - M.left), x: 34, y: 138, color: M.rt > 0 ? '#ff9ac8' : '#ffd23f', font: 'bold 18px Impact, sans-serif' });
+        if (M.rt > 0) {
+          const hudShapeRenderer = window.HM_WASM_RENDERER, reloadDrawn = hudShapeRenderer && hudShapeRenderer.drawHudShape && hudShapeRenderer.drawHudShape(g, 3, W, H, 1 - M.rt / M.rtMax);
+          if (!reloadDrawn) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(34, 146, 160, 8); g.fillStyle = '#ff9ac8'; g.fillRect(34, 146, 160 * (1 - M.rt / M.rtMax), 8); }
+          drawModeHudText(g, { text: 'RECARREGANDO', x: 34 + 170, y: 154, color: '#ff9ac8', font: 'bold 14px Impact, sans-serif' });
+        }
+        else if (M.left <= Math.ceil(M.max * .25) && ammo > M.left) drawModeHudText(g, { text: 'C · RECARREGAR', x: 34 + 150, y: 138, color: '#fff', font: '13px Impact, sans-serif' });
       }
       if (r && !r.done) {
         let top = m.nome.toUpperCase();
@@ -479,37 +489,91 @@
         else if (r.id === 'invasao') top += ' · ATAQUE ' + Math.max(1, r.atk) + '/5 · ZONA ' + r.integ + '/10';
         else if (r.total) top += ' · SALA ' + (r.rooms + 1) + '/' + r.total;
         else if (r.id === 'classico' || r.id === 'historia') top = '';
-        if (top) { g.save(); T(top, W / 2, 56, m.color || '#19f0e6', 'bold 20px Impact, sans-serif', 'center'); g.restore(); }
-        if (r.id === 'contrarrelogio' && r.timeLeft < 15) { g.fillStyle = 'rgba(255,46,91,' + (.08 + .08 * Math.sin(performance.now() / 120)) + ')'; g.fillRect(0, 0, W, H); }
+        if (top) {
+          const title = { text: top, x: W / 2, y: 56, color: m.color || '#19f0e6', font: 'bold 20px Impact, sans-serif', align: 'center' };
+          const modeTextRenderer = window.HM_WASM_RENDERER;
+          const titleDrawn = modeTextRenderer && modeTextRenderer.drawHudTexts && modeTextRenderer.drawHudTexts([title],
+            (text, x, textY, color, font, align) => T(text, x, textY, color, font, align), g);
+          if (!titleDrawn) { g.save(); T(title.text, title.x, title.y, title.color, title.font, title.align); g.restore(); }
+        }
+        if (r.id === 'contrarrelogio' && r.timeLeft < 15) {
+          const flashAlpha = .08 + .08 * Math.sin(performance.now() / 120), modeFxRenderer = window.HM_WASM_RENDERER;
+          if (!(modeFxRenderer && modeFxRenderer.drawFxOverlays && modeFxRenderer.drawFxOverlays(g, 3, W, H, 0, flashAlpha, 0, true))) {
+            g.fillStyle = 'rgba(255,46,91,' + flashAlpha + ')'; g.fillRect(0, 0, W, H);
+          }
+        }
         if (r.id === 'invasao' && r.zone) {   // marcador da zona fora da tela
           const z = r.zone, zoom = CFG.zoom, sx = (z.x - cam.x - W / 2) * zoom + W / 2, sy = (z.y - cam.y - H / 2) * zoom + H / 2;
-          if (sx < 20 || sx > W - 20 || sy < 20 || sy > H - 20) { const a = Math.atan2(sy - H / 2, sx - W / 2); g.save(); g.translate(W / 2 + Math.cos(a) * 270, H / 2 + Math.sin(a) * 250); g.rotate(a); g.fillStyle = '#ff6bd5'; g.beginPath(); g.moveTo(14, 0); g.lineTo(-8, -9); g.lineTo(-8, 9); g.fill(); g.restore(); }
+          if (sx < 20 || sx > W - 20 || sy < 20 || sy > H - 20) {
+            const a = Math.atan2(sy - H / 2, sx - W / 2), arrowX = W / 2 + Math.cos(a) * 270, arrowY = H / 2 + Math.sin(a) * 250;
+            const arrowRenderer = window.HM_WASM_RENDERER;
+            if (!(arrowRenderer && arrowRenderer.drawInvasionArrow && arrowRenderer.drawInvasionArrow(g, arrowX, arrowY, a))) {
+              g.save(); g.translate(arrowX, arrowY); g.rotate(a); g.fillStyle = '#ff6bd5'; g.beginPath(); g.moveTo(14, 0); g.lineTo(-8, -9); g.lineTo(-8, 9); g.fill(); g.restore();
+            }
+          }
         }
       }
       // barra do chefe
       const b = EXP.world.boss;
       if (b && enemies.includes(b)) {
-        const w = 460, x = (W - w) / 2, y = H - 92, f = Math.max(0, b.hp / b.hpMax);
-        g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(x - 3, y - 3, w + 6, 20); g.fillStyle = b.boss.col; g.fillRect(x, y, w * f, 14);
-        g.fillStyle = 'rgba(255,255,255,.35)'; for (let i = 1; i < b.boss.phases.length; i++) g.fillRect(x + w * b.boss.phases[i].at - 1, y, 2, 14);
-        g.strokeStyle = '#000'; g.lineWidth = 2; g.strokeRect(x, y, w, 14); T(b.boss.nome.toUpperCase() + ' · FASE ' + (b.ph + 1), W / 2, y - 8, '#fff', 'bold 18px Impact, sans-serif', 'center');
+        const bossRenderer = window.HM_WASM_RENDERER;
+        const barDrawn = bossRenderer && bossRenderer.drawBossHealthBar && bossRenderer.drawBossHealthBar(g, b, W, H);
+        const w = 460, x = (W - w) / 2, y = H - 92;
+        if (!barDrawn) {
+          const f = Math.max(0, b.hp / b.hpMax);
+          g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(x - 3, y - 3, w + 6, 20); g.fillStyle = b.boss.col; g.fillRect(x, y, w * f, 14);
+          g.fillStyle = 'rgba(255,255,255,.35)'; for (let i = 1; i < b.boss.phases.length; i++) g.fillRect(x + w * b.boss.phases[i].at - 1, y, 2, 14);
+          g.strokeStyle = '#000'; g.lineWidth = 2; g.strokeRect(x, y, w, 14);
+        }
+        const bossTitle = b.boss.nome.toUpperCase() + ' · FASE ' + (b.ph + 1), titleFont = 'bold 18px Impact, sans-serif';
+        const titleDrawn = bossRenderer && bossRenderer.drawHudTexts && bossRenderer.drawHudTexts([
+          { text: bossTitle, x: W / 2, y: y - 8, color: '#fff', font: titleFont, align: 'center' }
+        ], (text, x, textY, color, font, align) => T(text, x, textY, color, font, align), g);
+        if (!titleDrawn) T(bossTitle, W / 2, y - 8, '#fff', titleFont, 'center');
       }
     }
     // toasts
-    const ts = EXP.toasts; let y = 84, shown = 0;
-    for (let i = ts.length - 1; i >= 0; i--) { const t = ts[i]; t.life -= 1 / 60; if (t.life <= 0) { ts.splice(i, 1); continue; } if (shown++ >= 3) continue; g.globalAlpha = Math.min(1, t.life * 1.5); T(t.t, W / 2, y, t.c, 'bold 17px Impact, sans-serif', 'center'); if (t.sub) T(t.sub, W / 2, y + 16, '#fff', '13px Impact, sans-serif', 'center'); y += t.sub ? 38 : 24; g.globalAlpha = 1; }
+    const ts = EXP.toasts, toastEntries = []; let y = 84, shown = 0;
+    for (let i = ts.length - 1; i >= 0; i--) {
+      const t = ts[i]; t.life -= 1 / 60; if (t.life <= 0) { ts.splice(i, 1); continue; } if (shown++ >= 3) continue;
+      const alpha = Math.min(1, t.life * 1.5);
+      toastEntries.push({ text: t.t, x: W / 2, y, color: t.c, font: 'bold 17px Impact, sans-serif', align: 'center', alpha });
+      if (t.sub) toastEntries.push({ text: t.sub, x: W / 2, y: y + 16, color: '#fff', font: '13px Impact, sans-serif', align: 'center', alpha });
+      y += t.sub ? 38 : 24;
+    }
+    if (toastEntries.length) {
+      const toastRenderer = window.HM_WASM_RENDERER;
+      const toastsDrawn = toastRenderer && toastRenderer.drawHudTexts && toastRenderer.drawHudTexts(toastEntries,
+        (text, x, textY, color, font, align) => T(text, x, textY, color, font, align), g);
+      if (!toastsDrawn) {
+        for (const entry of toastEntries) { g.globalAlpha = entry.alpha; T(entry.text, entry.x, entry.y, entry.color, entry.font, entry.align); }
+        g.globalAlpha = 1;
+      }
+    }
     if (st === 'paused' && r) {
       g.fillStyle = 'rgba(5,0,18,.55)'; g.fillRect(W / 2 - 230, H / 2 + 80, 460, 120);
-      T(MODES[r.id].nome.toUpperCase() + ' · NÍVEL ' + EXP.save().level, W / 2, H / 2 + 110, '#19f0e6', 'bold 20px Impact, sans-serif', 'center');
-      T('Abates ' + r.kills + ' · Pontos ' + score + ' · XP +' + (r.xp || 0), W / 2, H / 2 + 140, '#fff', '18px Impact, sans-serif', 'center');
-      T('B · voltar ao lobby', W / 2, H / 2 + 172, '#ffd23f', '16px Impact, sans-serif', 'center');
+      const pauseEntries = [
+        { text: MODES[r.id].nome.toUpperCase() + ' · NÍVEL ' + EXP.save().level, x: W / 2, y: H / 2 + 110, color: '#19f0e6', font: 'bold 20px Impact, sans-serif', align: 'center' },
+        { text: 'Abates ' + r.kills + ' · Pontos ' + score + ' · XP +' + (r.xp || 0), x: W / 2, y: H / 2 + 140, color: '#fff', font: '18px Impact, sans-serif', align: 'center' },
+        { text: 'B · voltar ao lobby', x: W / 2, y: H / 2 + 172, color: '#ffd23f', font: '16px Impact, sans-serif', align: 'center' }
+      ];
+      const pauseTextRenderer = window.HM_WASM_RENDERER;
+      const pauseTextsDrawn = pauseTextRenderer && pauseTextRenderer.drawHudTexts && pauseTextRenderer.drawHudTexts(pauseEntries,
+        (text, x, textY, color, font, align) => T(text, x, textY, color, font, align), g);
+      if (!pauseTextsDrawn) for (const entry of pauseEntries) T(entry.text, entry.x, entry.y, entry.color, entry.font, entry.align);
     }
   };
   // desenho no mundo: zona da invasão
   const _worldDraw = EXP.worldDraw;
   EXP.drawWorld = function (g) {
     _worldDraw(g);
-    const r = EXP.run; if (r && r.id === 'invasao' && r.zone) { const z = r.zone, p = .5 + .5 * Math.sin(performance.now() / 260); g.save(); g.strokeStyle = 'rgba(255,107,213,' + (.5 + .4 * p) + ')'; g.lineWidth = 4; g.beginPath(); g.arc(z.x, z.y, 34, 0, TAU); g.stroke(); g.fillStyle = 'rgba(255,107,213,.14)'; g.fill(); g.restore(); }
+    const r = EXP.run;
+    if (r && r.id === 'invasao' && r.zone) {
+      const z = r.zone, now = performance.now(), zoneRenderer = window.HM_WASM_RENDERER;
+      if (!(zoneRenderer && zoneRenderer.drawInvasionZone && zoneRenderer.drawInvasionZone(g, z.x, z.y, now))) {
+        const p = .5 + .5 * Math.sin(now / 260); g.save(); g.strokeStyle = 'rgba(255,107,213,' + (.5 + .4 * p) + ')'; g.lineWidth = 4; g.beginPath(); g.arc(z.x, z.y, 34, 0, TAU); g.stroke(); g.fillStyle = 'rgba(255,107,213,.14)'; g.fill(); g.restore();
+      }
+    }
   };
   addEventListener('keydown', e => { if (e.key.toLowerCase() === 'b' && st === 'paused') { musStop(.3); toMenu(); EXP.ui.hideAll(); } });
 })();

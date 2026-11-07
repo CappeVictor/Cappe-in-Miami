@@ -1,0 +1,21 @@
+[package]
+name = "cappe-renderer-direct"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "=0.2.129"
+js-sys = "=0.3.106"
+
+[dependencies.web-sys]
+version = "=0.3.106"
+features = ["CanvasRenderingContext2d", "CanvasPattern", "HtmlCanvasElement", "HtmlImageElement", "ImageData", "TextMetrics"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

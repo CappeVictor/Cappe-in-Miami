@@ -15,13 +15,13 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
 - **Web — HTML, CSS e JavaScript:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — prévia híbrida:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v76-preview.zip)
+- **Rust/WASM — prévia híbrida v170:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v170-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
 ### Sobre a prévia Rust/WASM
 
-A prévia v76 move para Rust/WebAssembly a geração e organização de várias camadas gráficas, incluindo partes do piso, paredes, móveis, portas, jogadores e inimigos. Ela ainda é híbrida: o navegador continua rasterizando Canvas, e o compositor, alguns efeitos e partes da interface permanecem em JavaScript. Portanto, não é ainda uma conversão integral do motor gráfico e não há promessa de ganho de desempenho medido.
+A prévia v170 amplia as camadas gráficas que chamam diretamente o módulo Rust/WebAssembly, incluindo composição de escuridão/lanterna, muzzle flashes e arcos de impacto, além de piso, paredes, móveis, portas, jogadores e inimigos. Ela ainda é híbrida: lógica e estado continuam em JavaScript, algumas imagens são preparadas no host, e outros callbacks Canvas permanecem em migração. A paridade automatizada passou nos casos cobertos; não é ainda uma conversão integral do motor gráfico e não há ganho de desempenho medido.
 
 ## Últimas melhorias incluídas
 
@@ -32,10 +32,10 @@ A prévia v76 move para Rust/WebAssembly a geração e organização de várias 
 - Saídas de mapas Neon fora do piso caminhável passaram a ser ancoradas em uma posição livre próxima.
 - A regressão automatizada registrada para essa entrega passou em **57/57**. Não houve validação visual nem medição de FPS nessa entrega.
 
-**Prévia Rust/WASM v76.0**
-- Rust passou a preparar em lote transformações e imagens das portas Neon.
-- A composição gráfica de P1, P2 e do avatar remoto, partes dos corpos/sombras dos atores, móveis, portas e detalhes do mapa também foi ampliada.
-- As imagens e a rasterização Canvas continuam a cargo do navegador; o modo JavaScript permanece disponível.
+**Prévia Rust/WASM v170.0 — 7 de novembro de 2026**
+- Muzzle flashes, arcos de impacto, composição de escuridão/lanterna, névoa, luzes, anéis e zona de invasão agora chamam o painter Rust direto nos casos cobertos; callback Canvas segue como fallback.
+- Build Rust/WASM, testes de ABI/browser, regressões 82/82 e paridade RGBA em Chrome passaram.
+- A migração segue híbrida; não houve benchmark, revisão visual ampla nem campanha completa.
 
 **Organização do repositório — 6 de novembro de 2026**
 A raiz do GitHub fica organizada com este README e as duas pastas de distribuição. Os arquivos de cada versão, incluindo código, recursos e seu ZIP, ficam dentro da pasta correspondente.

@@ -1,10 +1,15 @@
-# Próximas ações — preview local v76.0
+# Próximas ações — preview local v170.0
 ## Migração integral do renderer — pendente
-1. Portas Neon com sprite agora enviam posição, rotação, offsets e handle de imagem em lote Rust; carregar/rasterizar asset fica no host, estado da porta no JS e fallback `neonDrawDoor` permanece. Build, testes ABI/bridge e regressões 61/61 passaram; smoke visual está pendente porque o ambiente negou o socket DevTools. `FTILES` mantém seleção/ordem de salas e offset em Rust.
-2. Portar o restante da composição por quadro de `draw()`: sangue, partículas, saída, textos restantes e HUD. Os corpos completos dos atores e os rótulos/efeitos de estado dos inimigos agora são comandados por Rust; manter o avanço temporal e gameplay no JS.
-3. Portar ou integrar os draw hooks de `js/exp-world.js` e `js/exp-fx.js` sem deixar chamadas gráficas fora do backend alvo.
-4. Comparar screenshots/jogabilidade do modo JS e WASM em navegador real; testar fallback e service worker offline.
-5. Remover a interceptação Canvas de passagem quando todas as camadas concretas estiverem portadas; medir frame time/CPU/GPU antes de anunciar ganhos.
+1. Auditar e portar callbacks Canvas restantes, incluindo pickups e shells; validar muzzle/impacto, fog/lights/dark em gameplay real.
+2. Continuar o módulo direto nas rotas de sprites, mundo, HUD restante e expansões; ImageData, clearRect, imagens cacheadas, mapas geométricos, sangue/cadáveres, poeira/faíscas, labels de inimigos, móveis, atores, jogadores/inimigos, armas, fantasmas e aura agora usam WebSys em casos cobertos, sem benchmark. Manter o caminho antigo até cada camada ter paridade e smoke de jogo.
+3. Continuar portando operações gráficas residuais por impacto. Texturas de mapa/piso ainda extraem ImageData e copiam pixels para WASM; persistem outros textos e draw hooks de exp-world.js/exp-fx.js. Auditar runtime em morte/combate, vidro, loja e overlays; remover o bridge antigo só depois de cobrir todas as operações.
+4. Portar ou integrar os draw hooks de `js/exp-world.js` e `js/exp-fx.js` sem deixar chamadas gráficas fora do backend alvo.
+5. Comparar screenshots/jogabilidade do modo JS e WASM em navegador real; testar fallback e service worker offline.
+6. Remover a interceptação Canvas de passagem quando todas as camadas concretas estiverem portadas; medir frame time/CPU/GPU antes de anunciar ganhos.
+
+7. Cobrir os estados e eventos que o smoke curto não alcançou; o caminho de suavização de mapa já foi movido ao Rust direto na v161.
+
+8. Continuar removendo rotas Canvas host dos efeitos e overlays que a auditoria revelar; manter o smoke do jogo separado das comparações sintéticas para controlar o custo.
 
 1. Jogar a campanha até vitória em uma fase inicial, uma intermediária e uma final; conferir morte e transições.
 2. Validar fogo amigo ligado/desligado, armas, portas, janelas, áudio e efeitos durante combate real.

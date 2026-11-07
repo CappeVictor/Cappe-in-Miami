@@ -1,8 +1,8 @@
-# Cappe-in-Miami — preview local Rust/WASM v76.0
+# Cappe-in-Miami — preview local Rust/WASM v170.0
 
 ## Experimento local Rust/WASM
 
-Esta cópia contém um modo opcional de migração do renderer: extraia o ZIP, abra a pasta `Cappe-in-Miami-WASM-full` e execute ali `INICIAR_EXPERIMENTO_WASM.bat` (Node.js 18+). O `.bat` fica ao lado de `index.html`, na raiz do projeto extraído. Com `?renderer=wasm`, Rust gera padrões e acabamento do piso, escolhe as salas e o offset das texturas `FTILES`, seleciona e ordena texturas de paredes/móveis e decalques de aberturas, fundo/decor, vidros quebráveis, detalhes de sala, geometria de paredes e postes, móveis, ícones de armas, portas Neon com sprite e portas comuns sem sprite, composição dos jogadores (P1, P2 e remoto), sombras/aura, corpos/sombras de inimigos e comandos posicionados dos rótulos e orbes de atordoamento, além de pixels de fallback e seleção de frames. O host fornece as imagens e executa o Canvas; efeitos, compositor principal e interface permanecem parcialmente em JavaScript. O navegador rasteriza Canvas, e o modo padrão continua em JavaScript. O escopo atual está em [docs/WASM_RENDERER_MIGRATION.md](docs/WASM_RENDERER_MIGRATION.md).
+Esta cópia contém um modo opcional de migração do renderer: execute INICIAR_EXPERIMENTO_WASM.bat com Node.js 18+ ao lado de index.html. v170 moveu flashes de disparo e arcos de impacto do callback Canvas JS para o painter Rust direto; v169 moveu a composição de escuridão/lanterna. Chrome 156 confirmou paridade RGBA exata nos casos cobertos; regressões 82/82. Módulo direto: 153.386 bytes WASM + glue de 37.706 bytes. Migração parcial, sem benchmark ou validação visual ampla. Consulte docs/WASM_RENDERER_MIGRATION.md.
 
 Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
 

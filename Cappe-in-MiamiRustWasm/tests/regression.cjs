@@ -91,6 +91,7 @@ async function run() {
     for(const f of fs.readdirSync(path.join(root,'js'))) if(f.endsWith('.js')) new vm.Script(read('js/'+f),{filename:f});
     new vm.Script(read('sw.js'));
     new vm.Script(read('server/server.js'),{filename:'server/server.js'});
+    new vm.Script(read('tests/wasm-direct-draw-parity.cjs'),{filename:'tests/wasm-direct-draw-parity.cjs'});
     for(const m of read('index.html').matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) new vm.Script(m[1]);
   });
   await test('Servidor online: rotas, IDs públicos, reconexão, validação, relay e autorização', async () => {
@@ -116,7 +117,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v76.0-wasm-neon-door-sprites');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v170.0-fx-painter');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     const wasm=await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm');assert.equal(wasm.status,200);assert.equal(wasm.headers['content-type'],'application/wasm');assert.ok(wasm.body.length>0);
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -267,6 +268,51 @@ async function run() {
     assert.match(content,/draw\(\); if \(EXP\.newWeapons\.includes\(w\)\) weaponFinish\(g, w\)/);
     assert.match(html,/g\.shadowColor = 'rgba\(0,0,0,\.62\)'/);assert.match(content,/g\.shadowColor = 'rgba\(0,0,0,\.62\)'/);
     assert.match(core,/EXP\.SKINS = SKINS/);assert.match(core,/settings\.skin = id/);
+  });
+  await test('Renderer WASM pinta o fundo de cada frame em Rust com fallback Canvas', () => {
+    const html=read('index.html'),wasm=read('js/wasm-renderer.js');
+    assert.match(html,/backgroundRenderer\.drawFrameBackground\(ctx, W, H\)/);
+    assert.match(html,/ctx\.fillRect\(-20, -20, W \+ 40, H \+ 40\)/);
+    assert.match(wasm,/draw_frame_background\(width, height\)/);
+    assert.match(wasm,/fillStyle = '#0d0320'; batch\.context\.fillRect\(-20, -20, width \+ 40, height \+ 40\)/);
+  });
+  await test('Menu de pausa desenha no Canvas por chamadas diretas de Rust/WASM', () => {
+    const html=read('index.html'),ui=read('js/exp-ui.js'),fx=read('js/exp-fx.js'),bridge=read('js/wasm-renderer.js'),rust=read('wasm-renderer-direct/src/lib.rs'),build=read('wasm-renderer/build.ps1'),worker=read('sw.js');
+    assert.match(ui,/drawPauseUiDirect\(g, W, H, hoverIndex\)/);
+    assert.match(bridge,/await import\(directJsUrl\.href\)/);assert.match(bridge,/state\.direct\.drawPauseUi\(context, width, height, hoverIndex\)/);
+    assert.match(rust,/pub fn draw_pause_ui\([\s\S]*?CanvasRenderingContext2d/);assert.match(rust,/context\.fill_rect/);assert.match(rust,/context\.fill_text/);
+    assert.match(rust,/pub fn draw_fx_overlays\([\s\S]*?CanvasRenderingContext2d/);assert.match(bridge,/state\.direct\.drawFxOverlays\(context, stage, width, height, nowMs, primary, secondary, enabled\)/);
+    assert.match(rust,/pub fn draw_rain\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array/);assert.match(bridge,/state\.direct\.drawRain\(context, input, drops\.length, step\)/);
+    assert.match(rust,/pub fn draw_weather_motes\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array/);assert.match(bridge,/state\.direct\.drawWeatherMotes\(context, input, motes\.length, nowMs\)/);
+    assert.match(rust,/pub fn draw_raw_hud_texts\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Array/);assert.match(bridge,/state\.direct\.drawRawHudTexts\(context, entries\)/);
+    assert.match(fx,/drawCanvasImage\(g, weatherLabel, 32, H_ - 25\)/);assert.match(html,/function snapCanvas\(c\)[\s\S]*?renderer\.drawCanvasImage\(g, c, 0, 0\)/);assert.match(bridge,/state\.direct\.drawCanvasImage\(context, image, x, y\)/);assert.match(rust,/pub fn draw_canvas_image\([\s\S]*?CanvasRenderingContext2d[\s\S]*?HtmlCanvasElement[\s\S]*?draw_image_with_html_canvas_element/);
+    assert.match(bridge,/state\.direct\.createCanvasImageData\(context, width, height\)/);assert.match(bridge,/state\.direct\.putCanvasImageData\(context, image, pixels, width, height\)/);assert.match(rust,/pub fn create_canvas_image_data\([\s\S]*?create_image_data_with_sw_and_sh/);assert.match(rust,/pub fn put_canvas_image_data\([\s\S]*?Uint8ClampedArray[\s\S]*?put_image_data/);
+    assert.match(html,/renderer\.clearCanvasRect\(flContext, 0, 0, fl\.width, fl\.height\)/);assert.match(bridge,/state\.direct\.clearCanvasRect\(context, x, y, width, height\)/);assert.match(rust,/pub fn clear_canvas_rect\([\s\S]*?context\.clear_rect/);
+    assert.match(html,/drawLayer\(c, alpha = null\)[\s\S]*?renderer\.drawCanvasLayer\(ctx, c, vx0, vy0, w, h, vx0, vy0, w, h, alpha === null \? -1 : alpha\)/);assert.match(html,/drawLayer\(BL, \.55\)/);assert.match(bridge,/state\.direct\.drawCanvasLayer\(context, image, sx, sy, sw, sh, dx, dy, dw, dh, alpha\)/);assert.match(rust,/pub fn draw_canvas_layer\([\s\S]*?set_global_alpha\(alpha\)[\s\S]*?draw_image_with_html_canvas_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh/);
+    assert.match(html,/function kill\(e, bx = 0, by = 0\)[\s\S]*?renderer\.drawBloodSplatter\(g, puddleColor, dropColor, blobs, streaks, droplets\)/);assert.match(html,/function drawBloodSplatterFallback\([\s\S]*?quadraticCurveTo/);assert.match(bridge,/state\.direct\.drawBloodSplatter\(context, puddleColor, dropColor,/);assert.match(rust,/pub fn draw_blood_splatter\([\s\S]*?quadratic_curve_to[\s\S]*?context\.stroke\(\)[\s\S]*?context\.arc\(/);
+    assert.match(rust,/pub fn draw_dust\([\s\S]*?context\.save\(\)[\s\S]*?context\.set_global_alpha\(alpha\)[\s\S]*?context\.restore\(\)/);
+    assert.match(rust,/pub fn draw_enemy_shadows\([\s\S]*?context\.ellipse\([\s\S]*?context\.fill\(\)/);assert.match(bridge,/state\.direct\.drawEnemyShadows\(context, commands, offset, 1\)/);assert.match(bridge,/state\.drawEnemyShadowDirect && state\.drawEnemyShadowDirect\(context, shadows, offset\) === 1/);
+    assert.match(fx,/const trace = new Float64Array\(9 \* 7\)[\s\S]*?glassTraceRenderer\.drawGlassBreakTrace\(f, gl\.x, gl\.y, gl\.w, gl\.h, trace\)/);assert.match(bridge,/state\.direct\.drawGlassBreakTrace\(context, x, y, width, height, commands\)/);assert.match(rust,/pub fn draw_glass_break_trace\([\s\S]*?context\.fill_rect\(x, y, width, height\)[\s\S]*?context\.line_to\([\s\S]*?context\.fill\(\)/);
+    assert.match(read('js/exp-world.js'),/scorchRenderer\.drawExplosionScorch\(g, b\.x, b\.y\)/);assert.match(bridge,/state\.direct\.drawExplosionScorch\(context, x, y\)/);assert.match(rust,/pub fn draw_explosion_scorch\([\s\S]*?context\.arc\(x, y, 38\.0, 0\.0, core::f64::consts::TAU\)[\s\S]*?context\.arc\(x, y, 24\.0, 0\.0, core::f64::consts::TAU\)/);
+    assert.match(read('js/exp-modes.js'),/if \(!toastsDrawn\) \{[\s\S]*?g\.globalAlpha = 1;[\s\S]*?\n      \}/);
+    assert.match(read('js/exp-debug.js'),/renderer\.drawDebugHud\(g, W, H, D\.panel, lines, D\.errs, errorLines\)/);assert.match(bridge,/state\.direct\.drawDebugHud\(context, width, height, showPanel, lines, showErrors, errors\)/);assert.match(rust,/pub fn draw_debug_hud\([\s\S]*?set_fill_style_str\("#7dff9b"\)[\s\S]*?fill_text\(&text/);
+    assert.match(read('js/exp-debug.js'),/renderer\.drawDebugWorld\(g, wallData, doorData, P\.x, P\.y, P\.r, D\.coll, enemyData, labels, D\.ai\)/);assert.match(bridge,/state\.direct\.drawDebugWorld\(context, walls, walls\.length \/ 4,[\s\S]*?enemies, labels, enemies\.length \/ 6, showAi\)/);assert.match(rust,/pub fn draw_debug_world\([\s\S]*?rgba\(0,255,120,\.8\)[\s\S]*?rgba\(255,46,147,\.7\)[\s\S]*?fill_text/);
+    assert.match(bridge,/state\.direct\.drawFog\(batch\.context, batch\.image, commands, count, alpha, smoke === 1\)/);assert.match(rust,/pub fn draw_fog\([\s\S]*?draw_image_at\(context, image/);
+    assert.match(bridge,/state\.direct\.drawWorldLights\(batch\.context, commands, images, batch\.flashImage \|\| null\)/);assert.match(rust,/pub fn draw_world_lights\([\s\S]*?set_global_composite_operation\("lighter"\)[\s\S]*?draw_image_at/);
+    assert.match(bridge,/state\.direct\.drawWorldRings\(batch\.context, commands\.subarray\(0, count \* 6\), batch\.colors\)/);assert.match(rust,/pub fn draw_world_rings\([\s\S]*?context\.arc\(/);
+    assert.match(bridge,/state\.direct\.drawInvasionZone\(batch\.context, commands\)/);assert.match(rust,/pub fn draw_invasion_zone\([\s\S]*?255,107,213/);
+    assert.match(bridge,/state\.direct\.drawDarkOverlay\(batch\.darkContext, batch\.screenContext,[\s\S]*?batch\.lamps\.flash, commands\)/);assert.match(rust,/pub fn draw_dark_overlay\([\s\S]*?destination-out[\s\S]*?draw_image_at\(screen_context, overlay/);
+    assert.match(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn draw_dark_overlay\(\)[\s\S]*?v\[4\] <= 0\.0 \|\| v\[5\] <= 0\.0 \|\| v\[6\] <= 0\.0[\s\S]*?v\[8\] == 0\.0 \|\| v\[8\] == 1\.0[\s\S]*?v\[9\] == 0\.0 \|\| v\[9\] == 1\.0/);
+    assert.match(bridge,/state\.direct\.drawFx\(batch\.context, commands, batch\.muzzleSprite \|\| null\)/);assert.match(rust,/pub fn draw_fx\([\s\S]*?set_global_composite_operation\("lighter"\)[\s\S]*?context\.arc\(/);
+    assert.match(html,/wasmRenderer\.setCanvasImageSmoothing\(g, false\)/);assert.match(bridge,/state\.direct\.setCanvasImageSmoothing\(context, enabled\)/);assert.match(rust,/pub fn set_canvas_image_smoothing\([\s\S]*?set_image_smoothing_enabled\(enabled\)/);
+    assert.match(fx,/renderer\.createTextImage\(k, s, font, col, false\)/);assert.match(html,/renderer\.createTextImage\(k, s, font, c, true\)/);assert.match(bridge,/state\.direct\.createTextImage\(canvas, text, font, color, outlined\)/);assert.match(rust,/pub fn create_text_image\([\s\S]*?measure_text\(text\)[\s\S]*?fill_text\(text, 2\.0, 17\.0\)/);assert.match(rust,/stroke_text\(text, 6\.0, baseline\)/);
+    assert.match(rust,/pub fn draw_batch_commands\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array[\s\S]*?JsValue/);assert.match(bridge,/state\.direct\.drawBatchCommands\(batch\.context, commands, FURNITURE_COLORS, ACTOR_COLORS, batch\)/);
+    assert.match(rust,/pub fn draw_map_commands\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array[\s\S]*?Array/);assert.match(bridge,/state\.direct\.drawMapCommands\(batch\.context, commands, batch\.mapColors \|\| \[\]\)/);assert.match(bridge,/batch\.commands\.push\(opcode, color, x1, y1, x2, y2, lineWidth, alpha\)/);
+    assert.match(rust,/batch_array\(batch, "enemyTextImages"\)/);assert.match(rust,/draw_image_at\(context, &image, &\[x, y\]\)/);assert.match(bridge,/painters\.textImage\(enemy, commands\[offset \+ 1\] \| 0, commands\[offset \+ 2\], commands\[offset \+ 3\]\)/);
+    assert.match(rust,/pub fn draw_dust\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array/);assert.match(rust,/pub fn draw_sparks\([\s\S]*?set_global_composite_operation\("lighter"\)/);assert.match(bridge,/state\.direct\.drawDust\(batch\.context, commands, alpha\)/);assert.match(bridge,/state\.direct\.drawSparks\(batch\.context, commands, batch\.colors\)/);
+    assert.match(rust,/pub fn draw_live_blood\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array/);assert.match(rust,/pub fn draw_static_blood\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array/);assert.match(bridge,/state\.direct\.drawLiveBlood\(batch\.context, commands, batch\.color\)/);assert.match(bridge,/state\.direct\.drawStaticBlood\(batch\.context, commands, batch\.color\)/);
+    assert.match(build,/wasm-bindgen \$directTargetWasm --target web/);
+    assert.match(worker,/wasm-renderer\/pkg\/direct\/direct_renderer_bg\.wasm/);
   });
   await test('Spawn procedural não deixa a primeira sala vazia nem conclui sem inimigos', () => {
     const html=read('index.html'), spawnFn=declaration(html,'function spawnFloor('), clearFn=declaration(html,'function allClear(');
@@ -448,11 +494,188 @@ async function run() {
     const game=read('index.html'),ui=read('js/exp-ui.js');
     assert.match(game,/shakeAmt: 100/);assert.match(game,/shakeAmt:\[0,100\]/);
     assert.match(game,/o-shakeAmt/);assert.match(game,/power \* CFG\.shakeAmt \/ 100/);assert.match(game,/kickX \* shakeScale/);
-    assert.match(ui,/ctx\.imageSmoothingEnabled = !!CFG\.aa/);assert.match(ui,/CFG\.gfx === 'ultra' \? 'high' : 'medium'/);
+    assert.match(ui,/const smooth = !!CFG\.aa/);assert.match(ui,/renderer\.setupCanvas\(ctx, hiK, smooth, quality/);
+    assert.match(ui,/quality === 2 \? 'high' : quality === 1 \? 'medium' : 'low'/);
     assert.doesNotMatch(ui,/ctx\.imageSmoothingEnabled = true/);
   });
   await test('Reduzir flashes suprime relâmpagos e cintilações de tela', () => {
-    const fx=read('js/exp-fx.js');assert.match(fx,/FX\.bolt > 0 && !CFG\.noflash/);assert.match(fx,/FX\.flick > 0 && !CFG\.noflash/);
+    const fx=read('js/exp-fx.js');assert.match(fx,/const stormFlash = FX\.kind === 'chuva' \? FX\.bolt : 0/);
+    assert.match(fx,/drawFxOverlays\(g, 0, W_, H_, now, stormFlash, FX\.flick, !CFG\.noflash\)/);
+    assert.match(fx,/if \(stormFlash > 0 && !CFG\.noflash\)/);assert.match(fx,/if \(FX\.flick > 0 && !CFG\.noflash\)/);
+    assert.match(fx,/darkRenderer\.drawDarkOverlay\(dg, g, dk, LAMP, P\.x, P\.y, cam\.x, cam\.y, W_, H_, zoom, P\.a, EXP\.world\.blackout > 0, P\.fireFlash > 0\)/);
+    assert.match(fx,/if \(!darkBatchDrawn\) \{/);
+    assert.match(read('js/wasm-renderer.js'),/draw_dark_overlay\(\)/);
+    assert.match(read('index.html'),/comboTextRenderer\.drawComboText\(ctx, combo, comboNow\)/);
+    assert.match(read('js/wasm-renderer.js'),/draw_combo_text\(\)/);
+    assert.match(read('index.html'),/drawHudImage\(ctx, 0, W, H, CFG\.crt, true/);
+    assert.match(read('index.html'),/drawHudImage\(ctx, 2, W, H, false, true/);
+    assert.match(read('js/exp-fx.js'),/weatherRenderer\.drawHudImage\(g, 3, W_, H_, false, true/);
+    assert.match(read('js/wasm-renderer.js'),/draw_hud_image\(\)/);
+    assert.match(fx,/alarmTextRenderer\.drawAlarmText\(g, EXP\.world\.alarmT, W_\)/);
+    assert.match(read('js/wasm-renderer.js'),/draw_alarm_text/);
+  });
+  await test('Anéis de mundo da expansão usam batch Rust com fallback Canvas', () => {
+    const world=read('js/exp-world.js'),renderer=read('js/wasm-renderer.js');
+    assert.match(world,/ringRenderer\.drawWorldRings\(g, WLD\.rings\)/);
+    assert.match(world,/if \(!\(ringRenderer && ringRenderer\.drawWorldRings/);
+    assert.match(renderer,/wasm\.exports\.draw_world_rings\(count, colors\.length\)/);
+    assert.match(renderer,/worldRingCommands/);
+  });
+  await test('Passe de luz vazio não altera o Canvas e preserva o fallback com efeitos ativos', () => {
+    const fx=read('js/exp-fx.js');
+    assert.match(fx,/let hasEnabledLight = false;[\s\S]*?if \(!L\.on\) continue;[\s\S]*?hasEnabledLight = true;/);
+    assert.match(fx,/if \(canDrawWorldLights && \(!L\.spr \|\| L\.sprR !== L\.r \|\| L\.sprC !== L\.c\)\)/);
+    assert.match(fx,/if \(!worldLightBatchDrawn && !hasEnabledLight && !hasFireFlash && !hasRainReflection\) return;/);
+    assert.match(fx,/if \(!worldLightBatchDrawn\) \{\s*g\.save\(\); g\.globalCompositeOperation = 'lighter';/);
+  });
+  await test('Zona pulsante da Invasão passa pelo batch Rust com fallback Canvas', () => {
+    const modes=read('js/exp-modes.js'),renderer=read('js/wasm-renderer.js');
+    assert.match(modes,/zoneRenderer\.drawInvasionZone\(g, z\.x, z\.y, now\)/);
+    assert.match(modes,/if \(!\(zoneRenderer && zoneRenderer\.drawInvasionZone/);
+    assert.match(renderer,/wasm\.exports\.draw_invasion_zone\(\)/);
+  });
+  await test('Barris da expansão usam batch Rust com fallback Canvas e preservam o limite', () => {
+    const world=read('js/exp-world.js'),renderer=read('js/wasm-renderer.js');
+    assert.match(world,/barrelRenderer\.drawWorldBarrels\(g, WLD\.barrels, now\)/);
+    assert.match(world,/if \(!\(barrelRenderer && barrelRenderer\.drawWorldBarrels/);
+    assert.match(renderer,/wasm\.exports\.draw_world_barrels\(barrels\.length, nowMs\)/);
+    assert.match(renderer,/barrels\.length > 16/);
+  });
+  await test('Câmeras da expansão enviam cone e corpo em batch Rust com fallback Canvas', () => {
+    const world=read('js/exp-world.js'),renderer=read('js/wasm-renderer.js');
+    assert.match(world,/cameraRenderer\.drawWorldCameras\(g, WLD\.cams, WLD\.alarmT > 0\)/);
+    assert.match(world,/if \(!\(cameraRenderer && cameraRenderer\.drawWorldCameras/);
+    assert.match(renderer,/wasm\.exports\.draw_world_cameras\(cameras\.length\)/);
+    assert.match(renderer,/cameras\.length > 8/);
+    assert.match(renderer,/camera\.poly\.length < 26/);
+  });
+  await test('Realces visuais de inimigos da expansão geram linhas, barras e vetores no Rust', () => {
+    const world=read('js/exp-world.js'),renderer=read('js/wasm-renderer.js');
+    assert.match(world,/enemyAccentRenderer\.drawWorldEnemyAccents\(g, enemies, now, P\.x, P\.y, g\.globalAlpha\)/);
+    assert.match(world,/if \(!\(P && enemyAccentRenderer/);
+    assert.match(renderer,/wasm\.exports\.draw_world_enemy_accents\(count, nowMs\)/);
+    assert.match(renderer,/enemy\.cls === 'blindado' \? 1 : enemy\.cls === 'lider' \? 2 : boss \? 3 : 0/);
+    assert.match(renderer,/enemies\.length > 256/);
+  });
+  await test('Tremores de quadro combinam screen shake, kick e camera shake no batch Rust', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js');
+    assert.match(html,/frameTransformRenderer\.drawFrameTransforms\(ctx, 0, screenShakeNow, screenShakePower, screenRx, screenRy/);
+    assert.match(html,/frameTransformRenderer\.drawFrameTransforms\(ctx, 1, 0, 0, \.5, \.5, kickX, kickY/);
+    assert.match(html,/if \(!screenTransformDrawn\) \{\s*ctx\.save\(\);/);
+    assert.match(html,/if \(!cameraTransformDrawn\) \{/);
+    assert.match(html,/drawFrameTransforms\(ctx, 2, 0, 0, \.5, \.5, 0, 0, 0, 0, \.5, \.5, W, H, CFG\.zoom, cam\.x, cam\.y\)/);
+    assert.match(renderer,/else if \(op === 39\) g\.scale\(a, b\)/);
+    assert.match(renderer,/wasm\.exports\.draw_frame_transforms\(stage\)/);
+    assert.match(renderer,/frameTransformCommands/);
+  });
+  await test('Escopos de transformação do quadro abrem e fecham no batch Rust com fallback', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+    assert.match(html,/drawFrameTransforms\(ctx, 0, screenShakeNow/);
+    assert.match(html,/drawFrameTransforms\(ctx, 1, 0, 0, \.5, \.5, kickX/);
+    assert.match(html,/drawFrameTransforms\(ctx, 3, 0, 0, \.5, \.5/);
+    assert.match(html,/drawFrameTransforms\(ctx, 4, 0, 0, \.5, \.5/);
+    assert.match(html,/if \(!screenTransformDrawn\) \{\s*ctx\.save\(\);/);
+    assert.match(html,/if \(!worldTransformRestored\) ctx\.restore\(\);/);
+    assert.match(html,/if \(!frameTransformRestored\) ctx\.restore\(\);/);
+    assert.match(renderer,/stage !== 0 && stage !== 1 && stage !== 2 && stage !== 3 && stage !== 4/);
+    assert.match(rust,/furniture_command\(16, 0, 0\.0, 0\.0, 0\.0, 0\.0, 0\.0, 0\.0\)/);
+    assert.match(rust,/if stage == 3 \|\| stage == 4 \{/);
+  });
+  await test('Renderer não reescreve alpha padrão após batch de ghosts', () => {
+    const html=read('index.html');
+    assert.match(html,/const ghostRenderer = window\.HM_WASM_RENDERER;[\s\S]*?if \(!\(ghostRenderer && ghostRenderer\.drawGhosts/);
+    assert.match(html,/if \(ctx\.globalAlpha !== 1\) ctx\.globalAlpha = 1;/);
+  });
+  await test('Rótulo de transporte usa batch HUD Rust com fallback de texto', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js');
+    const match=html.match(/if \(transportWasm && transportWasm\.drawTransport && transportWasm\.drawTransport\(ctx, t, andar\)\) \{([\s\S]*?)\n  \}/);
+    assert.ok(match,'WASM transport branch should stay isolated');
+    assert.match(match[1],/drawHudTextBatch\(\[\{ text: t\.tipo\.toUpperCase\(\)/);
+    assert.doesNotMatch(match[1],/tx\(/,'the WASM branch must not draw the label through the generic Canvas dispatcher');
+    assert.match(html,/tx\(t\.tipo\.toUpperCase\(\) \+ \(up \? ' ▲' : ' ▼'\), cx, y - 8/,'the Canvas transport fallback keeps its original label');
+    assert.match(renderer,/state\.drawHudTexts =/);
+  });
+  await test('Gradientes de escada/elevador usam RGBA Rust cacheado e preservam o gradiente inteiro das portas', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+    assert.match(html,/createLinearGradient\(x, y, x \+ w, y\)/);
+    assert.match(renderer,/const transportGradientCache = new WeakMap\(\)/);
+    assert.match(renderer,/generate_transport_gradient\(width, height, kind, offsetX, gradientWidth\)/);
+    assert.match(renderer,/const doorRight = getGradient\('doorRight', doorWidth, doorHeight, 2, transport\.w \/ 2 \+ 1, transport\.w\)/);
+    assert.match(rust,/let door_t = \(offset_x \+ x as f64 \+ 0\.5\) \/ gradient_width/);
+    assert.match(rust,/pub extern "C" fn generate_transport_gradient\(width: u32, height: u32, kind: u32, offset_x: f64, gradient_width: f64\)/);
+    const transportBatch=renderer.slice(renderer.indexOf('draw_transport_batch(pointer, count)'),renderer.indexOf('draw_transport_gradient_batch(pointer, width, height)'));
+    assert.match(transportBatch,/drawImage\(variant \? batch\.gradients\.doorRight : batch\.gradients\.doorLeft/);
+    assert.match(transportBatch,/drawImage\(batch\.gradients\.(stair|elevator)/);
+    assert.doesNotMatch(transportBatch,/createLinearGradient|addColorStop/);
+  });
+  await test('Créditos do overlay usam texto HUD Rust bruto com painter de fallback idêntico', () => {
+    const shop=read('js/exp-shop.js'),renderer=read('js/wasm-renderer.js');
+    assert.match(shop,/const creditHudEntry = \[\{ text: ''/);
+    assert.match(shop,/drawRawHudTexts\(creditHudEntry, g\)/);
+    assert.match(shop,/g\.textAlign = 'left'; g\.font = 'bold 18px Impact, sans-serif'; g\.fillStyle = '#ffd23f';\s*g\.fillText\(creditHudEntry\[0\]\.text, 34, 156\); g\.restore\(\);/);
+    assert.match(renderer,/state\.drawRawHudTexts = \(entries, context\)/);
+    assert.match(renderer,/context\.fillText\(entry\.text, commands\[i \+ 1\], commands\[i \+ 2\]\)/);
+    assert.match(renderer,/raw \? \(entry\.absoluteAlpha \? alpha : baseAlpha \* alpha\) : alpha/);
+  });
+  await test('Textos do dealer, cards, reroll e balão passam pelo batch HUD e preservam o wrap em cache', () => {
+    const shop=read('js/exp-shop.js'),renderer=read('js/wasm-renderer.js');
+    const extract=(start,end)=>shop.slice(shop.indexOf(start),shop.indexOf(end,shop.indexOf(start)+start.length));
+    for(const [name,end] of [['function drawBubble(','function drawCard('],['function drawCard(','function drawReroll('],['function drawReroll(','// Madame Piranha:']]) {
+      const body=extract(name,end); assert.ok(body.length>0,`${name} should exist`); assert.doesNotMatch(body,/\.fillText\(/,`${name} should submit raw text through the batch`);
+    }
+    assert.match(shop,/function flushDealerText\(g\)[\s\S]*?drawRawHudTexts\(dealerTextBatch, g\)/);
+    assert.match(shop,/entry\.absoluteAlpha = absoluteAlpha/);
+    assert.match(shop,/if \(txt === bubbleCacheText && fontKey === bubbleCacheFont && maxW === bubbleCacheWidth\) return bubbleCacheLines/);
+    assert.match(renderer,/entry\.absoluteAlpha \? alpha : baseAlpha \* alpha/);
+  });
+  await test('Geometria da Madame Piranha e painéis da loja são gerados em Rust com fallback Canvas', () => {
+    const shop=read('js/exp-shop.js'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+    assert.match(shop,/renderer\.drawShopDealer\(g, \[[\s\S]*?d\.fall > 0 \? 1 : 0/);
+    assert.match(shop,/if \(!dealerDrawn\) \{[\s\S]*?g\.ellipse\(gx, gy \+ 10/);
+    assert.match(shop,/renderer\.drawShopPanel\(g, \[0, x, by, w, h, 22, 0\]\)/);
+    assert.match(shop,/renderer\.drawShopPanel\(g, \[1, cx, cy, w, h, 24, flick \? 1 : 0\], c\.slot\.cor\)/);
+    assert.match(shop,/renderer\.drawShopPanel\(g, \[2, cx, cy, w, h, 18, 0\]\)/);
+    assert.match(renderer,/state\.drawShopDealer = \(context, inputValues\)/);
+    assert.match(renderer,/state\.drawShopPanel = \(context, inputValues, outlineColor\)/);
+    assert.match(renderer,/op === 2[\s\S]*?context\.ellipse\(x, y, width, height/);
+    assert.match(rust,/pub extern "C" fn draw_shop_dealer\(\)/);
+    assert.match(rust,/pub extern "C" fn draw_shop_panel\(\)/);
+    assert.match(rust,/hud_shape_command\(5, gx, gy \+ 6\.0, 30\.0, timer_ratio\.clamp/);
+  });
+  await test('Sprites de luz radial são rasterizados em RGBA pelo Rust com fallback Canvas', () => {
+    const fx=read('js/exp-fx.js'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),build=read('wasm-renderer/build.ps1');
+    assert.match(fx,/radialRenderer\.createRadialSprite\(c, rgb, r, a0\)/);
+    assert.match(renderer,/state\.createRadialSprite = \(canvas, rgb, radius, alpha\)/);
+    assert.match(renderer,/draw_radial_sprite_batch\(pointer, width, height\)/);
+    assert.match(rust,/pub extern "C" fn generate_radial_sprite\(\)/);
+    assert.match(rust,/RADIAL_SPRITE_PIXELS/);
+    assert.match(build,/if \(\$LASTEXITCODE -ne 0\)/);
+  });
+  await test('Clarões de disparo usam sprite RGBA Rust e preservam o fallback Canvas', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+    assert.match(html,/fxWasm\.drawFx && fxWasm\.drawFx\(ctx, fx\)/);
+    assert.match(html,/createRadialGradient\(f\.x, f\.y, 0, f\.x, f\.y, f\.R\)/);
+    assert.match(rust,/pub extern "C" fn generate_muzzle_sprite\(\)/);
+    assert.match(renderer,/draw_muzzle_sprite_batch\(pointer, width, height\)/);
+    assert.match(renderer,/context\.drawImage\(batch\.muzzleSprite, x - radius, y - radius, radius \* 2, radius \* 2\)/);
+    const fxBatch=renderer.slice(renderer.indexOf('draw_fx_batch(pointer, count)'),renderer.indexOf('draw_pickup_batch(pointer, count)'));
+    assert.doesNotMatch(fxBatch,/createRadialGradient|addColorStop/);
+  });
+  await test('Gradiente da saída é pré-rasterizado pelo Rust e mantém o painter Canvas de fallback', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+    assert.match(html,/exitWasm\.drawExit && exitWasm\.drawExit\(ctx, exitR, pulse, cleared, CFG\.bloom !== false\)/);
+    assert.match(html,/createLinearGradient\(ex, ey, ex \+ ew, ey \+ eh\)/);
+    assert.match(rust,/pub extern "C" fn generate_exit_gradient\(width: u32, height: u32, cleared: u32\)/);
+    const exitBatch=renderer.slice(renderer.indexOf('draw_exit_batch(pointer, count)'),renderer.indexOf('draw_color_grade_batch(pointer, count)'));
+    assert.match(exitBatch,/drawImage\(batch\.gradientCanvas/);
+    assert.doesNotMatch(exitBatch,/createLinearGradient|addColorStop/);
+  });
+  await test('Vidros intactos e estilhaços de expansão usam batch Rust com fallback', () => {
+    const fx=read('js/exp-fx.js'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+    assert.match(fx,/drawGlass\(g, EXP\.glass\.list, SH, now, g\.globalAlpha\)/);
+    assert.match(renderer,/wasm\.exports\.draw_glass\(panels\.length, shardCount, nowMs, baseAlpha\)/);
+    assert.match(rust,/pub extern "C" fn draw_glass\(panel_count: u32, shard_count: u32, now_ms: f64, base_alpha: f64\)/);
+    assert.match(fx,/for \(const gl of EXP\.glass\.list\)/);
   });
   await test('Jogar Solo desliga multiplayer persistido e evita criar P2', () => {
     const html=read('index.html'),ui=read('js/exp-ui.js');
@@ -474,22 +697,55 @@ async function run() {
     assert.match(html,/renderer\.paintFloorFinish\(fg, sol, WW, WH\)/);
     assert.match(html,/if \(!grainRendered\) for \(let k = 0; k < Math\.round\(WW \* WH \/ 160\)/);
     assert.match(html,/if \(!finishRendered\) \{/);
-    assert.match(renderer,/paint_floor_grain\(width, height, random\.getState\(\)\)/);
-    assert.match(renderer,/paint_floor_finish\(solids\.length, width, height\)/);
+    assert.match(renderer,/paint_floor_grain_rgba\(width, height, random\.getState\(\)\)/);
+    assert.match(renderer,/draw_floor_rgba_batch\(pointer, width, height\)/);
+    assert.match(renderer,/floorGrainImageCache = new WeakMap\(\)/);
+    assert.match(renderer,/batch\.context\.putImageData\(batch\.image, 0, 0\)/);
+    assert.match(read('wasm-renderer/src/lib.rs'),/const FLOOR_GRAIN_MAX_WIDTH: usize = 1440;[\s\S]*const FLOOR_GRAIN_MAX_HEIGHT: usize = 900/);
+    assert.match(renderer,/floorGrainRasterReady\.has\(context\)/);
+    assert.match(renderer,/const useCanvasFallback = \(\) => \{ if \(context\) floorGrainRasterReady\.delete\(context\); return false; \}/);
+    assert.match(renderer,/paint_floor_finish_rgba\(solids\.length, width, height\)/);
+    assert.match(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn paint_floor_finish_rgba\(solid_count: u32, width: f64, height: f64\)/);
+    assert.match(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn paint_floor_finish\(solid_count: u32, width: f64, height: f64\)/,'legacy Canvas command route is retained for fallback compatibility');
   });
   await test('BuildFloor envia texturas de sólidos e aberturas ao Rust preservando fallback', () => {
-    const html=read('index.html'),renderer=read('js/wasm-renderer.js');
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),pixelTest=read('tests/wasm-floor-pixel-parity.cjs');
     assert.match(html,/renderer\.paintMapTextures\(tc, sol, keep, mapTextures, T\)/);
+    assert.match(html,/wallSheet: ready\(WALLT\) \? WALLT : null/);
+    assert.match(html,/furnitureSheet: ready\(FURNT\) \? FURNT : null/);
+    assert.match(html,/doorSheet: ready\(DOORT\) \? DOORT : null/);
     assert.match(html,/if \(!texturesRendered\) \{/);
     assert.match(renderer,/paint_map_textures\(solids\.length, openings\.length/);
+    assert.match(renderer,/map_texture_pixels_ptr/);assert.match(renderer,/paint_map_textures_rgba\(/);
+    assert.match(rust,/pub extern "C" fn paint_map_textures_rgba/);
+    assert.match(rust,/pub extern "C" fn map_texture_sheet_pixels_ptr/);
+    assert.match(rust,/pub extern "C" fn copy_map_texture_sprite/);
+    assert.match(renderer,/copy_map_texture_sprite\(slot, pixels\.width, pixels\.height, sourceX, sourceY\)/);
+    assert.match(pixelTest,/mapTextureParity\.maxDifference>80/);assert.match(pixelTest,/mapTextureParity\.meanDifference>0\.0025/);
+    assert.match(pixelTest,/wallSheet:ready\(WALLT\)\?WALLT:null/);
+    assert.match(pixelTest,/furnitureSheet:ready\(FURNT\)\?FURNT:null/);
+    assert.match(pixelTest,/doorSheet:ready\(DOORT\)\?DOORT:null/);
     assert.match(renderer,/else if \(op === 31\)/);assert.match(renderer,/else if \(op === 32\)/);
+  });
+  await test('Névoa e fumaça geram sprite RGBA por Rust e mantêm fallback Canvas', () => {
+    const fx=read('js/exp-fx.js'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),pixels=read('tests/wasm-floor-pixel-parity.cjs');
+    assert.match(fx,/const fogRings = Array\.from\(\{ length: 9 \}/);assert.match(fx,/renderer\.createFogSprite\(canvas, fogRings\)/);
+    assert.match(fx,/createRadialGradient/);assert.match(renderer,/wasm\.exports\.generate_fog_sprite\(\)/);
+    assert.match(rust,/pub extern "C" fn generate_fog_sprite/);assert.match(pixels,/fogSpriteParity/);assert.match(pixels,/maxAlphaDifference>1/);
   });
   await test('BuildFloor envia FTILES ao Rust e preserva fallback do corredor', () => {
     const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
     assert.match(html,/renderer\.paintFloorTiles\(fg, rooms, tIdx, FTILES\)/);
     assert.match(html,/if \(!floorTilesRendered\) \{/);
-    assert.match(renderer,/paint_floor_tiles\(rooms\.length, hallIndex, tileIndex\)/);
-    assert.match(renderer,/else if \(op === 33\)/);
+    const block=renderer.match(/state\.paintFloorTiles = \(context, rooms, tileIndex, tileImage\) => \{[\s\S]*?\n      state\.paintFloorFinish/mi)?.[0];assert.ok(block);
+    assert.match(block,/floorGrainRasterReady\.has\(context\)/);
+    assert.match(block,/sourceContext\.getImageData\(0, 0, 72, 24\)\.data/);
+    assert.match(block,/floor_tile_pixels_ptr\(\)/);
+    assert.match(block,/paint_floor_tiles_rgba\(rooms\.length, hallIndex, tileIndex, grain\.width, grain\.height\)/);
+    assert.match(block,/drawnRooms === -1 \|\| drawnRooms === 0xffffffff/);
+    assert.match(renderer,/else if \(op === 33\)/,'legacy command renderer remains available for fallback');
+    assert.match(rust,/pub extern "C" fn paint_floor_tiles_rgba\(room_count: u32, hall_index: i32, tile_index: i32, width: f64, height: f64\)/);
+    assert.match(rust,/let source_x = \(x \+ tile_index as usize \* 24\) % 72/);
     assert.match(rust,/pub extern "C" fn paint_floor_tiles\(room_count: u32, hall_index: i32, tile_index: i32\)/);
   });
   await test('Portas Neon enviam sprite e transformação ao Rust com fallback JS', () => {
@@ -623,7 +879,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v76.0-wasm-neon-door-sprites');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v170.0-fx-painter');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(list.includes('wasm-renderer/pkg/renderer.wasm'));

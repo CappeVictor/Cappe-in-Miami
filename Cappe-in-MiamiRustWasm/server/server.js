@@ -121,7 +121,7 @@ function createGameServer(options={}) {
     try {
       const url=new URL(req.url,'http://localhost');
       if(url.pathname.startsWith('/api/')) {
-        if(req.method==='GET'&&url.pathname==='/api/health')return json(res,200,{ok:true,version:'v76.0-wasm-neon-door-sprites',rooms:listRooms().length});
+if(req.method==='GET'&&url.pathname==='/api/health')return json(res,200,{ok:true,version:'v170.0-fx-painter',rooms:listRooms().length});
         if(req.method==='GET'&&url.pathname==='/api/rooms')return json(res,200,{rooms:listRooms(),updatedAt:Date.now()});
         if(req.method==='POST'&&url.pathname==='/api/rooms'){limitRoomAttempts(req);return json(res,201,createRoom((await body(req)).name));}
         const match=url.pathname.match(/^\/api\/rooms\/([A-Z2-9]{6})(?:\/(join|rejoin|state|leave))?$/);
@@ -155,7 +155,7 @@ function createGameServer(options={}) {
       if(req.method!=='GET'&&req.method!=='HEAD')return json(res,405,{error:'Método não permitido.'});
       let rel;try{rel=decodeURIComponent(url.pathname);}catch{return json(res,400,{error:'Caminho inválido.'});}
       if(rel==='/'||rel==='')rel='/index.html';
-      if(!(rel==='/index.html'||rel==='/sw.js'||rel==='/wasm-renderer/pkg/renderer.wasm'||/^\/(js|css|assets)\/[a-zA-Z0-9_./-]+$/.test(rel)))return json(res,404,{error:'Arquivo não encontrado.'});
+      if(!(rel==='/index.html'||rel==='/sw.js'||rel==='/wasm-renderer/pkg/renderer.wasm'||rel==='/wasm-renderer/pkg/direct/direct_renderer.js'||rel==='/wasm-renderer/pkg/direct/direct_renderer_bg.wasm'||/^\/(js|css|assets)\/[a-zA-Z0-9_./-]+$/.test(rel)))return json(res,404,{error:'Arquivo não encontrado.'});
       const file=path.resolve(root,'.'+rel);if(!file.startsWith(root+path.sep))return json(res,404,{error:'Arquivo não encontrado.'});
       const ext=path.extname(file).toLowerCase();if(!mime[ext])return json(res,404,{error:'Arquivo não encontrado.'});
       let stat,real;

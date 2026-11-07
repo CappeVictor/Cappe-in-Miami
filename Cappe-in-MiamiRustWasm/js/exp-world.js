@@ -212,7 +212,13 @@
     const R = 82; ring(b.x, b.y, R, '#ff8a1f'); ring(b.x, b.y, R * .6, '#ffd23f');
     burstSparks(b.x, b.y, 40, ['#ff8a1f', '#ffd23f', '#fff', '#ff2e5b'], 380);
     triggerScreenShake(14, .35); flash = Math.max(flash, .7); freeze = Math.max(freeze, .06); emitNoise(b.x, b.y, 720, 'explosion'); EXP.sfx('boom');
-    try { const g = fl.getContext('2d'); g.fillStyle = 'rgba(8,4,12,.55)'; g.beginPath(); g.arc(b.x, b.y, 38, 0, TAU); g.fill(); g.fillStyle = 'rgba(255,138,31,.18)'; g.beginPath(); g.arc(b.x, b.y, 24, 0, TAU); g.fill(); } catch (er) {}
+    try {
+      const g = fl.getContext('2d'), scorchRenderer = window.HM_WASM_RENDERER;
+      if (!(scorchRenderer && scorchRenderer.drawExplosionScorch && scorchRenderer.drawExplosionScorch(g, b.x, b.y))) {
+        g.fillStyle = 'rgba(8,4,12,.55)'; g.beginPath(); g.arc(b.x, b.y, 38, 0, TAU); g.fill();
+        g.fillStyle = 'rgba(255,138,31,.18)'; g.beginPath(); g.arc(b.x, b.y, 24, 0, TAU); g.fill();
+      }
+    } catch (er) {}
     EXP.save().stats.barrels++;
     let n = 0;
     for (const e of enemies.slice()) if (hyp(e.x - b.x, e.y - b.y) < R) { EXP.dmg = 3; kill(e, e.x - b.x, e.y - b.y); EXP.dmg = 0; n++; }
@@ -360,37 +366,49 @@
   };
   EXP.worldDraw = function (g) {
     const now = performance.now();
-    for (const b of WLD.barrels) {
-      const arm = b.t >= 0 && Math.floor(now / 70) % 2;
-      g.save(); g.translate(b.x, b.y); g.fillStyle = 'rgba(255,138,31,.28)'; g.beginPath(); g.arc(0, 0, b.r + 5, 0, TAU); g.fill();   // brilho barato
-      g.fillStyle = arm ? '#fff' : '#b8321c'; g.beginPath(); g.arc(0, 0, b.r, 0, TAU); g.fill();
-      g.fillStyle = '#ffd23f'; for (let i = -1; i <= 1; i += 2) g.fillRect(-b.r + 2, i * 5 - 1.5, b.r * 2 - 4, 3);
-      g.strokeStyle = '#2a0a06'; g.lineWidth = 2; g.stroke(); g.restore();
-    }
-    for (const c of WLD.cams) {
-      const hot = c.hot > 0 || WLD.alarmT > 0;
-      g.save(); g.fillStyle = hot ? 'rgba(255,46,91,.20)' : 'rgba(25,240,230,.11)'; g.beginPath(); g.moveTo(c.x, c.y);
-      for (let k = 0; k <= 12; k++) g.lineTo(c.poly[k * 2], c.poly[k * 2 + 1]); g.closePath(); g.fill();
-      g.translate(c.x, c.y); g.rotate(c.a); g.fillStyle = '#20202c'; g.strokeStyle = hot ? '#ff2e5b' : '#19f0e6'; g.lineWidth = 2; g.fillRect(-7, -5, 14, 10); g.strokeRect(-7, -5, 14, 10);
-      g.fillStyle = hot ? '#ff2e5b' : '#19f0e6'; g.beginPath(); g.arc(7, 0, 3, 0, TAU); g.fill(); g.restore();
-    }
-    for (const e of enemies) {
-      if (!e.cls || e.ko > 0 || !seen(e)) continue;
-      const k = CLS[e.cls]; if (!k || !k.col) continue;
-      g.save(); g.translate(e.x, e.y); const lw = e.cls === 'blindado' ? 4 : 2, a0 = g.globalAlpha; g.strokeStyle = k.col;
-      // brilho barato: traço largo e translúcido por baixo (antes: shadowBlur, caro a cada quadro)
-      g.lineWidth = lw + 6; g.globalAlpha = a0 * .28; g.beginPath(); g.arc(0, 0, e.r + 5, 0, TAU); g.stroke();
-      g.globalAlpha = a0; g.lineWidth = lw; g.beginPath(); g.arc(0, 0, e.r + 5, 0, TAU); g.stroke();
-      if (e.cls === 'blindado' && e.hp > 0) { g.fillStyle = k.col; for (let i = 0; i < e.hp; i++) g.fillRect(-9 + i * 7, -e.r - 12, 5, 3); }
-      if (e.cls === 'lider') { g.fillStyle = k.col; g.beginPath(); g.moveTo(-7, -e.r - 6); g.lineTo(-7, -e.r - 14); g.lineTo(-3, -e.r - 9); g.lineTo(0, -e.r - 16); g.lineTo(3, -e.r - 9); g.lineTo(7, -e.r - 14); g.lineTo(7, -e.r - 6); g.fill(); }
-      if (e.sniper && e.tele > 0) { g.restore(); g.save(); g.strokeStyle = 'rgba(255,46,91,' + (.35 + .5 * (1 - e.tele / .7)) + ')'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(e.x, e.y); g.lineTo(e.x + Math.cos(e.a) * 560, e.y + Math.sin(e.a) * 560); g.stroke(); }
-      if (e.cls === 'boss') {
-        g.restore(); g.save(); g.translate(e.x, e.y); const pul = 1 + Math.sin(now / 160) * .08; g.strokeStyle = e.boss.col; g.globalAlpha = .3; g.lineWidth = 12; g.beginPath(); g.arc(0, 0, (e.r + 8) * pul, 0, TAU); g.stroke(); g.globalAlpha = 1; g.lineWidth = 4; g.beginPath(); g.arc(0, 0, (e.r + 8) * pul, 0, TAU); g.stroke();
-        if (e.chS === 1) { g.restore(); g.save(); g.strokeStyle = 'rgba(255,46,91,.7)'; g.lineWidth = 3; g.setLineDash([8, 6]); g.beginPath(); g.moveTo(e.x, e.y); g.lineTo(e.x + Math.cos(e.chA) * 420, e.y + Math.sin(e.chA) * 420); g.stroke(); }
+    const barrelRenderer = window.HM_WASM_RENDERER;
+    if (!(barrelRenderer && barrelRenderer.drawWorldBarrels && barrelRenderer.drawWorldBarrels(g, WLD.barrels, now))) {
+      for (const b of WLD.barrels) {
+        const arm = b.t >= 0 && Math.floor(now / 70) % 2;
+        g.save(); g.translate(b.x, b.y); g.fillStyle = 'rgba(255,138,31,.28)'; g.beginPath(); g.arc(0, 0, b.r + 5, 0, TAU); g.fill();   // brilho barato
+        g.fillStyle = arm ? '#fff' : '#b8321c'; g.beginPath(); g.arc(0, 0, b.r, 0, TAU); g.fill();
+        g.fillStyle = '#ffd23f'; for (let i = -1; i <= 1; i += 2) g.fillRect(-b.r + 2, i * 5 - 1.5, b.r * 2 - 4, 3);
+        g.strokeStyle = '#2a0a06'; g.lineWidth = 2; g.stroke(); g.restore();
       }
-      g.restore();
     }
-    for (const r of WLD.rings) if (r.t > 0) { const k = 1 - r.t / r.T; g.save(); g.globalAlpha = r.t / r.T; g.strokeStyle = r.c; g.lineWidth = 6 * (1 - k) + 1; g.beginPath(); g.arc(r.x, r.y, r.R * (.25 + .75 * k), 0, TAU); g.stroke(); g.restore(); }
+    const cameraRenderer = window.HM_WASM_RENDERER;
+    if (!(cameraRenderer && cameraRenderer.drawWorldCameras && cameraRenderer.drawWorldCameras(g, WLD.cams, WLD.alarmT > 0))) {
+      for (const c of WLD.cams) {
+        const hot = c.hot > 0 || WLD.alarmT > 0;
+        g.save(); g.fillStyle = hot ? 'rgba(255,46,91,.20)' : 'rgba(25,240,230,.11)'; g.beginPath(); g.moveTo(c.x, c.y);
+        for (let k = 0; k <= 12; k++) g.lineTo(c.poly[k * 2], c.poly[k * 2 + 1]); g.closePath(); g.fill();
+        g.translate(c.x, c.y); g.rotate(c.a); g.fillStyle = '#20202c'; g.strokeStyle = hot ? '#ff2e5b' : '#19f0e6'; g.lineWidth = 2; g.fillRect(-7, -5, 14, 10); g.strokeRect(-7, -5, 14, 10);
+        g.fillStyle = hot ? '#ff2e5b' : '#19f0e6'; g.beginPath(); g.arc(7, 0, 3, 0, TAU); g.fill(); g.restore();
+      }
+    }
+    const enemyAccentRenderer = window.HM_WASM_RENDERER;
+    if (!(P && enemyAccentRenderer && enemyAccentRenderer.drawWorldEnemyAccents && enemyAccentRenderer.drawWorldEnemyAccents(g, enemies, now, P.x, P.y, g.globalAlpha))) {
+      for (const e of enemies) {
+        if (!e.cls || e.ko > 0 || !seen(e)) continue;
+        const k = CLS[e.cls]; if (!k || !k.col) continue;
+        g.save(); g.translate(e.x, e.y); const lw = e.cls === 'blindado' ? 4 : 2, a0 = g.globalAlpha; g.strokeStyle = k.col;
+        // brilho barato: traço largo e translúcido por baixo (antes: shadowBlur, caro a cada quadro)
+        g.lineWidth = lw + 6; g.globalAlpha = a0 * .28; g.beginPath(); g.arc(0, 0, e.r + 5, 0, TAU); g.stroke();
+        g.globalAlpha = a0; g.lineWidth = lw; g.beginPath(); g.arc(0, 0, e.r + 5, 0, TAU); g.stroke();
+        if (e.cls === 'blindado' && e.hp > 0) { g.fillStyle = k.col; for (let i = 0; i < e.hp; i++) g.fillRect(-9 + i * 7, -e.r - 12, 5, 3); }
+        if (e.cls === 'lider') { g.fillStyle = k.col; g.beginPath(); g.moveTo(-7, -e.r - 6); g.lineTo(-7, -e.r - 14); g.lineTo(-3, -e.r - 9); g.lineTo(0, -e.r - 16); g.lineTo(3, -e.r - 9); g.lineTo(7, -e.r - 14); g.lineTo(7, -e.r - 6); g.fill(); }
+        if (e.sniper && e.tele > 0) { g.restore(); g.save(); g.strokeStyle = 'rgba(255,46,91,' + (.35 + .5 * (1 - e.tele / .7)) + ')'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(e.x, e.y); g.lineTo(e.x + Math.cos(e.a) * 560, e.y + Math.sin(e.a) * 560); g.stroke(); }
+        if (e.cls === 'boss') {
+          g.restore(); g.save(); g.translate(e.x, e.y); const pul = 1 + Math.sin(now / 160) * .08; g.strokeStyle = e.boss.col; g.globalAlpha = .3; g.lineWidth = 12; g.beginPath(); g.arc(0, 0, (e.r + 8) * pul, 0, TAU); g.stroke(); g.globalAlpha = 1; g.lineWidth = 4; g.beginPath(); g.arc(0, 0, (e.r + 8) * pul, 0, TAU); g.stroke();
+          if (e.chS === 1) { g.restore(); g.save(); g.strokeStyle = 'rgba(255,46,91,.7)'; g.lineWidth = 3; g.setLineDash([8, 6]); g.beginPath(); g.moveTo(e.x, e.y); g.lineTo(e.x + Math.cos(e.chA) * 420, e.y + Math.sin(e.chA) * 420); g.stroke(); }
+        }
+        g.restore();
+      }
+    }
+    const ringRenderer = window.HM_WASM_RENDERER;
+    if (!(ringRenderer && ringRenderer.drawWorldRings && ringRenderer.drawWorldRings(g, WLD.rings))) {
+      for (const r of WLD.rings) if (r.t > 0) { const k = 1 - r.t / r.T; g.save(); g.globalAlpha = r.t / r.T; g.strokeStyle = r.c; g.lineWidth = 6 * (1 - k) + 1; g.beginPath(); g.arc(r.x, r.y, r.R * (.25 + .75 * k), 0, TAU); g.stroke(); g.restore(); }
+    }
   };
 })();
 

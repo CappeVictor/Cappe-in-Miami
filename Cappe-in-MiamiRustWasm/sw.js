@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v76.0-wasm-neon-door-sprites';
+const CACHE = 'cappe-v170.0-fx-painter';
 const ASSETS = [
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",
@@ -109,7 +109,9 @@ const ASSETS = [
   "js/exp-world.js",
   "js/maps.js",
   "js/wasm-renderer.js",
-  "wasm-renderer/pkg/renderer.wasm"
+  "wasm-renderer/pkg/renderer.wasm",
+  "wasm-renderer/pkg/direct/direct_renderer.js",
+  "wasm-renderer/pkg/direct/direct_renderer_bg.wasm"
 ];
 const SCOPE = new URL(self.registration.scope);
 const CACHE_KEY = CACHE + ':' + SCOPE.pathname;
