@@ -297,3 +297,6 @@ O painter direto executa as operações Canvas do texto de combo nos casos cober
 ## v173.0 — texto do alarme Rust; sem benchmark
 O painter direto executa estilo, alinhamento e fillText para o rótulo nos casos cobertos. Não foram medidos frame time, CPU, memória ou FPS; nenhum ganho é afirmado.
 
+## v174.0 — imagens HUD por Rust; sem benchmark
+O painter direto faz drawImage para as camadas HUD cobertas. Não foram medidos frame time, CPU, memória ou FPS; nenhum ganho é afirmado.
+

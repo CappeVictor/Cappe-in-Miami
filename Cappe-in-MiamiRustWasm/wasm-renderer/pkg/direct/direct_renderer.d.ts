@@ -96,6 +96,11 @@ export function drawFxOverlays(context: CanvasRenderingContext2D, stage: number,
 export function drawGlassBreakTrace(context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, commands: Float64Array): boolean;
 
 /**
+ * Draws one selected HUD image from an existing five-number layout command.
+ */
+export function drawHudImage(context: CanvasRenderingContext2D, image: any, commands: Float64Array): boolean;
+
+/**
  * Draws the pulsing invasion-zone ring and fill from its six computed command values.
  */
 export function drawInvasionZone(context: CanvasRenderingContext2D, commands: Float64Array): boolean;
@@ -186,6 +191,7 @@ export interface InitOutput {
     readonly drawFx: (a: any, b: any, c: any) => [number, number, number];
     readonly drawFxOverlays: (a: any, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number];
     readonly drawGlassBreakTrace: (a: any, b: number, c: number, d: number, e: number, f: any) => [number, number, number];
+    readonly drawHudImage: (a: any, b: any, c: any) => [number, number, number];
     readonly drawInvasionZone: (a: any, b: any) => [number, number, number];
     readonly drawLiveBlood: (a: any, b: any, c: number, d: number) => [number, number, number];
     readonly drawMapCommands: (a: any, b: any, c: any) => [number, number, number];

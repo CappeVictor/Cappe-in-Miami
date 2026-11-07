@@ -177,3 +177,6 @@ Texto de combo usa painter Rust direto com o Canvas do navegador; a lógica de p
 ## Preview Rust/WASM local v173
 Rótulo de alarme passa pelo painter Rust direto quando disponível; o WASM legado continua calculando o texto e o posicionamento. Fallback ativo; paridade RGBA exata em Chrome; sem benchmark.
 
+## Preview Rust/WASM local v174
+Imagens de HUD selecionadas pelo WASM legado são desenhadas pelo painter Rust direto quando compatíveis; fallback Canvas permanece. Paridade RGBA exata em Chrome; sem benchmark.
+

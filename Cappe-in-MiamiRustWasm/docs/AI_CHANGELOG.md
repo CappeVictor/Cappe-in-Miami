@@ -610,3 +610,8 @@ Riscos/limites: partidas e instalação real do SW ainda não validadas; leitura
 - Chrome 156 confirmou callback integrado e paridade RGBA exata. Build direta 155.645 bytes WASM + glue 39.337 bytes; regressões 82/82.
 - Renderer segue híbrido. Sem benchmark, revisão visual ampla ou campanha completa.
 
+## Preview local v174.0 — 07/11/2026
+- Imagens selecionadas do HUD agora tentam desenho pelo painter Rust direto; seleção, coordenadas, tamanho e fallback permanecem compatíveis.
+- Chrome 156 confirmou callback integrado e paridade RGBA exata. Build direta 156.255 bytes WASM + glue 39.762 bytes; regressões 82/82.
+- Renderer segue híbrido. Sem benchmark, revisão visual ampla ou campanha completa.
+

@@ -323,3 +323,6 @@ Manter cálculo de pulso e multiplicador no caminho atual, enviando o comando e 
 ## D107 — v173.0 — Rasterizar texto do alarme via Rust
 Preservar no WASM legado o cálculo do rótulo e a centralização; usar Rust direto para as propriedades Canvas e fillText, com fallback existente. Isso move a rasterização sem mudar o relógio ou texto. Chrome 156 teve igualdade RGBA exata e regressões 82/82. Sem benchmark.
 
+## D108 — v174.0 — Rasterizar imagens do HUD via Rust
+Reutilizar a seleção/layout calculados no WASM legado e passar a imagem já escolhida ao helper WebSys, preservando Canvas fallback. Os sprites podem ser Canvas ou HTMLImageElement, ambos suportados. Chrome 156 mostrou igualdade RGBA e estado do Canvas preservado; regressões 82/82. Sem benchmark.
+

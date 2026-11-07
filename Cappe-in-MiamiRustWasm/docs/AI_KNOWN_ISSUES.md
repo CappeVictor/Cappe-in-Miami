@@ -74,3 +74,5 @@ Preview Rust/WASM local v172: o texto de combo teve paridade RGBA exata e callba
 
 Preview Rust/WASM local v173: rótulo de alarme teve paridade RGBA exata e callback integrado; segundos/texto e fallback permanecem no caminho legado. Ainda há callbacks Canvas host e estados sem auditoria ampla. Sem benchmark.
 
+Preview Rust/WASM local v174: o callback de imagem HUD teve paridade RGBA exata; imagem e layout ainda são preparados no caminho legado. Fallback permanece. Há callbacks Canvas host e estados sem auditoria ampla; sem benchmark.
+

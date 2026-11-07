@@ -363,6 +363,21 @@ export function drawGlassBreakTrace(context, x, y, width, height, commands) {
 }
 
 /**
+ * Draws one selected HUD image from an existing five-number layout command.
+ * @param {CanvasRenderingContext2D} context
+ * @param {any} image
+ * @param {Float64Array} commands
+ * @returns {boolean}
+ */
+export function drawHudImage(context, image, commands) {
+    const ret = wasm.drawHudImage(context, image, commands);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
  * Draws the pulsing invasion-zone ring and fill from its six computed command values.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} commands

@@ -627,6 +627,26 @@ pub fn draw_alarm_text(context: &CanvasRenderingContext2d, commands: &Float64Arr
     Ok(true)
 }
 
+/// Draws one selected HUD image from an existing five-number layout command.
+#[wasm_bindgen(js_name = drawHudImage)]
+pub fn draw_hud_image(context: &CanvasRenderingContext2d, image: &JsValue, commands: &Float64Array) -> Result<bool, JsValue> {
+    if commands.length() != 5 || !supported_image(image) {
+        return Ok(false);
+    }
+    let index = commands.get_index(0);
+    let x = commands.get_index(1);
+    let y = commands.get_index(2);
+    let width = commands.get_index(3);
+    let height = commands.get_index(4);
+    if !index.is_finite() || index.fract() != 0.0 || !(0.0..=4.0).contains(&index)
+        || !x.is_finite() || !y.is_finite() || !width.is_finite() || !height.is_finite() || width <= 0.0 || height <= 0.0
+    {
+        return Ok(false);
+    }
+    draw_image_at(context, image, &[x, y, width, height])?;
+    Ok(true)
+}
+
 fn batch_prop(batch: &JsValue, key: &str) -> Result<JsValue, JsValue> {
     Reflect::get(batch, &JsValue::from_str(key))
 }

@@ -101,6 +101,7 @@
   state.directShellCalls = 0;
   state.directComboTextCalls = 0;
   state.directAlarmTextCalls = 0;
+  state.directHudImageCalls = 0;
   state.fxCommands = 0;
   state.directDustCommands = 0;
   state.directSparkFrames = 0;
@@ -919,6 +920,17 @@
               const index = commands[0] | 0, image = batch.images[index];
               if (!image || !(image.width > 0 && image.height > 0) || (image.complete !== undefined && (!image.complete || !(image.naturalWidth > 0)))) {
                 throw new Error(`imagem HUD Rust indisponível: ${index}`);
+              }
+              if (state.directReady && state.direct && state.direct.drawHudImage) {
+                try {
+                  const drawn = withCanvasBypass(() => state.direct.drawHudImage(batch.context, image, commands));
+                  if (drawn === true) {
+                    state.directHudImageCalls++;
+                    state.hudImageCommands++;
+                    if (index === 4) state.weatherLabelCommands++;
+                    return;
+                  }
+                } catch (error) { state.directError = String(error && error.message || error); }
               }
               withCanvasBypass(() => batch.context.drawImage(image, commands[1], commands[2], commands[3], commands[4]));
               state.hudImageCommands++;

@@ -1,5 +1,9 @@
 # Migração do renderer gráfico para Rust/WASM
 
+## Etapa atual — preview local v174, conversão parcial
+
+Imagens HUD selecionadas e dimensionadas pelo WASM legado agora passam ao painter Rust direto para drawImage via WebSys. Sprite, posição e fallback permanecem compatíveis. Chrome 156 confirmou callback integrado e paridade RGBA exata. Build direta: 156.255 bytes WASM + 39.762 bytes glue; regressões 82/82. Sem campanha completa, revisão visual ampla ou benchmark.
+
 ## Etapa atual — preview local v173, conversão parcial
 
 O callback de alarme envia comandos e texto já formatado ao painter Rust direto para estilo, alinhamento e fillText. Temporizador e centralização permanecem no WASM legado; Canvas mantém fallback. Chrome 156 confirmou chamada integrada e paridade RGBA exata. Build direta: 155.645 bytes WASM + 39.337 bytes glue; regressões 82/82. Sem campanha completa, revisão visual ampla ou benchmark.

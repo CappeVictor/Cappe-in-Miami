@@ -1,4 +1,7 @@
-# Arquitetura real — preview local v173.0
+# Arquitetura real — preview local v174.0
+
+## Preview Rust/WASM local v174.0 — imagens do HUD
+O WASM legado continua escolhendo o sprite existente e gerando posição/dimensões. O callback envia imagem selecionada e comando de cinco valores ao painter Rust, que usa drawImage em WebSys; Canvas JS continua fallback.
 
 ## Preview Rust/WASM local v173.0 — texto do alarme
 O WASM legado calcula segundos arredondados e posição central do status. O callback envia valores e string ao painter Rust, que configura estilo/alinhamento e chama fillText; o fallback JS permanece.

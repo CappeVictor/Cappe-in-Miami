@@ -21,6 +21,7 @@ export const drawFog: (a: any, b: any, c: any, d: number, e: number, f: number) 
 export const drawFx: (a: any, b: any, c: any) => [number, number, number];
 export const drawFxOverlays: (a: any, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number];
 export const drawGlassBreakTrace: (a: any, b: number, c: number, d: number, e: number, f: any) => [number, number, number];
+export const drawHudImage: (a: any, b: any, c: any) => [number, number, number];
 export const drawInvasionZone: (a: any, b: any) => [number, number, number];
 export const drawLiveBlood: (a: any, b: any, c: number, d: number) => [number, number, number];
 export const drawMapCommands: (a: any, b: any, c: any) => [number, number, number];
