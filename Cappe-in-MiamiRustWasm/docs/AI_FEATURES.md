@@ -180,3 +180,6 @@ Rótulo de alarme passa pelo painter Rust direto quando disponível; o WASM lega
 ## Preview Rust/WASM local v174
 Imagens de HUD selecionadas pelo WASM legado são desenhadas pelo painter Rust direto quando compatíveis; fallback Canvas permanece. Paridade RGBA exata em Chrome; sem benchmark.
 
+## Preview Rust/WASM local v175
+Projéteis com sprites já existentes agora chamam o painter Rust direto, mantendo projeção e seleção do sprite no WASM legado. Fallback Canvas permanece; paridade RGBA exata em Chrome; sem benchmark.
+

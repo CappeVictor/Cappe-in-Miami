@@ -615,3 +615,8 @@ Riscos/limites: partidas e instalação real do SW ainda não validadas; leitura
 - Chrome 156 confirmou callback integrado e paridade RGBA exata. Build direta 156.255 bytes WASM + glue 39.762 bytes; regressões 82/82.
 - Renderer segue híbrido. Sem benchmark, revisão visual ampla ou campanha completa.
 
+## Preview local v175.0 — 07/11/2026
+- O callback de projéteis agora tenta rasterização direta no painter Rust, preservando ordem, sprites do proprietário, posições e fallback.
+- Chrome 156 confirmou callback integrado e paridade RGBA exata. Build direta 156.945 bytes WASM + glue 40.209 bytes; regressões 82/82.
+- Renderer segue híbrido. Sem benchmark, revisão visual ampla ou campanha completa.
+

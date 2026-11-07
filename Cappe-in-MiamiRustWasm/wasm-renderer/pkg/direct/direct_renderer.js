@@ -110,6 +110,22 @@ export function drawBloodSplatter(context, puddle_color, drop_color, blobs, stre
 }
 
 /**
+ * Draws cached projectile sprites at positions emitted by the legacy Rust pass.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} commands
+ * @param {any} mine
+ * @param {any} foe
+ * @returns {number}
+ */
+export function drawBullets(context, commands, mine, foe) {
+    const ret = wasm.drawBullets(context, commands, mine, foe);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
  * Draws a cached Canvas image directly into another Canvas context.
  * @param {CanvasRenderingContext2D} context
  * @param {HTMLCanvasElement} image

@@ -102,6 +102,7 @@
   state.directComboTextCalls = 0;
   state.directAlarmTextCalls = 0;
   state.directHudImageCalls = 0;
+  state.directBulletCalls = 0;
   state.fxCommands = 0;
   state.directDustCommands = 0;
   state.directSparkFrames = 0;
@@ -530,6 +531,12 @@
             try {
               const batch = currentBulletBatch;
               const commands = new Float64Array(wasm.exports.memory.buffer, pointer, count * 3);
+              if (state.directReady && state.direct && state.direct.drawBullets) {
+                try {
+                  const drawn = withCanvasBypass(() => state.direct.drawBullets(batch.context, commands, batch.mine, batch.foe));
+                  if (drawn === count) { state.directBulletCalls++; return; }
+                } catch (error) { state.directError = String(error && error.message || error); }
+              }
               withCanvasBypass(() => {
                 for (let i = 0; i < commands.length; i += 3) {
                   const image = commands[i + 2] ? batch.mine : batch.foe;

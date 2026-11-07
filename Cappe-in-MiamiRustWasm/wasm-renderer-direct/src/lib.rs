@@ -647,6 +647,32 @@ pub fn draw_hud_image(context: &CanvasRenderingContext2d, image: &JsValue, comma
     Ok(true)
 }
 
+/// Draws cached projectile sprites at positions emitted by the legacy Rust pass.
+#[wasm_bindgen(js_name = drawBullets)]
+pub fn draw_bullets(context: &CanvasRenderingContext2d, commands: &Float64Array, mine: &JsValue, foe: &JsValue) -> Result<i32, JsValue> {
+    if commands.length() % 3 != 0 || commands.length() > 24576 || !supported_image(mine) || !supported_image(foe) {
+        return Ok(-1);
+    }
+    let count = commands.length() / 3;
+    for index in 0..count {
+        let offset = index * 3;
+        let x = commands.get_index(offset);
+        let y = commands.get_index(offset + 1);
+        let owner = commands.get_index(offset + 2);
+        if !x.is_finite() || !y.is_finite() || !(owner == 0.0 || owner == 1.0) {
+            return Ok(-1);
+        }
+    }
+    for index in 0..count {
+        let offset = index * 3;
+        let x = commands.get_index(offset);
+        let y = commands.get_index(offset + 1);
+        let image = if commands.get_index(offset + 2) == 1.0 { mine } else { foe };
+        draw_image_at(context, image, &[x, y])?;
+    }
+    Ok(count as i32)
+}
+
 fn batch_prop(batch: &JsValue, key: &str) -> Result<JsValue, JsValue> {
     Reflect::get(batch, &JsValue::from_str(key))
 }

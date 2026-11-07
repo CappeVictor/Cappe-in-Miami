@@ -24,6 +24,11 @@ export function drawBatchCommands(context: CanvasRenderingContext2D, commands: F
 export function drawBloodSplatter(context: CanvasRenderingContext2D, puddle_color: string, drop_color: string, blobs: Float64Array, streaks: Float64Array, droplets: Float64Array): boolean;
 
 /**
+ * Draws cached projectile sprites at positions emitted by the legacy Rust pass.
+ */
+export function drawBullets(context: CanvasRenderingContext2D, commands: Float64Array, mine: any, foe: any): number;
+
+/**
  * Draws a cached Canvas image directly into another Canvas context.
  */
 export function drawCanvasImage(context: CanvasRenderingContext2D, image: HTMLCanvasElement, x: number, y: number): boolean;
@@ -177,6 +182,7 @@ export interface InitOutput {
     readonly drawAlarmText: (a: any, b: any, c: number, d: number) => [number, number, number];
     readonly drawBatchCommands: (a: any, b: any, c: any, d: any, e: any) => [number, number, number];
     readonly drawBloodSplatter: (a: any, b: number, c: number, d: number, e: number, f: any, g: any, h: any) => [number, number, number];
+    readonly drawBullets: (a: any, b: any, c: any, d: any) => [number, number, number];
     readonly drawCanvasImage: (a: any, b: any, c: number, d: number) => [number, number, number];
     readonly drawCanvasLayer: (a: any, b: any, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number) => [number, number, number];
     readonly drawComboText: (a: any, b: any, c: number, d: number) => [number, number, number];

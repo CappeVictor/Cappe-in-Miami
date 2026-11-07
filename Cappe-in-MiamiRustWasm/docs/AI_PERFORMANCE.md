@@ -300,3 +300,6 @@ O painter direto executa estilo, alinhamento e fillText para o rótulo nos casos
 ## v174.0 — imagens HUD por Rust; sem benchmark
 O painter direto faz drawImage para as camadas HUD cobertas. Não foram medidos frame time, CPU, memória ou FPS; nenhum ganho é afirmado.
 
+## v175.0 — projéteis por Rust; sem benchmark
+O painter direto executa drawImage para os projéteis do lote coberto. Não foram medidos frame time, CPU, memória ou FPS; nenhum ganho é afirmado.
+

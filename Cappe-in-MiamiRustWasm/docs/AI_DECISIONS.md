@@ -326,3 +326,6 @@ Preservar no WASM legado o cálculo do rótulo e a centralização; usar Rust di
 ## D108 — v174.0 — Rasterizar imagens do HUD via Rust
 Reutilizar a seleção/layout calculados no WASM legado e passar a imagem já escolhida ao helper WebSys, preservando Canvas fallback. Os sprites podem ser Canvas ou HTMLImageElement, ambos suportados. Chrome 156 mostrou igualdade RGBA e estado do Canvas preservado; regressões 82/82. Sem benchmark.
 
+## D109 — v175.0 — Rasterizar projéteis com sprites no Rust
+Manter projeção e escolha do sprite no WASM legado, passar o lote e as imagens existentes ao módulo WebSys para desenhar por ordem. O fallback Canvas é mantido. Chrome 156 confirmou igualdade RGBA; regressões 82/82. Sem benchmark.
+

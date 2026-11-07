@@ -1,4 +1,7 @@
-# Arquitetura real — preview local v174.0
+# Arquitetura real — preview local v175.0
+
+## Preview Rust/WASM local v175.0 — projéteis
+O WASM legado calcula posição de tela e seleção de sprite do proprietário. O callback envia comandos de três números e imagens existentes ao painter Rust, que rasteriza os projéteis com drawImage; fallback Canvas permanece.
 
 ## Preview Rust/WASM local v174.0 — imagens do HUD
 O WASM legado continua escolhendo o sprite existente e gerando posição/dimensões. O callback envia imagem selecionada e comando de cinco valores ao painter Rust, que usa drawImage em WebSys; Canvas JS continua fallback.

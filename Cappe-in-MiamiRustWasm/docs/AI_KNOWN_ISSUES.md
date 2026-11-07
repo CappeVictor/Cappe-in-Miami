@@ -76,3 +76,5 @@ Preview Rust/WASM local v173: rótulo de alarme teve paridade RGBA exata e callb
 
 Preview Rust/WASM local v174: o callback de imagem HUD teve paridade RGBA exata; imagem e layout ainda são preparados no caminho legado. Fallback permanece. Há callbacks Canvas host e estados sem auditoria ampla; sem benchmark.
 
+Preview Rust/WASM local v175: projéteis têm paridade RGBA exata e callback integrado; projeção/seleção ainda ficam no WASM legado e Canvas permanece como fallback. Ainda há callbacks e estados não auditados, sem benchmark.
+
