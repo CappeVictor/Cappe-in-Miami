@@ -320,3 +320,6 @@ Reutilizar a projeção e o lote existente do WASM legado, enviando as elipses a
 ## D106 — v172.0 — Rasterizar texto de combo por Rust direto
 Manter cálculo de pulso e multiplicador no caminho atual, enviando o comando e a string formatada ao módulo web-sys. Isso desloca as chamadas de transform/stroke/fill de texto sem mudar timing ou conteúdo. Chrome 156 mostrou igualdade RGBA exata; regressões 82/82. Sem benchmark.
 
+## D107 — v173.0 — Rasterizar texto do alarme via Rust
+Preservar no WASM legado o cálculo do rótulo e a centralização; usar Rust direto para as propriedades Canvas e fillText, com fallback existente. Isso move a rasterização sem mudar o relógio ou texto. Chrome 156 teve igualdade RGBA exata e regressões 82/82. Sem benchmark.
+

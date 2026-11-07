@@ -174,3 +174,6 @@ Estojos de munição projetados em lote pelo WASM legado agora chamam o painter 
 ## Preview Rust/WASM local v172
 Texto de combo usa painter Rust direto com o Canvas do navegador; a lógica de pulso/valor permanece no caminho existente. Fallback ativo, paridade RGBA exata em Chrome; sem benchmark.
 
+## Preview Rust/WASM local v173
+Rótulo de alarme passa pelo painter Rust direto quando disponível; o WASM legado continua calculando o texto e o posicionamento. Fallback ativo; paridade RGBA exata em Chrome; sem benchmark.
+

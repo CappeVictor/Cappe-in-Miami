@@ -1,4 +1,7 @@
-# Arquitetura real — preview local v172.0
+# Arquitetura real — preview local v173.0
+
+## Preview Rust/WASM local v173.0 — texto do alarme
+O WASM legado calcula segundos arredondados e posição central do status. O callback envia valores e string ao painter Rust, que configura estilo/alinhamento e chama fillText; o fallback JS permanece.
 
 ## Preview Rust/WASM local v172.0 — texto do combo
 O WASM legado mantém o cálculo do pulso e do multiplicador. O callback entrega o pulso, o número e a string já formatada ao painter direto Rust, que aplica transform, stroke e fill de texto com o Canvas do navegador; fallback JS permanece.

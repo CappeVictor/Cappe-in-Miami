@@ -294,3 +294,6 @@ Os estojos usam desenho direto via WebSys nas chamadas cobertas. Não foram medi
 ## v172.0 — texto de combo Rust; sem benchmark
 O painter direto executa as operações Canvas do texto de combo nos casos cobertos. Não foram medidos frame time, CPU, memória ou FPS; nenhum ganho é afirmado.
 
+## v173.0 — texto do alarme Rust; sem benchmark
+O painter direto executa estilo, alinhamento e fillText para o rótulo nos casos cobertos. Não foram medidos frame time, CPU, memória ou FPS; nenhum ganho é afirmado.
+

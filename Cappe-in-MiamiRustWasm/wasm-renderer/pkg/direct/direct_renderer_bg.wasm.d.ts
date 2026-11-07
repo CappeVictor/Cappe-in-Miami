@@ -4,6 +4,7 @@ export const memory: WebAssembly.Memory;
 export const clearCanvasRect: (a: any, b: number, c: number, d: number, e: number) => [number, number, number];
 export const createCanvasImageData: (a: any, b: number, c: number) => [number, number, number];
 export const createTextImage: (a: any, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number];
+export const drawAlarmText: (a: any, b: any, c: number, d: number) => [number, number, number];
 export const drawBatchCommands: (a: any, b: any, c: any, d: any, e: any) => [number, number, number];
 export const drawBloodSplatter: (a: any, b: number, c: number, d: number, e: number, f: any, g: any, h: any) => [number, number, number];
 export const drawCanvasImage: (a: any, b: any, c: number, d: number) => [number, number, number];

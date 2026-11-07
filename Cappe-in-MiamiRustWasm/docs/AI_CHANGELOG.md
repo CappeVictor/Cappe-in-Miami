@@ -605,3 +605,8 @@ Riscos/limites: partidas e instalação real do SW ainda não validadas; leitura
 - Chrome 156 confirmou callback integrado e paridade RGBA exata, incluindo restauração do estado Canvas. Build direta 154.919 bytes WASM + glue 38.768 bytes; regressões 82/82.
 - Renderer segue híbrido. Sem benchmark, revisão visual ampla ou campanha completa.
 
+## Preview local v173.0 — 07/11/2026
+- O callback do rótulo de alarme agora tenta desenho pelo painter Rust direto; tempo, posição, conteúdo e fallback seguem compatíveis.
+- Chrome 156 confirmou callback integrado e paridade RGBA exata. Build direta 155.645 bytes WASM + glue 39.337 bytes; regressões 82/82.
+- Renderer segue híbrido. Sem benchmark, revisão visual ampla ou campanha completa.
+

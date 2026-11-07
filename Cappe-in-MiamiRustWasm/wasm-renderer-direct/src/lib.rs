@@ -608,6 +608,25 @@ pub fn draw_combo_text(context: &CanvasRenderingContext2d, commands: &Float64Arr
     Ok(true)
 }
 
+/// Draws the existing alarm status label using the browser's Canvas text rasterizer.
+#[wasm_bindgen(js_name = drawAlarmText)]
+pub fn draw_alarm_text(context: &CanvasRenderingContext2d, commands: &Float64Array, label: &str) -> Result<bool, JsValue> {
+    if commands.length() != 3 || label.is_empty() || label.len() > 96 {
+        return Ok(false);
+    }
+    let seconds = commands.get_index(0);
+    let x = commands.get_index(1);
+    let y = commands.get_index(2);
+    if !seconds.is_finite() || seconds <= 0.0 || !x.is_finite() || !y.is_finite() {
+        return Ok(false);
+    }
+    context.set_fill_style_str("rgba(255,60,90,.9)");
+    context.set_font("bold 14px Orbitron, sans-serif");
+    context.set_text_align("center");
+    context.fill_text(label, x, y)?;
+    Ok(true)
+}
+
 fn batch_prop(batch: &JsValue, key: &str) -> Result<JsValue, JsValue> {
     Reflect::get(batch, &JsValue::from_str(key))
 }

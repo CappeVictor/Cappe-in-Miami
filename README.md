@@ -15,13 +15,13 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
 - **Web — HTML, CSS e JavaScript:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — prévia híbrida v172:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v172-preview.zip)
+- **Rust/WASM — prévia híbrida v173:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v173-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
 ### Sobre a prévia Rust/WASM
 
-A prévia v172 amplia as camadas gráficas que chamam diretamente o módulo Rust/WebAssembly, incluindo texto de combo, estojos, composição de escuridão/lanterna, muzzle flashes e arcos de impacto, além de piso, paredes, móveis, portas, jogadores e inimigos. Ela ainda é híbrida: lógica e estado continuam em JavaScript, algumas imagens são preparadas no host, e outros callbacks Canvas permanecem em migração. A paridade automatizada passou nos casos cobertos; não é ainda uma conversão integral do motor gráfico e não há ganho de desempenho medido.
+A prévia v173 amplia as camadas gráficas que chamam diretamente o módulo Rust/WebAssembly, incluindo textos de alarme e combo, estojos, composição de escuridão/lanterna, muzzle flashes e arcos de impacto, além de piso, paredes, móveis, portas, jogadores e inimigos. Ela ainda é híbrida: lógica e estado continuam em JavaScript, algumas imagens são preparadas no host, e outros callbacks Canvas permanecem em migração. A paridade automatizada passou nos casos cobertos; não é ainda uma conversão integral do motor gráfico e não há ganho de desempenho medido.
 
 ## Últimas melhorias incluídas
 
@@ -32,8 +32,8 @@ A prévia v172 amplia as camadas gráficas que chamam diretamente o módulo Rust
 - Saídas de mapas Neon fora do piso caminhável passaram a ser ancoradas em uma posição livre próxima.
 - A regressão automatizada registrada para essa entrega passou em **57/57**. Não houve validação visual nem medição de FPS nessa entrega.
 
-**Prévia Rust/WASM v172.0 — 7 de novembro de 2026**
-- Texto de combo, estojos de munição, muzzle flashes, arcos de impacto, composição de escuridão/lanterna, névoa, luzes, anéis e zona de invasão agora chamam o painter Rust direto nos casos cobertos; callback Canvas segue como fallback.
+**Prévia Rust/WASM v173.0 — 7 de novembro de 2026**
+- Textos de alarme e combo, estojos de munição, muzzle flashes, arcos de impacto, composição de escuridão/lanterna, névoa, luzes, anéis e zona de invasão agora chamam o painter Rust direto nos casos cobertos; callback Canvas segue como fallback.
 - Build Rust/WASM, testes de ABI/browser, regressões 82/82 e paridade RGBA em Chrome passaram.
 - A migração segue híbrida; não houve benchmark, revisão visual ampla nem campanha completa.
 

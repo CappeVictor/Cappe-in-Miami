@@ -8,6 +8,11 @@ export function createCanvasImageData(context: CanvasRenderingContext2D, width: 
 export function createTextImage(canvas: HTMLCanvasElement, text: string, font: string, color: string, outlined: boolean): boolean;
 
 /**
+ * Draws the existing alarm status label using the browser's Canvas text rasterizer.
+ */
+export function drawAlarmText(context: CanvasRenderingContext2D, commands: Float64Array, label: string): boolean;
+
+/**
  * Direct Rust/web-sys painter for the full shared eight-number command ABI.
  */
 export function drawBatchCommands(context: CanvasRenderingContext2D, commands: Float64Array, furniture_colors: Array<any>, actor_colors: Array<any>, batch: any): number;
@@ -164,6 +169,7 @@ export interface InitOutput {
     readonly clearCanvasRect: (a: any, b: number, c: number, d: number, e: number) => [number, number, number];
     readonly createCanvasImageData: (a: any, b: number, c: number) => [number, number, number];
     readonly createTextImage: (a: any, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number];
+    readonly drawAlarmText: (a: any, b: any, c: number, d: number) => [number, number, number];
     readonly drawBatchCommands: (a: any, b: any, c: any, d: any, e: any) => [number, number, number];
     readonly drawBloodSplatter: (a: any, b: number, c: number, d: number, e: number, f: any, g: any, h: any) => [number, number, number];
     readonly drawCanvasImage: (a: any, b: any, c: number, d: number) => [number, number, number];

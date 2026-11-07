@@ -72,3 +72,5 @@ Preview Rust/WASM local v171: estojos têm paridade RGBA sintética e callback i
 
 Preview Rust/WASM local v172: o texto de combo teve paridade RGBA exata e callback integrado; o WASM legado ainda calcula pulso e multiplicador, com fallback Canvas ativo. Persistem callbacks Canvas host e estados sem auditoria ampla. Sem benchmark.
 
+Preview Rust/WASM local v173: rótulo de alarme teve paridade RGBA exata e callback integrado; segundos/texto e fallback permanecem no caminho legado. Ainda há callbacks Canvas host e estados sem auditoria ampla. Sem benchmark.
+

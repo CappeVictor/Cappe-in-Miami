@@ -100,6 +100,7 @@
   state.directFxCalls = 0;
   state.directShellCalls = 0;
   state.directComboTextCalls = 0;
+  state.directAlarmTextCalls = 0;
   state.fxCommands = 0;
   state.directDustCommands = 0;
   state.directSparkFrames = 0;
@@ -929,10 +930,17 @@
             try {
               const batch = currentAlarmTextBatch;
               const commands = new Float64Array(wasm.exports.memory.buffer, pointer, 3);
+              const label = 'ALARME ATIVO · ' + commands[0].toFixed(0) + ' s';
+              if (state.directReady && state.direct && state.direct.drawAlarmText) {
+                try {
+                  const drawn = withCanvasBypass(() => state.direct.drawAlarmText(batch.context, commands, label));
+                  if (drawn === true) { state.directAlarmTextCalls++; state.alarmTextCommands++; return; }
+                } catch (error) { state.directError = String(error && error.message || error); }
+              }
               withCanvasBypass(() => {
                 const context = batch.context;
                 context.fillStyle = 'rgba(255,60,90,.9)'; context.font = 'bold 14px Orbitron, sans-serif'; context.textAlign = 'center';
-                context.fillText('ALARME ATIVO · ' + commands[0].toFixed(0) + ' s', commands[1], commands[2]);
+                context.fillText(label, commands[1], commands[2]);
               });
               state.alarmTextCommands++;
             } catch (error) { currentAlarmTextBatch.error = error; }

@@ -1,5 +1,9 @@
 # Migração do renderer gráfico para Rust/WASM
 
+## Etapa atual — preview local v173, conversão parcial
+
+O callback de alarme envia comandos e texto já formatado ao painter Rust direto para estilo, alinhamento e fillText. Temporizador e centralização permanecem no WASM legado; Canvas mantém fallback. Chrome 156 confirmou chamada integrada e paridade RGBA exata. Build direta: 155.645 bytes WASM + 39.337 bytes glue; regressões 82/82. Sem campanha completa, revisão visual ampla ou benchmark.
+
 ## Etapa atual — preview local v172, conversão parcial
 
 O callback de combo agora envia pulso, valor e texto formatado ao painter Rust direto para transform, contorno e preenchimento Canvas. Lógica/temporização continuam no caminho existente e o fallback JS permanece. Chrome 156 confirmou uma chamada integrada e paridade RGBA exata, com estado restaurado. Build direta: 154.919 bytes WASM + 38.768 bytes glue; regressões 82/82. Sem campanha completa, revisão visual ampla ou benchmark.

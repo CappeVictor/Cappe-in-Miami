@@ -53,6 +53,23 @@ export function createTextImage(canvas, text, font, color, outlined) {
 }
 
 /**
+ * Draws the existing alarm status label using the browser's Canvas text rasterizer.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} commands
+ * @param {string} label
+ * @returns {boolean}
+ */
+export function drawAlarmText(context, commands, label) {
+    const ptr0 = passStringToWasm0(label, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.drawAlarmText(context, commands, ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
  * Direct Rust/web-sys painter for the full shared eight-number command ABI.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} commands
