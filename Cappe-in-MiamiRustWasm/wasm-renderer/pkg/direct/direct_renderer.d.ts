@@ -30,6 +30,11 @@ export function drawCanvasImage(context: CanvasRenderingContext2D, image: HTMLCa
 export function drawCanvasLayer(context: CanvasRenderingContext2D, image: HTMLCanvasElement, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number, alpha: number): boolean;
 
 /**
+ * Draws the outlined combo multiplier using the browser's current font rasterizer.
+ */
+export function drawComboText(context: CanvasRenderingContext2D, commands: Float64Array, label: string): boolean;
+
+/**
  * Rasterizes ordered corpse ellipses with their original transforms and palette.
  */
 export function drawCorpses(context: CanvasRenderingContext2D, commands: Float64Array, colors: Array<any>): number;
@@ -163,6 +168,7 @@ export interface InitOutput {
     readonly drawBloodSplatter: (a: any, b: number, c: number, d: number, e: number, f: any, g: any, h: any) => [number, number, number];
     readonly drawCanvasImage: (a: any, b: any, c: number, d: number) => [number, number, number];
     readonly drawCanvasLayer: (a: any, b: any, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number) => [number, number, number];
+    readonly drawComboText: (a: any, b: any, c: number, d: number) => [number, number, number];
     readonly drawCorpses: (a: any, b: any, c: any) => [number, number, number];
     readonly drawDarkOverlay: (a: any, b: any, c: any, d: any, e: any, f: any, g: any) => [number, number, number];
     readonly drawDebugHud: (a: any, b: number, c: number, d: number, e: any, f: number, g: any) => [number, number, number];

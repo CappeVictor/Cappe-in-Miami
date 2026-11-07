@@ -1,4 +1,4 @@
-# Próximas ações — preview local v171.0
+# Próximas ações — preview local v172.0
 ## Migração integral do renderer — pendente
 1. Auditar e portar callbacks Canvas restantes, incluindo pickups; validar shells, muzzle/impacto, fog/lights/dark em gameplay real.
 2. Continuar o módulo direto nas rotas de sprites, mundo, HUD restante e expansões; ImageData, clearRect, imagens cacheadas, mapas geométricos, sangue/cadáveres, poeira/faíscas, labels de inimigos, móveis, atores, jogadores/inimigos, armas, fantasmas e aura agora usam WebSys em casos cobertos, sem benchmark. Manter o caminho antigo até cada camada ter paridade e smoke de jogo.

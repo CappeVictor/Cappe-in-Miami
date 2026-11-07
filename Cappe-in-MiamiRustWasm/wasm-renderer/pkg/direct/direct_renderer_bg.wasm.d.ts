@@ -8,6 +8,7 @@ export const drawBatchCommands: (a: any, b: any, c: any, d: any, e: any) => [num
 export const drawBloodSplatter: (a: any, b: number, c: number, d: number, e: number, f: any, g: any, h: any) => [number, number, number];
 export const drawCanvasImage: (a: any, b: any, c: number, d: number) => [number, number, number];
 export const drawCanvasLayer: (a: any, b: any, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number) => [number, number, number];
+export const drawComboText: (a: any, b: any, c: number, d: number) => [number, number, number];
 export const drawCorpses: (a: any, b: any, c: any) => [number, number, number];
 export const drawDarkOverlay: (a: any, b: any, c: any, d: any, e: any, f: any, g: any) => [number, number, number];
 export const drawDebugHud: (a: any, b: number, c: number, d: number, e: any, f: number, g: any) => [number, number, number];

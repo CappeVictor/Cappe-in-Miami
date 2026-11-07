@@ -70,3 +70,5 @@ Preview Rust/WASM local v170: muzzle flash e arco de impacto têm paridade RGBA 
 
 Preview Rust/WASM local v171: estojos têm paridade RGBA sintética e callback integrado confirmado. Projeção e fallback ainda dependem do módulo/host legado; permanecem vários callbacks Canvas JS e estados sem auditoria ampla. Sem revisão visual geral ou benchmark.
 
+Preview Rust/WASM local v172: o texto de combo teve paridade RGBA exata e callback integrado; o WASM legado ainda calcula pulso e multiplicador, com fallback Canvas ativo. Persistem callbacks Canvas host e estados sem auditoria ampla. Sem benchmark.
+

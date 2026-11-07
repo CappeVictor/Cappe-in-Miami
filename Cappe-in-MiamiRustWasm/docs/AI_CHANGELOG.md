@@ -600,3 +600,8 @@ Riscos/limites: partidas e instalação real do SW ainda não validadas; leitura
 - Chrome 156 confirmou chamada integrada e paridade RGBA exata, incluindo restauração de alpha/composição. Build direta 154.105 bytes WASM + glue 38.200 bytes; regressões 82/82.
 - Renderer segue híbrido. Sem benchmark, revisão visual ampla ou campanha completa.
 
+## Preview local v172.0 — 07/11/2026
+- O texto animado do combo agora tenta desenho no painter Rust direto; o número, pulso e formatação seguem calculados no WASM legado/JS.
+- Chrome 156 confirmou callback integrado e paridade RGBA exata, incluindo restauração do estado Canvas. Build direta 154.919 bytes WASM + glue 38.768 bytes; regressões 82/82.
+- Renderer segue híbrido. Sem benchmark, revisão visual ampla ou campanha completa.
+

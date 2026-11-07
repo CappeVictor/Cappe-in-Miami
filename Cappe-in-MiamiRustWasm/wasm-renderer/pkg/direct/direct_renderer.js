@@ -133,6 +133,23 @@ export function drawCanvasLayer(context, image, sx, sy, sw, sh, dx, dy, dw, dh, 
 }
 
 /**
+ * Draws the outlined combo multiplier using the browser's current font rasterizer.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} commands
+ * @param {string} label
+ * @returns {boolean}
+ */
+export function drawComboText(context, commands, label) {
+    const ptr0 = passStringToWasm0(label, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.drawComboText(context, commands, ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
  * Rasterizes ordered corpse ellipses with their original transforms and palette.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} commands

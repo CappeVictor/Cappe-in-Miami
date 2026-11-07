@@ -99,6 +99,7 @@
   state.directDarkOverlayCalls = 0;
   state.directFxCalls = 0;
   state.directShellCalls = 0;
+  state.directComboTextCalls = 0;
   state.fxCommands = 0;
   state.directDustCommands = 0;
   state.directSparkFrames = 0;
@@ -891,6 +892,12 @@
               const batch = currentComboTextBatch;
               const commands = new Float64Array(wasm.exports.memory.buffer, pointer, 2);
               const pulse = commands[0], label = `${Math.floor(commands[1])}X`;
+              if (state.directReady && state.direct && state.direct.drawComboText) {
+                try {
+                  const drawn = withCanvasBypass(() => state.direct.drawComboText(batch.context, commands, label));
+                  if (drawn === true) { state.directComboTextCalls++; state.comboTextCommands++; return; }
+                } catch (error) { state.directError = String(error && error.message || error); }
+              }
               withCanvasBypass(() => {
                 const context = batch.context;
                 context.save();

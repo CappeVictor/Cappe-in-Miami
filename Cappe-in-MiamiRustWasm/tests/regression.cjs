@@ -117,7 +117,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v171.0-shell-painter');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v172.0-combo-text-painter');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     const wasm=await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm');assert.equal(wasm.status,200);assert.equal(wasm.headers['content-type'],'application/wasm');assert.ok(wasm.body.length>0);
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -305,6 +305,7 @@ async function run() {
     assert.match(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn draw_dark_overlay\(\)[\s\S]*?v\[4\] <= 0\.0 \|\| v\[5\] <= 0\.0 \|\| v\[6\] <= 0\.0[\s\S]*?v\[8\] == 0\.0 \|\| v\[8\] == 1\.0[\s\S]*?v\[9\] == 0\.0 \|\| v\[9\] == 1\.0/);
     assert.match(bridge,/state\.direct\.drawFx\(batch\.context, commands, batch\.muzzleSprite \|\| null\)/);assert.match(rust,/pub fn draw_fx\([\s\S]*?set_global_composite_operation\("lighter"\)[\s\S]*?context\.arc\(/);
     assert.match(bridge,/state\.direct\.drawShells\(batch\.context, commands, count\)/);assert.match(rust,/pub fn draw_shells\([\s\S]*?set_global_alpha\(0\.72\)[\s\S]*?context\.ellipse\(/);
+    assert.match(bridge,/state\.direct\.drawComboText\(batch\.context, commands, label\)/);assert.match(rust,/pub fn draw_combo_text\([\s\S]*?set_font\("bold 54px Impact, sans-serif"\)[\s\S]*?stroke_text\(label[\s\S]*?fill_text\(label/);
     assert.match(html,/wasmRenderer\.setCanvasImageSmoothing\(g, false\)/);assert.match(bridge,/state\.direct\.setCanvasImageSmoothing\(context, enabled\)/);assert.match(rust,/pub fn set_canvas_image_smoothing\([\s\S]*?set_image_smoothing_enabled\(enabled\)/);
     assert.match(fx,/renderer\.createTextImage\(k, s, font, col, false\)/);assert.match(html,/renderer\.createTextImage\(k, s, font, c, true\)/);assert.match(bridge,/state\.direct\.createTextImage\(canvas, text, font, color, outlined\)/);assert.match(rust,/pub fn create_text_image\([\s\S]*?measure_text\(text\)[\s\S]*?fill_text\(text, 2\.0, 17\.0\)/);assert.match(rust,/stroke_text\(text, 6\.0, baseline\)/);
     assert.match(rust,/pub fn draw_batch_commands\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array[\s\S]*?JsValue/);assert.match(bridge,/state\.direct\.drawBatchCommands\(batch\.context, commands, FURNITURE_COLORS, ACTOR_COLORS, batch\)/);
@@ -880,7 +881,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v171.0-shell-painter');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v172.0-combo-text-painter');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(list.includes('wasm-renderer/pkg/renderer.wasm'));

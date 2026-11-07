@@ -171,3 +171,6 @@ Muzzle flashes e arcos de impacto tentam rasterização direta Rust por lote tip
 ## Preview Rust/WASM local v171
 Estojos de munição projetados em lote pelo WASM legado agora chamam o painter direto para desenhar elipses. Fallback Canvas permanece; Chrome confirmou paridade RGBA exata; migração parcial e sem benchmark.
 
+## Preview Rust/WASM local v172
+Texto de combo usa painter Rust direto com o Canvas do navegador; a lógica de pulso/valor permanece no caminho existente. Fallback ativo, paridade RGBA exata em Chrome; sem benchmark.
+

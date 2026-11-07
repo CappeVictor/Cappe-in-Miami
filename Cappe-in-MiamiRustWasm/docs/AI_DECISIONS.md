@@ -317,3 +317,6 @@ Manter os dados e o sprite pré-gerado no host, enviar o lote tipado ao painter 
 ## D105 — v171.0 — Rasterizar estojos no painter direto
 Reutilizar a projeção e o lote existente do WASM legado, enviando as elipses ao painter Rust/WebSys. Mantém a geometria, ordem, cor, alpha e fallback atuais, movendo o desenho para Rust sem alterar física ou simulação. Chrome 156 mostrou pixels idênticos nos casos cobertos; regressões 82/82. Sem benchmark.
 
+## D106 — v172.0 — Rasterizar texto de combo por Rust direto
+Manter cálculo de pulso e multiplicador no caminho atual, enviando o comando e a string formatada ao módulo web-sys. Isso desloca as chamadas de transform/stroke/fill de texto sem mudar timing ou conteúdo. Chrome 156 mostrou igualdade RGBA exata; regressões 82/82. Sem benchmark.
+

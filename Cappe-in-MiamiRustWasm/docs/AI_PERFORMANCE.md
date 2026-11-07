@@ -291,3 +291,6 @@ Muzzle flash e arco de impacto usam o painter direto nos callbacks cobertos. Nã
 ## v171.0 — estojos pelo painter Rust; sem benchmark
 Os estojos usam desenho direto via WebSys nas chamadas cobertas. Não foram medidos frame time, CPU, memória ou FPS, portanto não se afirma ganho de desempenho.
 
+## v172.0 — texto de combo Rust; sem benchmark
+O painter direto executa as operações Canvas do texto de combo nos casos cobertos. Não foram medidos frame time, CPU, memória ou FPS; nenhum ganho é afirmado.
+

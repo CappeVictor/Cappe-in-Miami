@@ -1,4 +1,7 @@
-# Arquitetura real — preview local v171.0
+# Arquitetura real — preview local v172.0
+
+## Preview Rust/WASM local v172.0 — texto do combo
+O WASM legado mantém o cálculo do pulso e do multiplicador. O callback entrega o pulso, o número e a string já formatada ao painter direto Rust, que aplica transform, stroke e fill de texto com o Canvas do navegador; fallback JS permanece.
 
 ## Preview Rust/WASM local v171.0 — estojos
 O WASM legado projeta estojos do espaço do jogo à tela em comandos de cinco números. O callback passa esses comandos ao painter direto Rust, que forma um caminho de elipses e aplica alpha/cor; em erro, o painter Canvas JS é mantido.

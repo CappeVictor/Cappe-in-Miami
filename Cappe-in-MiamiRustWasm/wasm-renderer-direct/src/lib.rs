@@ -580,6 +580,34 @@ pub fn draw_shells(context: &CanvasRenderingContext2d, commands: &Float64Array, 
     Ok(drawn)
 }
 
+/// Draws the outlined combo multiplier using the browser's current font rasterizer.
+#[wasm_bindgen(js_name = drawComboText)]
+pub fn draw_combo_text(context: &CanvasRenderingContext2d, commands: &Float64Array, label: &str) -> Result<bool, JsValue> {
+    if commands.length() != 2 {
+        return Ok(false);
+    }
+    let pulse = commands.get_index(0);
+    let combo = commands.get_index(1);
+    if !pulse.is_finite() || pulse <= 0.0 || pulse > 2.0 || !combo.is_finite() || combo <= 1.0 || label.is_empty() || label.len() > 64 {
+        return Ok(false);
+    }
+    context.save();
+    let drawn = (|| -> Result<(), JsValue> {
+        context.translate(34.0, 176.0)?;
+        context.scale(pulse, pulse)?;
+        context.set_font("bold 54px Impact, sans-serif");
+        context.set_line_width(6.0);
+        context.set_stroke_style_str("#1a0006");
+        context.stroke_text(label, 0.0, 0.0)?;
+        context.set_fill_style_str("#ff2e5b");
+        context.fill_text(label, 0.0, 0.0)?;
+        Ok(())
+    })();
+    context.restore();
+    drawn?;
+    Ok(true)
+}
+
 fn batch_prop(batch: &JsValue, key: &str) -> Result<JsValue, JsValue> {
     Reflect::get(batch, &JsValue::from_str(key))
 }
