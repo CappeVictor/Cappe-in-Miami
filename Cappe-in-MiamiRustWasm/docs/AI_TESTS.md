@@ -1,4 +1,10 @@
 # Testes — até 07/11/2026
+## Preview Rust/WASM local v171.0 — 07/11/2026
+- `wasm-renderer/build.ps1`: passou; módulo direto 154.105 bytes WASM e glue 38.200 bytes.
+- `node tests/regression.cjs`: 82/82 passou, com asserts de versão/health e integração drawShells.
+- `node tests/wasm-direct-draw-parity.cjs`: passou em Chrome 156; callback dos estojos chamou Rust e a comparação RGBA teve zero canais diferentes; alpha e composite foram restaurados.
+- Sem benchmark, revisão visual ampla, campanha completa ou validação dos demais callbacks em todas as telas.
+
 ## Preview Rust/WASM local v170.0 — 07/11/2026
 - `wasm-renderer/build.ps1`: passou; módulo direto 153.386 bytes WASM e glue 37.706 bytes.
 - `node tests/regression.cjs`: 82/82 passou, incluindo versão/health e ligação estática de drawFx.

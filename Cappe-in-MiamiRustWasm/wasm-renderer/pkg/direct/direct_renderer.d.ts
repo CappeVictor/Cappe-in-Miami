@@ -118,6 +118,12 @@ export function drawRain(context: CanvasRenderingContext2D, input: Float64Array,
 export function drawRawHudTexts(context: CanvasRenderingContext2D, entries: Array<any>): number;
 
 /**
+ * Draws projected shell casings from commands emitted by the legacy Rust pass.
+ * Each row contains screen x/y, horizontal/vertical radii, and rotation.
+ */
+export function drawShells(context: CanvasRenderingContext2D, commands: Float64Array, count: number): number;
+
+/**
  * Rasterizes color/alpha-grouped spark rectangles using additive Canvas blending.
  */
 export function drawSparks(context: CanvasRenderingContext2D, commands: Float64Array, colors: Array<any>): number;
@@ -174,6 +180,7 @@ export interface InitOutput {
     readonly drawPauseUi: (a: any, b: number, c: number, d: number) => [number, number, number];
     readonly drawRain: (a: any, b: any, c: number, d: number) => [number, number, number];
     readonly drawRawHudTexts: (a: any, b: any) => [number, number, number];
+    readonly drawShells: (a: any, b: any, c: number) => [number, number, number];
     readonly drawSparks: (a: any, b: any, c: any) => [number, number, number];
     readonly drawStaticBlood: (a: any, b: any, c: number, d: number) => [number, number, number];
     readonly drawWeatherMotes: (a: any, b: any, c: number, d: number) => [number, number, number];

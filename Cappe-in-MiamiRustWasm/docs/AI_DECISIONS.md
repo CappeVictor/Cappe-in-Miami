@@ -314,3 +314,6 @@ A chamada Rust de poeira alterava globalAlpha e não restaurava o contexto, obri
 ## D104 — v170.0 — Rasterizar muzzle flash e arcos de impacto em Rust
 Manter os dados e o sprite pré-gerado no host, enviar o lote tipado ao painter Rust direto e conservar o callback Canvas como fallback. Isso move a chamada de desenho para o módulo direto sem alterar simulação ou RNG. Chrome 156 mostrou pixels RGBA idênticos nos casos cobertos; regressões 82/82. Sem benchmark.
 
+## D105 — v171.0 — Rasterizar estojos no painter direto
+Reutilizar a projeção e o lote existente do WASM legado, enviando as elipses ao painter Rust/WebSys. Mantém a geometria, ordem, cor, alpha e fallback atuais, movendo o desenho para Rust sem alterar física ou simulação. Chrome 156 mostrou pixels idênticos nos casos cobertos; regressões 82/82. Sem benchmark.
+

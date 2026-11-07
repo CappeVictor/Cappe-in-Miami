@@ -423,6 +423,22 @@ export function drawRawHudTexts(context, entries) {
 }
 
 /**
+ * Draws projected shell casings from commands emitted by the legacy Rust pass.
+ * Each row contains screen x/y, horizontal/vertical radii, and rotation.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} commands
+ * @param {number} count
+ * @returns {number}
+ */
+export function drawShells(context, commands, count) {
+    const ret = wasm.drawShells(context, commands, count);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
  * Rasterizes color/alpha-grouped spark rectangles using additive Canvas blending.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} commands

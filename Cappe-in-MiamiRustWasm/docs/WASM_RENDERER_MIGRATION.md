@@ -1,5 +1,9 @@
 # Migração do renderer gráfico para Rust/WASM
 
+## Etapa atual — preview local v171, conversão parcial
+
+O callback de estojos agora tenta desenhar os comandos de elipse pelo painter Rust direto. Projeção de tela e geração do lote permanecem no WASM legado; simulação continua JS e Canvas conserva fallback. Chrome 156 confirmou uma chamada integrada e paridade RGBA exata, com alpha/composição restaurados. Build direta: 154.105 bytes WASM + 38.200 bytes glue; regressões 82/82. Sem campanha completa, revisão visual ampla ou benchmark.
+
 ## Etapa atual — preview local v170, conversão parcial
 
 Muzzle flashes e arcos de impacto agora tentam rasterização pelo painter Rust/WebSys direto; a simulação, criação do sprite e fallback continuam no host. Chrome 156 confirmou uma chamada integrada e paridade RGBA exata nos casos cobertos. Build direta: 153.386 bytes WASM + 37.706 bytes glue; regressões 82/82. O renderer continua híbrido; sem campanha completa, revisão visual ampla ou benchmark.

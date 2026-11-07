@@ -68,3 +68,5 @@ Preview Rust/WASM local v112: screen shake e kick/camera shake usam dois estági
 Preview Rust/WASM local v132: os textos da loja usam o batch HUD, mas as formas do dealer/cards, rasterização de glifos, simulação e fallback permanecem JS/Canvas. Regressões 75/75, ABI e browser bridge passaram; sem smoke runtime válido, comparação visual ou FPS medido. Migração ainda parcial.
 Preview Rust/WASM local v170: muzzle flash e arco de impacto têm paridade RGBA sintética e uma chamada integrada confirmada; sprite/estado são preparados em JS e o fallback permanece. Ainda há callbacks Canvas host, dispatcher legado e modos sem auditoria ampla. Campanha não concluída, sem revisão visual geral ou benchmark.
 
+Preview Rust/WASM local v171: estojos têm paridade RGBA sintética e callback integrado confirmado. Projeção e fallback ainda dependem do módulo/host legado; permanecem vários callbacks Canvas JS e estados sem auditoria ampla. Sem revisão visual geral ou benchmark.
+

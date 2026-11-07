@@ -1,5 +1,5 @@
 # Cappe-in-Miami — contexto persistente
-Atualizado em 07/11/2026. Iteração de renderer local: preview Rust/WASM v170.0; a base de gameplay continua v55.0.
+Atualizado em 07/11/2026. Iteração de renderer local: preview Rust/WASM v171.0; a base de gameplay continua v55.0.
 
 ## Identidade e restrições
 Ação top-down em HTML, CSS e JavaScript, Canvas 2D e Web Audio. Preservar identidade, conteúdo, mapas, saves e recursos existentes. Objetivo: evolução incremental mensurável; referência de 60 FPS / 16,67 ms, sem alegar resultados sem medição.
@@ -14,6 +14,9 @@ Base e estados globais em index.html; módulos JS, 2 folhas CSS, 86 imagens exis
 Mapas pesados em maps.js (~2,93 MB), já com decodificação sob demanda. Há sistemas de navegação, IA por classes, chefes, máscaras, armas, perks, modos, vendedor e áudio sintetizado. Consulte AI_ARCHITECTURE.md e AI_FEATURES.md.
 
 ## Iteração atual
+
+## Preview local Rust/WASM v171.0 — 07/11/2026
+O callback dos estojos de munição agora tenta desenhar os elipses do lote pelo módulo Rust direto; o WASM legado continua projetando posições e o Canvas JS permanece como fallback. Chrome 156 confirmou paridade RGBA exata e callback integrado; regressões 82/82. Build direta: 154.105 bytes WASM + 38.200 bytes glue. Sem benchmark ou validação visual ampla.
 
 ## Preview local Rust/WASM v170.0 — 07/11/2026
 Flashes de disparo e arcos de impacto agora tentam rasterização Rust direta, preservando o callback Canvas como fallback. Chrome 156 confirmou paridade RGBA exata nos casos cobertos; regressões 82/82. Build direta: 153.386 bytes WASM + 37.706 bytes glue. Sem benchmark ou validação visual ampla.

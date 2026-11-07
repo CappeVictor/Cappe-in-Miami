@@ -288,3 +288,6 @@ O painter Rust conserva globalAlpha e estilos anteriores ao desenhar a poeira. O
 ## v170.0 — efeitos curtos por Rust; sem benchmark
 Muzzle flash e arco de impacto usam o painter direto nos callbacks cobertos. Não foram medidos frame time, CPU, memória ou FPS; nenhuma melhora de desempenho é afirmada.
 
+## v171.0 — estojos pelo painter Rust; sem benchmark
+Os estojos usam desenho direto via WebSys nas chamadas cobertas. Não foram medidos frame time, CPU, memória ou FPS, portanto não se afirma ganho de desempenho.
+

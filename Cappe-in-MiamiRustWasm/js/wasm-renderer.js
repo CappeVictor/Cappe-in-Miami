@@ -98,6 +98,7 @@
   state.directInvasionZoneCalls = 0;
   state.directDarkOverlayCalls = 0;
   state.directFxCalls = 0;
+  state.directShellCalls = 0;
   state.fxCommands = 0;
   state.directDustCommands = 0;
   state.directSparkFrames = 0;
@@ -547,6 +548,12 @@
             try {
               const batch = currentShellBatch;
               const commands = new Float64Array(wasm.exports.memory.buffer, pointer, count * 5);
+              if (state.directReady && state.direct && state.direct.drawShells) {
+                try {
+                  const drawn = withCanvasBypass(() => state.direct.drawShells(batch.context, commands, count));
+                  if (drawn === count) { state.directShellCalls++; return; }
+                } catch (error) { state.directError = String(error && error.message || error); }
+              }
               withCanvasBypass(() => {
                 const context = batch.context;
                 context.save();

@@ -168,3 +168,6 @@ Em v104 Rust também escolhe imagem/posição das vinhetas do gameplay/HUD e do 
 ## Preview Rust/WASM local v170
 Muzzle flashes e arcos de impacto tentam rasterização direta Rust por lote tipado; sprite, simulação e fallback permanecem no host. Paridade sintética exata em Chrome; migração parcial e sem benchmark.
 
+## Preview Rust/WASM local v171
+Estojos de munição projetados em lote pelo WASM legado agora chamam o painter direto para desenhar elipses. Fallback Canvas permanece; Chrome confirmou paridade RGBA exata; migração parcial e sem benchmark.
+

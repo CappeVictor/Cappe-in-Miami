@@ -25,6 +25,7 @@ export const drawMapCommands: (a: any, b: any, c: any) => [number, number, numbe
 export const drawPauseUi: (a: any, b: number, c: number, d: number) => [number, number, number];
 export const drawRain: (a: any, b: any, c: number, d: number) => [number, number, number];
 export const drawRawHudTexts: (a: any, b: any) => [number, number, number];
+export const drawShells: (a: any, b: any, c: number) => [number, number, number];
 export const drawSparks: (a: any, b: any, c: any) => [number, number, number];
 export const drawStaticBlood: (a: any, b: any, c: number, d: number) => [number, number, number];
 export const drawWeatherMotes: (a: any, b: any, c: number, d: number) => [number, number, number];

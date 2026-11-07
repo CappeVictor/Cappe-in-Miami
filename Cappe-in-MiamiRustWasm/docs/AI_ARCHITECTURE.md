@@ -1,4 +1,7 @@
-# Arquitetura real — preview local v170.0
+# Arquitetura real — preview local v171.0
+
+## Preview Rust/WASM local v171.0 — estojos
+O WASM legado projeta estojos do espaço do jogo à tela em comandos de cinco números. O callback passa esses comandos ao painter direto Rust, que forma um caminho de elipses e aplica alpha/cor; em erro, o painter Canvas JS é mantido.
 
 ## Preview Rust/WASM local v170.0 — efeitos curtos
 O callback de muzzle flash e arco de impacto entrega ao painter Rust um lote intercalado com posição, tempo, raio, ângulo e tipo de efeito. O sprite de muzzle permanece uma imagem criada/cacheada no host; a simulação e o fallback também seguem JS.

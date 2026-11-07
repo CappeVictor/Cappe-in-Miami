@@ -548,6 +548,38 @@ pub fn draw_fx(context: &CanvasRenderingContext2d, commands: &Float64Array, muzz
     Ok(count as i32)
 }
 
+/// Draws projected shell casings from commands emitted by the legacy Rust pass.
+/// Each row contains screen x/y, horizontal/vertical radii, and rotation.
+#[wasm_bindgen(js_name = drawShells)]
+pub fn draw_shells(context: &CanvasRenderingContext2d, commands: &Float64Array, count: u32) -> Result<i32, JsValue> {
+    if count > 8192 || commands.length() < count.saturating_mul(5) {
+        return Ok(-1);
+    }
+    context.save();
+    context.set_global_alpha(0.72);
+    context.set_fill_style_str("#d8c8a2");
+    context.begin_path();
+    let mut drawn = 0i32;
+    for index in 0..count {
+        let offset = index * 5;
+        let x = commands.get_index(offset);
+        let y = commands.get_index(offset + 1);
+        let radius_x = commands.get_index(offset + 2);
+        let radius_y = commands.get_index(offset + 3);
+        let rotation = commands.get_index(offset + 4);
+        if !x.is_finite() || !y.is_finite() || !radius_x.is_finite() || !radius_y.is_finite()
+            || !rotation.is_finite() || radius_x < 0.0 || radius_y < 0.0
+        {
+            continue;
+        }
+        context.ellipse(x, y, radius_x, radius_y, rotation, 0.0, core::f64::consts::TAU)?;
+        drawn += 1;
+    }
+    context.fill();
+    context.restore();
+    Ok(drawn)
+}
+
 fn batch_prop(batch: &JsValue, key: &str) -> Result<JsValue, JsValue> {
     Reflect::get(batch, &JsValue::from_str(key))
 }

@@ -60,7 +60,8 @@ async function until(fn, ms = 20000) {
       const lamps={core:lampCanvas(),far:lampCanvas(),flash:lampCanvas()},beforeDark=HM_WASM_RENDERER.directDarkOverlayCalls;
       const dark=HM_WASM_RENDERER.drawDarkOverlay(darkContext,screenContext,darkCanvas,lamps,P.x,P.y,cam.x,cam.y,W,H,CFG.zoom,P.a,false,true);
       const beforeFx=HM_WASM_RENDERER.directFxCalls,fx=HM_WASM_RENDERER.drawFx(context,[{x:160,y:120,t:.2,R:14,a:.4,muzzle:false}]);
-      return{fog,lights,rings,zone,dark,fx,directFogCalls:HM_WASM_RENDERER.directFogCalls-before.fog,directWorldLightCalls:HM_WASM_RENDERER.directWorldLightCalls-before.lights,directWorldRingCalls:HM_WASM_RENDERER.directWorldRingCalls-before.rings,directInvasionZoneCalls:HM_WASM_RENDERER.directInvasionZoneCalls-before.zone,directDarkOverlayCalls:HM_WASM_RENDERER.directDarkOverlayCalls-beforeDark,directFxCalls:HM_WASM_RENDERER.directFxCalls-beforeFx};
+      const beforeShells=HM_WASM_RENDERER.directShellCalls,shells=HM_WASM_RENDERER.drawShells(context,[{x:160,y:120,r:2},{x:168,y:125,r:1.5}],10,20);
+      return{fog,lights,rings,zone,dark,fx,shells,directFogCalls:HM_WASM_RENDERER.directFogCalls-before.fog,directWorldLightCalls:HM_WASM_RENDERER.directWorldLightCalls-before.lights,directWorldRingCalls:HM_WASM_RENDERER.directWorldRingCalls-before.rings,directInvasionZoneCalls:HM_WASM_RENDERER.directInvasionZoneCalls-before.zone,directDarkOverlayCalls:HM_WASM_RENDERER.directDarkOverlayCalls-beforeDark,directFxCalls:HM_WASM_RENDERER.directFxCalls-beforeFx,directShellCalls:HM_WASM_RENDERER.directShellCalls-beforeShells};
     })()`);
     process.stdout.write('[parity] world batch callbacks ready\n');
     const debugHud = await evaluate(`(()=>{if(!EXP.dbg)return{error:'debug mode not active'};const before=HM_WASM_RENDERER.directDebugHudCalls;const drawn=HM_WASM_RENDERER.drawDebugHud(ctx,W,H,true,['DEV FPS 60','pos 240,160','mapa TESTE 960x600','inimigos 3 balas 2','paredes 14 portas 1','F3 painel F4 colisão F6 IA F7 mapa','F9 erros F10 chefe'],true,['debug parity sample']);return{calls:HM_WASM_RENDERER.directDebugHudCalls-before,drawn}})()`);
@@ -155,7 +156,11 @@ async function until(fn, ms = 20000) {
       fxReference.save();fxReference.globalCompositeOperation='lighter';fxReference.globalAlpha=.8;fxReference.drawImage(muzzle,28,23,24,24);fxReference.restore();
       fxReference.strokeStyle='#fff';fxReference.lineWidth=4;fxReference.beginPath();fxReference.arc(80,65,16,.4-1.2,.4+1.2);fxReference.stroke();
       const fxCount=HM_WASM_RENDERER.direct.drawFx(fxDirect,new Float64Array([40,35,.08,12,.3,1,80,65,.15,16,.4,0]),muzzle),fxParity=compare(fxReference,fxDirect);
-      return{fogCount,fog,lightCount,worldLights,ringCount,rings,zone,invasion,darkDrawn,darkOverlay,fxCount,fxParity};
+      const shellReference=make(),shellDirect=make(),shells=new Float64Array([42,36,3,1.8,.5,73,58,2.25,1.2,-.3]);
+      shellReference.globalAlpha=shellDirect.globalAlpha=.65;shellReference.globalCompositeOperation=shellDirect.globalCompositeOperation='multiply';
+      shellReference.save();shellReference.globalAlpha=.72;shellReference.fillStyle='#d8c8a2';shellReference.beginPath();shellReference.ellipse(42,36,3,1.8,.5,0,Math.PI*2);shellReference.ellipse(73,58,2.25,1.2,-.3,0,Math.PI*2);shellReference.fill();shellReference.restore();
+      const shellCount=HM_WASM_RENDERER.direct.drawShells(shellDirect,shells,2),shellParity=compare(shellReference,shellDirect);
+      return{fogCount,fog,lightCount,worldLights,ringCount,rings,zone,invasion,darkDrawn,darkOverlay,fxCount,fxParity,shellCount,shellParity};
     })()`);
     process.stdout.write('[parity] world batches ready\n');
     if (started !== 'play' || runtime < 1) throw Error('gameplay did not route enemy shadows through direct Rust: ' + JSON.stringify({ started, runtime }));
@@ -163,14 +168,16 @@ async function until(fn, ms = 20000) {
     if (debugWorld?.calls < 1 || !debugWorld.drawn || debugWorld.walls < 1 || debugWorld.enemies < 1) throw Error('developer world overlays did not draw through direct Rust: ' + JSON.stringify(debugWorld));
     if (!worldBatchRuntime.fog || !worldBatchRuntime.lights || !worldBatchRuntime.rings || !worldBatchRuntime.zone
       || !worldBatchRuntime.dark || worldBatchRuntime.directFogCalls < 1 || worldBatchRuntime.directWorldLightCalls < 1 || worldBatchRuntime.directWorldRingCalls < 1
-      || !worldBatchRuntime.fx || worldBatchRuntime.directInvasionZoneCalls < 1 || worldBatchRuntime.directDarkOverlayCalls < 1 || worldBatchRuntime.directFxCalls < 1) throw Error('world batch callback did not call direct Rust: ' + JSON.stringify(worldBatchRuntime));
+      || !worldBatchRuntime.fx || worldBatchRuntime.directInvasionZoneCalls < 1 || worldBatchRuntime.directDarkOverlayCalls < 1 || worldBatchRuntime.directFxCalls < 1
+      || !worldBatchRuntime.shells || worldBatchRuntime.directShellCalls < 1) throw Error('world batch callback did not call direct Rust: ' + JSON.stringify(worldBatchRuntime));
     if (parity.shadows !== 3 || parity.directCount !== 3 || parity.differentChannels !== 0 || parity.maxDifference !== 0 || parity.referenceAlpha !== parity.directAlpha || parity.referenceFill !== parity.directFill) throw Error('enemy shadow parity failed: ' + JSON.stringify(parity));
     if (!glassTraceParity.directResult || glassTraceParity.shards !== 9 || glassTraceParity.differentChannels !== 0 || glassTraceParity.maxDifference !== 0 || glassTraceParity.restoredAlpha !== .65 || glassTraceParity.restoredFill !== '#123456' || glassTraceParity.directCalls < 1) throw Error('glass trace parity failed: ' + JSON.stringify(glassTraceParity));
     if (!explosionScorchParity.directResult || explosionScorchParity.differentChannels !== 0 || explosionScorchParity.maxDifference !== 0 || explosionScorchParity.referenceAlpha !== explosionScorchParity.directAlpha || explosionScorchParity.referenceFill !== explosionScorchParity.directFill || explosionScorchParity.directCalls < 1) throw Error('explosion scorch parity failed: ' + JSON.stringify(explosionScorchParity));
     if (!debugHudParity.directResult || debugHudParity.differentChannels !== 0 || debugHudParity.maxDifference !== 0 || debugHudParity.referenceAlpha !== debugHudParity.directAlpha || debugHudParity.referenceFill !== debugHudParity.directFill) throw Error('debug HUD parity failed: ' + JSON.stringify(debugHudParity));
     if (!debugWorldParity.directResult || debugWorldParity.differentChannels !== 0 || debugWorldParity.maxDifference !== 0 || debugWorldParity.referenceAlpha !== debugWorldParity.directAlpha || debugWorldParity.referenceFill !== debugWorldParity.directFill || debugWorldParity.referenceStroke !== debugWorldParity.directStroke || debugWorldParity.referenceLineWidth !== debugWorldParity.directLineWidth) throw Error('debug world overlay parity failed: ' + JSON.stringify(debugWorldParity));
     if (worldBatchParity.fogCount !== 3 || worldBatchParity.lightCount !== 3 || worldBatchParity.ringCount !== 1 || worldBatchParity.zone !== true || worldBatchParity.darkDrawn !== true || worldBatchParity.fxCount !== 2
-      || [worldBatchParity.fog, worldBatchParity.worldLights, worldBatchParity.rings, worldBatchParity.invasion, worldBatchParity.darkOverlay, worldBatchParity.fxParity].some(result => result.differentChannels !== 0 || !result.alphaRestored || !result.compositeRestored)) throw Error('world batch parity failed: ' + JSON.stringify(worldBatchParity));
+      || worldBatchParity.shellCount !== 2
+      || [worldBatchParity.fog, worldBatchParity.worldLights, worldBatchParity.rings, worldBatchParity.invasion, worldBatchParity.darkOverlay, worldBatchParity.fxParity, worldBatchParity.shellParity].some(result => result.differentChannels !== 0 || !result.alphaRestored || !result.compositeRestored)) throw Error('world batch parity failed: ' + JSON.stringify(worldBatchParity));
     console.log(JSON.stringify({ browser: 'Chrome', gameState: started, runtimeDirectShadowCalls: runtime, worldBatchRuntime, debugHud, debugWorld, parity, glassTraceParity, explosionScorchParity, debugHudParity, debugWorldParity, worldBatchParity }, null, 2));
   } catch (error) {
     console.error(error.stack || String(error)); process.exitCode = 1;
