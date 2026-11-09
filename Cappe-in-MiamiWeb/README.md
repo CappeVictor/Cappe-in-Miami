@@ -1,4 +1,4 @@
-# Cappe in Miami Web — v84.0
+# Cappe in Miami Web — v85.0
 
 Versão para navegador com HTML, CSS e JavaScript; o jogo usa o renderer Canvas 2D em JavaScript e não depende de Rust nem WebAssembly.
 
@@ -27,3 +27,9 @@ Valide a compressão com `node tests/compression-regression.cjs`; o teste confer
 O desenho de faíscas agora agrupa cada partícula uma vez por cor e faixa de opacidade, reutilizando os grupos entre quadros. A regressão de pixels verifica o caminho Canvas com 500 faíscas; os dados da simulação e a aparência esperada permanecem iguais.
 
 A IA agora reutiliza os objetos dos pontos de rota BFS quando recalcula o caminho. A rota não muda; uma regressão verifica a igualdade com uma busca independente. O microbenchmark sintético registrou 0 objetos de ponto criados em 500 recálculos após aquecer o pool, contra 35.000 sem reutilização. A mediana ficou perto de 0,04 ms nos dois casos; não houve ganho demonstrado em tempo de quadro ou heap total.
+
+## Otimização v85
+
+A colisão usada pela navegação da IA agora consulta uma grade espacial de sólidos próximos em vez de percorrer todos os retângulos do mapa em cada amostra de raio. Os sólidos, tiles e geometria dos mapas não mudam. Uma regressão compara 3.000 posições com a busca linear e confirma os mesmos resultados.
+
+Em três rodadas locais no Chrome, com 120 inimigos e 500 faíscas, a mediana do p90 de update+draw caiu de 3,7 ms na v84 para 2,0 ms; p95 caiu de 4,5 para 2,7 ms e a média de 2,272 para 1,613 ms. É um cenário de estresse local; os tempos variam por mapa e computador. Regressões compartilhadas: 108/108.

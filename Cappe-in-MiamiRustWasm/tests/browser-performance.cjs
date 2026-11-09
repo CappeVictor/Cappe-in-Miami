@@ -15,10 +15,11 @@ const STRESS_ENEMIES = Math.max(0, Math.min(120, Number(process.env.CAPPE_PERF_E
 const STRESS_SPARKS = Math.max(0, Math.min(500, Number(process.env.CAPPE_PERF_SPARKS) || 0));
 const FORCE_CANVAS_SPARKS = process.env.CAPPE_PERF_FORCE_CANVAS_SPARKS === '1';
 const REPO = path.resolve(__dirname, '../..');
+const BUILD_FILTER = (process.env.CAPPE_PERF_BUILD || '').toLowerCase();
 const BUILDS = [
-  { name: 'Web', root: path.join(REPO, 'Cappe-in-MiamiWeb'), wasm: false },
+  { name: 'Web', root: process.env.CAPPE_PERF_WEB_ROOT || path.join(REPO, 'Cappe-in-MiamiWeb'), wasm: false },
   { name: 'Rust/WASM', root: RUST_ROOT, wasm: true },
-];
+].filter(build => !BUILD_FILTER || build.name.toLowerCase() === BUILD_FILTER || (BUILD_FILTER === 'rust' && build.wasm));
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function freePort() {
@@ -216,6 +217,7 @@ async function measure(build) {
 
 (async () => {
   if (typeof WebSocket === 'undefined') throw new Error('Este medidor requer Node.js 22 ou superior.');
+  if (!BUILDS.length) throw new Error('CAPPE_PERF_BUILD deve ser Web ou Rust.');
   const results = [];
   for (const build of BUILDS) results.push(await measure(build));
   console.log(JSON.stringify({ chrome: CHROME, note: 'Tempo local de update+draw e intervalo RAF; resultados dependem do PC, navegador e carga.', results }, null, 2));

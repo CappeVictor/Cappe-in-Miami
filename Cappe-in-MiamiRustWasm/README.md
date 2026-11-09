@@ -1,4 +1,10 @@
-# Cappe-in-Miami — preview Rust/WASM v297.0
+# Cappe-in-Miami — preview Rust/WASM v298.0
+
+## Otimização v298
+
+A navegação da IA agora consulta uma grade espacial dos sólidos próximos ao testar colisões em raios e células de caminho, sem alterar tiles, colisões ou geometria. O índice é reconstruído quando os sólidos do mapa mudam, inclusive quando o vidro quebra. Uma regressão determinística comparou 3.000 posições com a busca linear e confirmou os mesmos resultados.
+
+Em três rodadas locais no Chrome, com 120 inimigos e 500 faíscas, a mediana do p90 de update+draw caiu de 3,6 ms na v297 para 3,2 ms; p95 caiu de 4,5 para 3,8 ms. A média subiu levemente de 2,385 para 2,502 ms neste teste, portanto o resultado não prova ganho geral de desempenho; a medição precisa continuar. Os resultados variam entre mapas e computadores. Regressões: 108/108.
 
 ## Otimização v295
 
