@@ -1,4 +1,8 @@
-# Cappe in Miami Web — v92.0
+# Cappe in Miami Web — v93.0
+
+## Otimização v93 — atualização e remoção de faíscas em um percurso
+
+O jogo agora atualiza posição/vida e remove partículas expiradas durante o mesmo percurso, mantendo a ordem e os objetos das faíscas sobreviventes. Três execuções locais no Chrome, com 120 inimigos e 500 faíscas, tiveram p90 mediano de update+draw após adaptação de 0,6 para 0,5 ms; p95 mediano de 0,6 para 0,5 ms. A média mediana mudou pouco (0,433 para 0,430 ms), então o resultado é específico da carga e não garante aumento de FPS.
 
 ## Otimização v92 — verificações de alcance da IA
 

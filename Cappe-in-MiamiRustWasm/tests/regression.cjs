@@ -125,6 +125,24 @@ async function run() {
     const goal=enemy.goal;assert.ok(goal);enemy.lkp={x:220,y:160};exp.aiExtTick(.016);
     assert.equal(enemy.goal,goal,'o mesmo objeto é mantido');assert.equal(goal.x,220);assert.equal(goal.y,160);
   });
+  await test('Atualização e remoção de faíscas usam um único laço nas versões Web e Rust/WASM', () => {
+    const dirs=[root,path.resolve(root,'..','Cappe-in-MiamiWeb')].filter(dir=>fs.existsSync(path.join(dir,'index.html')));
+    assert.equal(dirs.length,2,'fonte Web disponível para comparação cruzada');
+    for(const dir of dirs) {
+      const html=fs.readFileSync(path.join(dir,'index.html'),'utf8'),fn=declaration(html,'function updateSparks(dt) {');
+      assert.equal((fn.match(/\bfor\s*\(/g)||[]).length,1,'um só percurso por quadro');
+      assert.match(fn,/if \(p\.life > 0\) sparks\[w\+\+\] = p;[\s\S]*?sparks\.length = w;/);
+      const ctx=vm.createContext({sparks:[
+        {x:1,y:2,vx:3,vy:-2,life:.5,max:1},
+        {x:4,y:5,vx:1,vy:1,life:.05,max:1},
+        {x:-2,y:9,vx:-4,vy:2,life:.12,max:1}
+      ],Math});
+      vm.runInContext(fn,ctx);const first=ctx.sparks[0],last=ctx.sparks[2];ctx.updateSparks(.1);
+      assert.equal(ctx.sparks.length,2);assert.equal(ctx.sparks[0],first);assert.equal(ctx.sparks[1],last,'ordem e identidade das sobreviventes preservadas');
+      assert.equal(first.life,.4);assert.equal(first.x,1.3);assert.equal(first.y,1.8);
+      assert.equal(last.life,.01999999999999999);assert.equal(last.x,-2.4);assert.equal(last.y,9.2);
+    }
+  });
   await test('Servidor online: rotas, IDs públicos, reconexão, validação, relay e autorização', async () => {
     delete require.cache[require.resolve('../server/server.js')];
     const {createGameServer,rooms,createRoom,joinRoom,rejoinRoom,publishState,roomView,listRooms,limitRoomAttempts}=require('../server/server.js');
@@ -148,7 +166,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v307.0-reuse-spark-input-view-rust');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v308.0-single-pass-sparks-rust');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -1168,7 +1186,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v307.0-reuse-spark-input-view-rust');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v308.0-single-pass-sparks-rust');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));

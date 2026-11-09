@@ -542,3 +542,7 @@ Em dois pares locais do Chrome com 120 inimigos e 500 faíscas, usando CAPPE_PER
 
 O desenho das faíscas reutiliza `Float64Array.subarray` enquanto a quantidade e o buffer permanecem iguais. Com 500 faíscas em 180 quadros, o contador instrumentado caiu de 179 vistas criadas para 1. A mediana da média de quadro ficou praticamente igual (0,797→0,803 ms), p90 igual (0,9 ms) e p95 mudou de 1,1 para 1,0 ms. Isso reduz a criação de objetos de vista no caminho medido, mas não comprova redução de heap bytes nem aumento consistente de FPS. Regressões 115/115 e paridade Chrome de partículas: zero diferenças de pixel.
 
+## v93/v308 — atualização e compactação de faíscas em um percurso
+
+`updateSparks` integra posição/vida e compacta as partículas sobreviventes no mesmo laço estável, reduzindo um percurso completo por quadro em Web e Rust/WASM. O teste determinístico verifica as duas versões, identidade/ordem das partículas sobreviventes e remoção após expiração. Em três execuções Chrome com 120 inimigos e 500 faíscas, as medianas de update+draw após adaptação foram: Web p90 0,6→0,5 ms, p95 0,6→0,5 ms e média 0,433→0,430 ms; Rust/WASM p90 0,9→0,9 ms, p95 1,0→0,9 ms e média 0,762→0,712 ms. São amostras de 60 quadros por execução, em uma máquina; não demonstram redução de memória nem garantem FPS em geral.
+

@@ -1,4 +1,8 @@
-# Cappe-in-Miami — preview Rust/WASM v307.0
+# Cappe-in-Miami — preview Rust/WASM v308.0
+
+## Otimização v308 — atualização e remoção de faíscas em um percurso
+
+Web e Rust/WASM agora atualizam posição/vida e removem faíscas expiradas no mesmo percurso estável. Ordem e identidade das partículas sobreviventes permanecem iguais. Em três execuções locais no Chrome com 120 inimigos e 500 faíscas, p90 mediano de update+draw após adaptação permaneceu em 0,9 ms em Rust/WASM e caiu de 0,6 para 0,5 ms na Web; p95 mediano caiu de 1,0 para 0,9 ms e de 0,6 para 0,5 ms, respectivamente. A amostra é local e não garante FPS geral.
 
 ## Otimização v307 — vista reutilizada para entrada de faíscas
 
