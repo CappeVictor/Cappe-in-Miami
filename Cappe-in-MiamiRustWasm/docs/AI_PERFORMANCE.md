@@ -1,3 +1,6 @@
+## v293/v81 — carregar apenas os mapas Neon ativos
+O catálogo incluía 159 mapas, embora a allowlist permita 61. Ambos os bundles agora contêm exatamente os 61 ativos e omitem 98 mapas não selecionáveis. O arquivo de mapas caiu de 2.929.052 para 1.616.608 bytes no Rust/WASM e de 2.929.179 para 1.616.614 bytes na Web (−44,8%). A compactação compara cada tile, objeto e dimensão dos mapas mantidos; a suíte exige a allowlist exata e igualdade geométrica entre as versões. Reduz dados transferidos e estruturas montadas no carregamento. Os ZIPs caíram 11,6% na Web e 7,4% em Rust/WASM. Não foi medido FPS nem heap do processo.
+
 ## v292 — governor resistente a picos de frame isolados
 O tier adaptativo agora usa o percentil 90 do custo update+draw e da cadência nos primeiros 120 quadros aceitos, com o limite de FPS como meta. Isso evita reduzir escala/efeitos por poucos atrasos grandes durante a inicialização. Em um smoke headless com movimento e disparos, Web e Rust permaneceram no tier 0: p90 RAF 18,3 ms nas duas; p90 update+draw 2,2 ms Web e 3,4 ms Rust. O processo executa em um único Chrome, mas a amostra é local e não é benchmark controlado. `node tests/browser-performance.cjs`; perfil: `node tests/browser-performance.cjs --profile` (Node 22+).
 

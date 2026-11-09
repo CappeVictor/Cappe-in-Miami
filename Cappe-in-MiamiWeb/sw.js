@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v80.0-p90-frame-governor-web-js';
+const CACHE = 'cappe-v81.0-active-map-data-web-js';
 const ASSETS = [
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",

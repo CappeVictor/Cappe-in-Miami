@@ -14,8 +14,8 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
-- **Web — HTML, CSS e JavaScript v80:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — v292:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v292-preview.zip)
+- **Web — HTML, CSS e JavaScript v81:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
+- **Rust/WASM — v293:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v293-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
@@ -84,8 +84,8 @@ A prévia v289 usa painters Rust/WebSys diretos para as camadas amostradas de ga
 - Color grade e overlays de fade/flash passaram a usar os painters diretos; os batches correspondentes saíram do WASM legado, preservando o fallback Canvas.
 - Regressões 102/102, ABI, browser bridge e comparações RGBA passaram. Sem benchmark ou revisão visual manual ampla.
 
-**Versões v80 Web e v292 Rust/WASM — 9 de novembro de 2026**
-- Governador usa o percentil 90 de update+draw e cadência RAF, respeitando o limite de FPS escolhido e evitando downgrade por picos isolados. No smoke headless com movimento/disparos, ambas ficaram no tier 0 com p90 de cadência 18,3 ms; tempo p90 update+draw: 2,2 ms Web e 3,4 ms Rust/WASM. Amostra local, sem controle.
+**Versões v81 Web e v293 Rust/WASM — 9 de novembro de 2026**
+- O bundle Neon passou de 159 para 61 mapas permitidos nas duas versões; os 98 mapas inativos/de teste foram removidos do arquivo carregado. Os 61 mapas mantidos foram comparados antes/depois: dimensões, tiles e objetos idênticos. `js/maps.js` caiu 44,8% (cerca de 1,31 MB em cada build). Os ZIPs caíram de 1.025.908 para 906.429 bytes (Web) e de 1.581.344 para 1.463.623 bytes (Rust/WASM). O governador v80/v292 continua usando percentil 90 para ignorar picos isolados. Suíte e paridade validadas.
 
 **Conteúdo Web v55.0 — 5 de novembro de 2026**
 - A seleção ativa de mapas foi organizada para remover títulos com dimensões, mapas de teste e protótipos.
