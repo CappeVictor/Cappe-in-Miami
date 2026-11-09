@@ -1,4 +1,8 @@
-# Cappe-in-Miami — preview Rust/WASM v300.0
+# Cappe-in-Miami — preview Rust/WASM v301.0
+
+## Otimização v301 — camada de sangue sem cópia temporária
+
+Ao acrescentar marcas de sangue à camada persistente, Rust/WASM agora recebe a lista original e o índice das partículas novas. Isso elimina a cópia intermediária criada com `slice()`; a ponte ainda reutiliza o buffer numérico e processa apenas as marcas recém-adicionadas. O fallback Canvas percorre a mesma faixa. A paridade no Chrome confirmou zero canais de pixel diferentes e que a lista não é alterada. Suíte de regressão: 110/110. Não foi medido ganho de FPS para esta alteração.
 
 ## Otimização v300 — grade de colisão da IA
 
