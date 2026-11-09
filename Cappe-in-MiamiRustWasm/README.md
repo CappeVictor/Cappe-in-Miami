@@ -4,7 +4,7 @@
 
 Esta versão requer Node.js 18+ para INICIAR_EXPERIMENTO_WASM.bat. O módulo Rust/WebSys direto é a única implementação WASM compilada, carregada e armazenada pelo jogo; paredes da Campanha e mapas de até 1600 × 1200 px usam os painters diretos. O governador v292 decide a redução adaptativa pelo percentil 90 dos primeiros 120 quadros aceitos, respeita o limite de FPS e ignora picos esporádicos. Regressões: 105/105; ABI: 114 exports/107 imports; bridge e paridade de desenho Chrome passaram. No smoke headless com renderer Rust ativo, p90 de cadência foi 18,3 ms e o tier ficou 0; p90 de update+draw foi 3,4 ms. Amostra única, sem controle nem garantia de FPS em outros PCs.
 
-O bundle `js/maps.js` mantém somente os 61 mapas permitidos; 98 mapas inativos e de teste saíram do arquivo. O tamanho caiu 44,8%, de 2.929.052 para 1.616.608 bytes; o ZIP passou de 1.581.344 para 1.463.623 bytes. Tiles, objetos e dimensões dos mapas ativos foram comparados e permanecem idênticos à Web.
+O bundle `js/maps.js` mantém somente os 61 mapas permitidos; 98 mapas inativos e de teste saíram do arquivo. O tamanho caiu 44,8%, de 2.929.052 para 1.616.608 bytes; o ZIP caiu cerca de 7,6% (aprox. 1.581 KB para 1.462 KB). Tiles, objetos e dimensões dos mapas ativos foram comparados e permanecem idênticos à Web.
 
 Para medir as duas versões no Chrome instalado: `node tests/browser-performance.cjs`. Para perfil de CPU: `node tests/browser-performance.cjs --profile` (requer Node.js 22+).
 

@@ -85,7 +85,7 @@ A prévia v289 usa painters Rust/WebSys diretos para as camadas amostradas de ga
 - Regressões 102/102, ABI, browser bridge e comparações RGBA passaram. Sem benchmark ou revisão visual manual ampla.
 
 **Versões v81 Web e v293 Rust/WASM — 9 de novembro de 2026**
-- O bundle Neon passou de 159 para 61 mapas permitidos nas duas versões; os 98 mapas inativos/de teste foram removidos do arquivo carregado. Os 61 mapas mantidos foram comparados antes/depois: dimensões, tiles e objetos idênticos. `js/maps.js` caiu 44,8% (cerca de 1,31 MB em cada build). Os ZIPs caíram de 1.025.908 para 906.429 bytes (Web) e de 1.581.344 para 1.463.623 bytes (Rust/WASM). O governador v80/v292 continua usando percentil 90 para ignorar picos isolados. Suíte e paridade validadas.
+- O bundle Neon passou de 159 para 61 mapas permitidos nas duas versões; os 98 mapas inativos/de teste foram removidos do arquivo carregado. Os 61 mapas mantidos foram comparados antes/depois: dimensões, tiles e objetos idênticos. `js/maps.js` caiu 44,8% (cerca de 1,31 MB em cada build). O tamanho dos ZIPs caiu cerca de 11,7% na Web e 7,6% em Rust/WASM. O governador v80/v292 continua usando percentil 90 para ignorar picos isolados. Suíte e paridade validadas.
 
 **Conteúdo Web v55.0 — 5 de novembro de 2026**
 - A seleção ativa de mapas foi organizada para remover títulos com dimensões, mapas de teste e protótipos.
