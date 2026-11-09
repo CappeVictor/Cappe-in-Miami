@@ -19,3 +19,4 @@ features = ["CanvasGradient", "CanvasRenderingContext2d", "CanvasPattern", "Html
 opt-level = "s"
 lto = true
 codegen-units = 1
+

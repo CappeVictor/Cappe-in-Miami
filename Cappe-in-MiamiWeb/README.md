@@ -1,10 +1,14 @@
-# Cappe in Miami Web — v94.0
+# Cappe in Miami Web — v95.0
+
+## Otimização v95 — agrupamento de faíscas sem listas temporárias
+
+O jogo encadeia índices reutilizáveis ao agrupar faíscas por cor e opacidade, preservando a ordem e o resultado do desenho. Em dois perfis locais com 500 faíscas e 120 inimigos, as alocações amostradas de `drawSparks` caíram de 4,31 MB para 1,21 MB (−71,9%). A média de quadro permaneceu próxima (0,454→0,449 ms), sem ganho de FPS demonstrado. Regressões cruzadas: 117/117; partículas Web e compressão passaram.
 
 ## Otimização v93 — atualização e remoção de faíscas em um percurso
 
 O jogo agora atualiza posição/vida e remove partículas expiradas durante o mesmo percurso, mantendo a ordem e os objetos das faíscas sobreviventes. Três execuções locais no Chrome, com 120 inimigos e 500 faíscas, tiveram p90 mediano de update+draw após adaptação de 0,6 para 0,5 ms; p95 mediano de 0,6 para 0,5 ms. A média mediana mudou pouco (0,433 para 0,430 ms), então o resultado é específico da carga e não garante aumento de FPS.
 
-## Pacote de jogo v94
+## Pacote de jogo v95
 
 O ZIP contém somente os arquivos necessários para executar o jogo, incluindo o servidor local, os recursos e o launcher. Testes e documentação de desenvolvimento permanecem no repositório. O arquivo caiu de 928.185 para 920.973 bytes (7.212 bytes; 0,78%). O README do ZIP traz só as instruções para começar.
 
@@ -75,3 +79,4 @@ Em dois pares Chrome locais, com 120 inimigos e 500 faíscas, a Web melhorou de 
 ## Otimização v87 — grade de colisão da IA
 
 As consultas de colisão da navegação da IA percorrem apenas as caixas colocadas nas células espaciais tocadas pelo raio. A grade mantém referências diretas aos sólidos e deixa de expandir cada caixa e deduplicar a cada consulta. A geometria e o teste exato de círculo contra retângulo foram preservados. Regressões compararam 15.000 posições aleatórias com busca linear; 110/110 passaram. Em três rodadas Chrome com 120 inimigos e 500 faíscas, p90 mediano de update+draw foi de 2,3 para 2,0 ms e a mediana dos p95 de 3,0 para 2,6 ms. Ganhos modestos neste cenário local; não medem FPS geral.
+

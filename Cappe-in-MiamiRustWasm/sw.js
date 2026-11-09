@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v310.0-wasm-size-rust';
+const CACHE = 'cappe-v311.0-spark-pool';
 const ASSETS = [
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",
@@ -131,3 +131,4 @@ self.addEventListener('fetch', e => {
     }
   }));
 });
+

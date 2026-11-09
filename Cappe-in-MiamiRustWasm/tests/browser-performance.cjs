@@ -289,3 +289,4 @@ async function measure(build) {
   for (const build of BUILDS) results.push(await measure(build));
   console.log(JSON.stringify({ chrome: CHROME, note: 'Tempo local de update+draw e intervalo RAF; resultados dependem do PC, navegador e carga.', results }, null, 2));
 })().catch(error => { console.error(error.stack || String(error)); process.exitCode = 1; });
+

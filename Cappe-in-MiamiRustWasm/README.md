@@ -1,6 +1,10 @@
-# Cappe-in-Miami — preview Rust/WASM v310.0
+# Cappe-in-Miami — preview Rust/WASM v311.0
 
-## Pacote de jogo v309
+## Otimização v311 — agrupamento de faíscas sem listas temporárias
+
+Web e Rust/WASM agora encadeiam índices reutilizáveis para agrupar as faíscas por cor e opacidade. A sequência de desenho, cores e opacidades permanece igual. Em dois perfis locais com 500 faíscas e 120 inimigos, as alocações amostradas de `drawSparks` na Web caíram de 4,31 MB para 1,21 MB (−71,9%). No Rust/WASM, `drawSparks` deixou de aparecer entre os 16 maiores alocadores do perfil. O custo médio de quadro ficou próximo: Web 0,454→0,449 ms; Rust/WASM 0,759→0,766 ms. Não há ganho de FPS demonstrado. Regressões: 117/117; teste de partículas Web e compressão passaram.
+
+## Pacote de jogo v311
 
 O ZIP de jogador inclui apenas o HTML, recursos, scripts, servidor Node e o renderer Rust/WASM compilado que o jogo realmente solicita. Fontes de compilação, relatórios e suítes de teste continuam no repositório do GitHub; não são necessários para executar o jogo. O pacote caiu de 1.504.334 para 1.065.800 bytes (438.534 bytes; 29,2%).
 
@@ -380,4 +384,5 @@ Perfil de CPU na v18: a thread principal ficou ~93% ociosa (o JavaScript deixou 
 - Melhorada a adaptação para telas menores e telas com pouca altura; os cartões de modos, opções e formulários também receberam ajustes.
 - Ajustes de foco, estados desabilitados, feedback de clique e rolagem das telas para facilitar a navegação.
 - Validada a sintaxe de todos os arquivos JavaScript com Node.js. A execução completa ainda deve ser conferida no navegador, pois depende de interação, áudio e APIs do navegador.
+
 

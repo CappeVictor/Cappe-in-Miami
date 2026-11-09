@@ -554,3 +554,8 @@ Os downloads agora incluem somente os arquivos usados para jogar: recursos, CSS/
 
 O perfil `opt-level = "s"` reduziu `direct_renderer_bg.wasm` de 326.479 para 287.430 bytes no arquivo, e de 326.779 para 287.730 bytes transferidos pelo servidor (−39.049; −12,0%). O ZIP runtime passou de 1.065.800 bytes para 1.060.621 (−5.179; −0,49%); a compressão ZIP já reduzia bastante o binário. Seis pares de execuções Chrome, cada build com 60 quadros após adaptação, mantiveram p90 mediano de 0,9 ms e p95 mediano de 1,0 ms; a média mediana mudou de 0,727 para 0,759 ms. Essa pequena diferença não prova regressão estável ou melhora; o objetivo mensurado aqui é reduzir bytes de download. Regressões 116/116, paridade direta, piso, partículas e renderer-browser passaram.
 
+
+## v95/v311 — agrupamento de faíscas sem listas temporárias
+
+O agrupamento Canvas de faíscas usa índices encadeados em um buffer `Int32Array` reutilizável, preservando ordem, cor e opacidade. Em dois perfis locais Chrome com 500 faíscas, 120 inimigos e IA mista, as alocações amostradas em `drawSparks` na Web foram 4.623.316 e 4.000.848 bytes antes, contra 1.179.864 e 1.245.408 depois (média −71,9%). Rust/WASM teve 1.477.208 e 984.464 bytes antes; depois, a função não apareceu entre os 16 maiores alocadores, portanto não calculamos uma redução percentual. Médias de quadro: Web 0,454→0,449 ms (p90 mediano 0,55→0,5 ms; p95 0,6→0,6 ms); Rust/WASM 0,759→0,766 ms (p90 0,9→0,95 ms; p95 0,95→0,95 ms). A amostra não mostra ganho consistente de quadro/FPS. Regressões: 117/117; partículas Web e teste de compressão passaram.
+
