@@ -14,14 +14,18 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
-- **Web — HTML, CSS e JavaScript v82:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — v294:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v294-preview.zip)
+- **Web — HTML, CSS e JavaScript v83:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
+- **Rust/WASM — v295:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v295-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
 ### Sobre a prévia Rust/WASM
 
 A prévia v294 mantém painters Rust/WebSys diretos para as camadas amostradas de gameplay, incluindo Campanha, Horda e Invasão. O antigo trampoline Canvas deixou de ser compilado, servido e pré-cacheado. A auditoria instrumentada não encontrou chamadas Canvas do host em 23 cenas/estados amostrados. Os painters Canvas permanecem como fallback; lógica, simulação, aleatoriedade e seleção/cache de assets seguem em JavaScript. O pool de pontos de rota da IA reduz objetos temporários em um microbenchmark sintético; não há ganho de frame time medido.
+
+## Última atualização — 9 de novembro de 2026
+
+As duas versões agora servem HTML, JavaScript, CSS, JSON e SVG comprimidos em gzip quando o navegador suporta. Em medição local no Chrome, a transferência inicial observada caiu de 2,28 MB para 765 KB na Web e de 2,83 MB para 1,14 MB em Rust/WASM. `js/maps.js` passou de 1.616.616 para cerca de 301.534 bytes transferidos (81,4% menos no corpo); o conteúdo descomprimido é idêntico. Testes verificam negociação gzip, fallback sem compressão e bytes originais. Não houve nova validação visual nem medição de desempenho de gameplay nesta atualização.
 
 ## Últimas melhorias incluídas
 
@@ -84,7 +88,7 @@ A prévia v294 mantém painters Rust/WebSys diretos para as camadas amostradas d
 - Color grade e overlays de fade/flash passaram a usar os painters diretos; os batches correspondentes saíram do WASM legado, preservando o fallback Canvas.
 - Regressões 102/102, ABI, browser bridge e comparações RGBA passaram. Sem benchmark ou revisão visual manual ampla.
 
-**Versões v82 Web e v294 Rust/WASM — 9 de novembro de 2026**
+**Versões v83 Web e v295 Rust/WASM — 9 de novembro de 2026**
 - A IA reaproveita os objetos dos pontos da rota BFS ao recalcular caminhos, nas duas versões. No microbenchmark sintético de 500 rotas repetidas no mesmo labirinto, os pontos criados caíram de 35.000 para 0 após aquecimento do pool; a mediana de cálculo permaneceu perto de 0,04 ms. Isso reduz alocação temporária nesse caso, mas não comprova queda de heap total ou de frame time.
 - O bundle Neon passou de 159 para 61 mapas permitidos nas duas versões; os 98 mapas inativos/de teste foram removidos do arquivo carregado. Os 61 mapas mantidos foram comparados antes/depois: dimensões, tiles e objetos idênticos. `js/maps.js` caiu 44,8% (cerca de 1,31 MB em cada build). O tamanho dos ZIPs caiu cerca de 11,7% na Web e 7,6% em Rust/WASM. O governador v80/v292 continua usando percentil 90 para ignorar picos isolados. Suíte e paridade validadas.
 

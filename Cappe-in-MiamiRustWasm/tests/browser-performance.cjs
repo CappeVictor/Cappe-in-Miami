@@ -104,6 +104,28 @@ async function measure(build) {
       await until(async () => (await evaluate('HM_WASM_RENDERER.directReady === true')).result?.value, 15000, 'o renderer direto Rust/WASM');
     }
 
+    const startup = (await evaluate(`(() => {
+      const nav = performance.getEntriesByType('navigation')[0];
+      const resources = performance.getEntriesByType('resource');
+      const top = [...resources].sort((a, b) => b.transferSize - a.transferSize).slice(0, 10).map(r => ({
+        path: r.name.startsWith(location.origin) ? r.name.slice(location.origin.length) : r.name,
+        transferBytes: r.transferSize || 0,
+        decodedBytes: r.decodedBodySize || 0,
+        durationMs: +r.duration.toFixed(1),
+      }));
+      return {
+        readyState: document.readyState,
+        observedReadyElapsedMs: +performance.now().toFixed(1),
+        domInteractiveMs: +(nav?.domInteractive || 0).toFixed(1),
+        domContentLoadedMs: +(nav?.domContentLoadedEventEnd || 0).toFixed(1),
+        loadEventMs: +(nav?.loadEventEnd || 0).toFixed(1),
+        resourceCount: resources.length,
+        totalTransferBytes: resources.reduce((n, r) => n + (r.transferSize || 0), 0),
+        totalDecodedBytes: resources.reduce((n, r) => n + (r.decodedBodySize || 0), 0),
+        largestResources: top,
+      };
+    })()`)).result.value;
+
     await evaluate('CFG.fps = 60');
     await evaluate("document.getElementById('jogar').click()");
     await wait(250);
@@ -162,6 +184,7 @@ async function measure(build) {
       build: build.name,
       renderer: sample.renderer,
       stressEnemies: STRESS_ENEMIES,
+      startup,
       governorTier: sample.tier,
       initialCanvas,
       finalCanvas: sample.canvas,

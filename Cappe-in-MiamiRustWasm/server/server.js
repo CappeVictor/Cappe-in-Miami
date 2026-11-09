@@ -3,6 +3,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const zlib = require('node:zlib');
 
 const GAME_ROOT = path.resolve(__dirname, '..');
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -121,7 +122,7 @@ function createGameServer(options={}) {
     try {
       const url=new URL(req.url,'http://localhost');
       if(url.pathname.startsWith('/api/')) {
-if(req.method==='GET'&&url.pathname==='/api/health')return json(res,200,{ok:true,version:'v294.0-ai-path-reuse-rust',rooms:listRooms().length});
+if(req.method==='GET'&&url.pathname==='/api/health')return json(res,200,{ok:true,version:'v295.0-gzip-static-rust',rooms:listRooms().length});
         if(req.method==='GET'&&url.pathname==='/api/rooms')return json(res,200,{rooms:listRooms(),updatedAt:Date.now()});
         if(req.method==='POST'&&url.pathname==='/api/rooms'){limitRoomAttempts(req);return json(res,201,createRoom((await body(req)).name));}
         const match=url.pathname.match(/^\/api\/rooms\/([A-Z2-9]{6})(?:\/(join|rejoin|state|leave))?$/);
@@ -161,9 +162,19 @@ if(req.method==='GET'&&url.pathname==='/api/health')return json(res,200,{ok:true
       let stat,real;
       try{real=await fs.promises.realpath(file);const base=await fs.promises.realpath(root);if(!real.startsWith(base+path.sep))throw Error();stat=await fs.promises.stat(real);if(!stat.isFile())throw Error();}
       catch{return json(res,404,{error:'Arquivo não encontrado.'});}
-      res.writeHead(200,{'content-type':mime[ext],'content-length':stat.size,'cache-control':rel==='/index.html'||rel==='/sw.js'?'no-cache':'public, max-age=3600','x-content-type-options':'nosniff','referrer-policy':'no-referrer'});
+      const compressible=['.html','.js','.css','.json','.svg'];
+      const acceptsGzip=String(req.headers['accept-encoding']||'').split(',').some(value=>{
+        const [name,...params]=value.trim().toLowerCase().split(';');
+        return name==='gzip'&&!params.some(param=>/^\s*q\s*=\s*0(?:\.0*)?\s*$/.test(param));
+      });
+      const gzip=acceptsGzip&&compressible.includes(ext)&&req.method==='GET';
+      const headers={'content-type':mime[ext],'cache-control':rel==='/index.html'||rel==='/sw.js'?'no-cache':'public, max-age=3600','x-content-type-options':'nosniff','referrer-policy':'no-referrer'};
+      if(compressible.includes(ext))headers.vary='Accept-Encoding';
+      if(gzip)headers['content-encoding']='gzip';else headers['content-length']=stat.size;
+      res.writeHead(200,headers);
       if(req.method==='HEAD')return res.end();
-      const stream=fs.createReadStream(real);stream.on('error',()=>{if(!res.headersSent)json(res,404,{error:'Arquivo não encontrado.'});else res.destroy();});stream.pipe(res);
+      const stream=fs.createReadStream(real);stream.on('error',()=>{if(!res.headersSent)json(res,404,{error:'Arquivo não encontrado.'});else res.destroy();});
+      if(gzip){const encoder=zlib.createGzip({level:zlib.constants.Z_BEST_SPEED});encoder.on('error',()=>res.destroy());stream.pipe(encoder).pipe(res);}else stream.pipe(res);
     } catch(error) {
       if(!res.headersSent)json(res,error.status||500,{error:error.status?error.message:'Erro interno do servidor.'});
       else res.destroy();

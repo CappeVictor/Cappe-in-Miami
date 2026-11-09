@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v82.0-ai-path-reuse-web-js';
+const CACHE = 'cappe-v83.0-gzip-static-web-js';
 const ASSETS = [
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",

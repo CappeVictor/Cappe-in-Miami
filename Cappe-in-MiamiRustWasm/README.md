@@ -1,4 +1,10 @@
-# Cappe-in-Miami — preview Rust/WASM v294.0
+# Cappe-in-Miami — preview Rust/WASM v295.0
+
+## Otimização v295
+
+O servidor comprime HTML, JavaScript, CSS, JSON e SVG com gzip quando o navegador aceita; WASM e outros binários seguem sem recompressão. No Chrome local, `js/maps.js` transferiu 301.534 bytes para 1.616.616 bytes decodificados (81,4% menos no corpo). A transferência total observada no carregamento inicial passou de 2.831.083 para 1.136.765 bytes. Resultados locais, sem garantia de latência noutros ambientes.
+
+Teste a compressão com `node tests/compression-regression.cjs`; a regressão principal também a executa.
 
 ## Experimento local Rust/WASM
 
