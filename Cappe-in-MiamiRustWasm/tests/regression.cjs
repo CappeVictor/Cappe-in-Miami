@@ -117,7 +117,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v293.0-active-map-data-rust');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v294.0-ai-path-reuse-rust');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -1109,7 +1109,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v293.0-active-map-data-rust');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v294.0-ai-path-reuse-rust');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));
@@ -1202,6 +1202,17 @@ assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v293.0-active-map-data-rust')
     const {ctx,exp}=environment();ctx.sol=[[180,0,40,220]];exp.navBuild();
     const route=exp.navPath(50,50,350,50);assert.ok(route?.length);assert.ok(route.some(p=>p.y>=230));
     for(const p of route)assert.ok(!(p.x>166&&p.x<234&&p.y<234));
+  });
+  await test('Replanejamento de IA reutiliza os pontos do caminho sem alterar a rota BFS', () => {
+    const {ctx,exp}=environment();ctx.sol=[[180,0,40,220]];exp.navBuild();
+    const route=exp.navPath(50,50,350,50), expected=route.map(p=>[p.x,p.y]), pool=route.slice();
+    const reused=exp.navPath(50,70,350,70,route,pool);
+    const reference=exp.navPath(50,70,350,70);
+    assert.equal(reused,route);assert.deepEqual(reused.map(p=>[p.x,p.y]),reference.map(p=>[p.x,p.y]));
+    assert.ok(reused.length>0);assert.notDeepEqual(reused.map(p=>[p.x,p.y]),expected);
+    const longer=reused.length;const shorter=exp.navPath(50,70,90,70,reused,pool);assert.equal(shorter,reused);assert.ok(shorter.length<=longer);assert.ok(pool.length>=longer);
+    const expanded=exp.navPath(50,70,350,70,shorter,pool);
+    assert.equal(expanded,route);assert.ok(pool.length>=longer);assert.ok(expanded.every(p=>pool.includes(p)));assert.deepEqual(expanded.map(p=>[p.x,p.y]),reference.map(p=>[p.x,p.y]));
   });
   await test('Navegação retorna null quando os lados estão desconectados', () => {
     const {ctx,exp}=environment();ctx.sol=[[180,0,40,300]];exp.navBuild();assert.equal(exp.navPath(50,50,350,50),null);

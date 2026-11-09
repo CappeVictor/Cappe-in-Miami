@@ -271,7 +271,7 @@
     }
     return -1;
   }
-  EXP.navPath = function (sx, sy, gx, gy) {
+  EXP.navPath = function (sx, sy, gx, gy, reusePath, pointPool) {
     if (!NAV.built) return null;
     const s = nearestOk(cellOf(sx, sy)), g = nearestOk(cellOf(gx, gy)); if (s < 0 || g < 0) return null;
     const stamp = ++NAV.stamp, cols = NAV.cols, rows = NAV.rows, seen = NAV.seen, par = NAV.par, q = NAV.q, ok = NAV.ok;
@@ -287,8 +287,12 @@
       }
     }
     if (!found) return null;
-    const path = []; for (let c = g; c !== -1; c = par[c]) path.push({ x: (c % cols) * NAV.cs + NAV.cs / 2, y: ((c / cols) | 0) * NAV.cs + NAV.cs / 2 });
-    path.reverse(); return path;
+    const path = reusePath || [], pool = pointPool || path; let pathLen = 0;
+    for (let c = g; c !== -1; c = par[c]) {
+      const p = pool[pathLen] || (pool[pathLen] = { x: 0, y: 0 });
+      p.x = (c % cols) * NAV.cs + NAV.cs / 2; p.y = ((c / cols) | 0) * NAV.cs + NAV.cs / 2; path[pathLen] = p; pathLen++;
+    }
+    path.length = pathLen; path.reverse(); return path;
   };
   // raio livre de sólidos com o tamanho do próprio inimigo (portas contam como livres: os inimigos as abrem)
   function clearRay(x1, y1, x2, y2, r) {
@@ -301,7 +305,8 @@
   function navTarget(e, gx, gy, dt) {
     e.pathT = (e.pathT || 0) - dt; const gk = ((gx / 32) | 0) * 4096 + ((gy / 32) | 0);
     if (!e.path || e.pathT <= 0 || e.pathK !== gk) {
-      e.path = EXP.navPath(e.x, e.y, gx, gy); e.pathT = .9 + Math.random() * .4; e.pathK = gk; e.pk = 0; e.smT = 0; e.pi = 0;
+      e.pathPoints = e.pathPoints || (e.path ? e.path.slice() : []);
+      e.path = EXP.navPath(e.x, e.y, gx, gy, e.path, e.pathPoints); e.pathT = .9 + Math.random() * .4; e.pathK = gk; e.pk = 0; e.smT = 0; e.pi = 0;
       // começa no nó do caminho mais próximo do inimigo (não no início, que pode estar atrás dele)
       if (e.path) { let bi = 0, bd = 1e9; for (let i = 0; i < e.path.length; i++) { const dd = hyp(e.path[i].x - e.x, e.path[i].y - e.y); if (dd < bd) { bd = dd; bi = i; } } e.pi = bi; }
     }

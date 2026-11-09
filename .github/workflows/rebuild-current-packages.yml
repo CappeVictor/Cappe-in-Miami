@@ -1,0 +1,62 @@
+name: Rebuild current game packages
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Cappe-in-MiamiWeb/**'
+      - 'Cappe-in-MiamiRustWasm/**'
+permissions:
+  contents: write
+jobs:
+  package:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run regression suite
+        run: node Cappe-in-MiamiRustWasm/tests/regression.cjs
+      - name: Build and validate packages
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          from zipfile import ZIP_DEFLATED, ZipFile
+          import subprocess
+          import tempfile
+          specs = [
+              (Path('Cappe-in-MiamiWeb'), Path('Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip')),
+              (Path('Cappe-in-MiamiRustWasm'), Path('Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v294-preview.zip')),
+          ]
+          for folder, archive in specs:
+              with ZipFile(archive, 'w', compression=ZIP_DEFLATED, compresslevel=9) as out:
+                  for file in sorted(folder.rglob('*')):
+                      if file.is_file() and file.suffix.lower() != '.zip':
+                          out.write(file, file.relative_to(folder).as_posix())
+              with ZipFile(archive) as z:
+                  assert z.testzip() is None
+                  assert 'index.html' in z.namelist()
+                  if 'RustWasm' in archive.as_posix():
+                      assert 'wasm-renderer/pkg/direct/direct_renderer_bg.wasm' in z.namelist()
+          with tempfile.TemporaryDirectory() as tmp:
+              root = Path(tmp)
+              for folder, archive in specs:
+                  dest = root / folder.name
+                  dest.mkdir()
+                  with ZipFile(archive) as z:
+                      z.extractall(dest)
+              subprocess.run(['node', 'tests/regression.cjs'], cwd=root / 'Cappe-in-MiamiRustWasm', check=True)
+          PY
+      - name: Publish current packages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git rm --ignore-unmatch Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v293-preview.zip
+          git add Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v294-preview.zip
+          git diff --cached --quiet && exit 0
+          git commit -m "Publish optimized Web v82 and Rust WASM v294 packages"
+          git push origin main

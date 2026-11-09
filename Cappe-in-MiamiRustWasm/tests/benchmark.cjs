@@ -15,10 +15,22 @@ function run() {
   for(let i=0;i<20;i++)exp.navPath(50,50,1150,750);
   const timings=[];let found=0;
   for(let i=0;i<200;i++){const t=performance.now();const route=exp.navPath(50,50+(i%10)*20,1150,550+(i%10)*20);timings.push(performance.now()-t);if(route)found++;}
+  const routeReuseRuns=[];
+  for(const reuse of [false,true]){
+    let route=null,pool=[],created=0,maxPathLength=0;const samples=[];
+    for(let i=0;i<20;i++)route=exp.navPath(50,50+(i%10)*20,1150,550+(i%10)*20,reuse?route:undefined,reuse?pool:undefined);
+    maxPathLength=reuse?pool.length:0;
+    for(let i=0;i<500;i++){
+      const t=performance.now();route=exp.navPath(50,50+(i%10)*20,1150,550+(i%10)*20,reuse?route:undefined,reuse?pool:undefined);samples.push(performance.now()-t);
+      if(route){if(reuse){created+=Math.max(0,pool.length-maxPathLength);maxPathLength=Math.max(maxPathLength,pool.length);}else{created+=route.length;maxPathLength=Math.max(maxPathLength,route.length);}}
+    }
+    routeReuseRuns.push({reuse,createdPathPointObjects:created,maxPathLength,p50Ms:percentile(samples,.5),p95Ms:percentile(samples,.95)});
+  }
   return { environment:'Node '+process.version+' / '+process.platform+' '+process.arch,
     warning:'Microbenchmark sintético, sem navegador; não representa FPS nem frame time de partidas.',
     maps:{bytes:Buffer.byteLength(source),parseSamples:5,parseP50Ms:percentile(parse,.5),parseP95Ms:percentile(parse,.95)},
-    navigation:{world:[1200,800],cells:exp.NAV.ok.length,obstacles:ctx.sol.length,buildMs,samples:200,pathsFound:found,p50Ms:percentile(timings,.5),p95Ms:percentile(timings,.95)} };
+    navigation:{world:[1200,800],cells:exp.NAV.ok.length,obstacles:ctx.sol.length,buildMs,samples:200,pathsFound:found,p50Ms:percentile(timings,.5),p95Ms:percentile(timings,.95)},
+    navigationReuse:{samples:500,runs:routeReuseRuns,warning:'As contagens são objetos de ponto criados pelo gerador de caminhos; não representam o heap total do jogo.'} };
 }
 module.exports={run};
 if(require.main===module)console.log(JSON.stringify(run(),null,2));

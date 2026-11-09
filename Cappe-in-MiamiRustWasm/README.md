@@ -1,12 +1,14 @@
-# Cappe-in-Miami — preview Rust/WASM v293.0
+# Cappe-in-Miami — preview Rust/WASM v294.0
 
 ## Experimento local Rust/WASM
 
-Esta versão requer Node.js 18+ para INICIAR_EXPERIMENTO_WASM.bat. O módulo Rust/WebSys direto é a única implementação WASM compilada, carregada e armazenada pelo jogo; paredes da Campanha e mapas de até 1600 × 1200 px usam os painters diretos. O governador v292 decide a redução adaptativa pelo percentil 90 dos primeiros 120 quadros aceitos, respeita o limite de FPS e ignora picos esporádicos. Regressões: 105/105; ABI: 114 exports/107 imports; bridge e paridade de desenho Chrome passaram. No smoke headless com renderer Rust ativo, p90 de cadência foi 18,3 ms e o tier ficou 0; p90 de update+draw foi 3,4 ms. Amostra única, sem controle nem garantia de FPS em outros PCs.
+Esta versão requer Node.js 18+ para INICIAR_EXPERIMENTO_WASM.bat. O módulo Rust/WebSys direto é a única implementação WASM compilada, carregada e armazenada pelo jogo; paredes da Campanha e mapas de até 1600 × 1200 px usam os painters diretos. O governador v292 decide a redução adaptativa pelo percentil 90 dos primeiros 120 quadros aceitos, respeita o limite de FPS e ignora picos esporádicos. Regressões: 106/106; ABI: 114 exports/107 imports; bridge e paridade de desenho Chrome passaram. Em combate sintético com 48 inimigos no Chrome, update+draw ficou em p90 1,5 ms antes e 1,6 ms depois da adaptação; é uma amostra local, não um benchmark controlado nem garantia de FPS em outros PCs.
 
 O bundle `js/maps.js` mantém somente os 61 mapas permitidos; 98 mapas inativos e de teste saíram do arquivo. O tamanho caiu 44,8%, de 2.929.052 para 1.616.608 bytes; o ZIP caiu cerca de 7,6% (aprox. 1.581 KB para 1.462 KB). Tiles, objetos e dimensões dos mapas ativos foram comparados e permanecem idênticos à Web.
 
 Para medir as duas versões no Chrome instalado: `node tests/browser-performance.cjs`. Para perfil de CPU: `node tests/browser-performance.cjs --profile` (requer Node.js 22+).
+
+A IA reutiliza pontos de rotas BFS entre recálculos para reduzir objetos temporários. Em microbenchmark sintético, 500 recálculos repetidos criaram 35.000 objetos de ponto sem pool e 0 após aquecimento com pool; mediana aproximada de 0,04 ms em ambos. Isso mede alocação no gerador de rotas, não heap total ou tempo de quadro. O teste de regressão confere paridade e reuso depois de rotas curtas e longas.
 
 Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
 
