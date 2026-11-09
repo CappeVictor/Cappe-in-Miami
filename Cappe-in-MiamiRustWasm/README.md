@@ -6,7 +6,7 @@ Web e Rust/WASM agora encadeiam índices reutilizáveis para agrupar as faíscas
 
 ## Pacote de jogo v311
 
-O ZIP de jogador inclui apenas o HTML, recursos, scripts, servidor Node e o renderer Rust/WASM compilado que o jogo realmente solicita. Fontes de compilação, relatórios e suítes de teste continuam no repositório do GitHub; não são necessários para executar o jogo. O pacote caiu de 1.504.334 para 1.065.800 bytes (438.534 bytes; 29,2%).
+O ZIP de jogador inclui apenas o HTML, recursos, scripts, servidor Node e o renderer Rust/WASM compilado que o jogo realmente solicita. Fontes de compilação, relatórios e suítes de teste continuam no repositório do GitHub; não são necessários para executar o jogo. O ZIP v311 ocupa 1.060.773 bytes, 152 bytes (0,01%) a mais que o v310. O renderer WASM permanece em 287.430 bytes.
 
 ## Otimização v310 — WASM compilado para tamanho
 

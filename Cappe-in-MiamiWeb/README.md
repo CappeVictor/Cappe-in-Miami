@@ -10,7 +10,7 @@ O jogo agora atualiza posição/vida e remove partículas expiradas durante o me
 
 ## Pacote de jogo v95
 
-O ZIP contém somente os arquivos necessários para executar o jogo, incluindo o servidor local, os recursos e o launcher. Testes e documentação de desenvolvimento permanecem no repositório. O arquivo caiu de 928.185 para 920.973 bytes (7.212 bytes; 0,78%). O README do ZIP traz só as instruções para começar.
+O ZIP contém somente os arquivos necessários para executar o jogo, incluindo o servidor local, os recursos e o launcher. Testes e documentação de desenvolvimento permanecem no repositório. A v95 ocupa 921.132 bytes, 159 bytes (0,02%) a mais que a v94. O README do ZIP traz só as instruções para começar.
 
 ## Otimização v92 — verificações de alcance da IA
 
