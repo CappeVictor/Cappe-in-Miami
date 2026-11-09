@@ -1,5 +1,9 @@
 # Cappe-in-Miami — preview Rust/WASM v304.0
 
+## Verificação cruzada de colisões
+
+A suíte agora compara `hitWall` e `hitWallNG` com uma referência geométrica em 6.010 posições por função nas builds Web e Rust/WASM, incluindo tangência e vidro. Resultado: 113/113. O pré-filtro retangular foi mantido somente na Web, onde os pares Chrome mostraram melhora; nas medições da Rust/WASM não houve ganho consistente nos tempos de quadro, então o runtime desta versão permaneceu inalterado.
+
 ## Otimização v304 — seleção de alvo da IA sem ordenação
 
 `activeTarget` compara as distâncias quadráticas até P1 e P2 diretamente, sem criar uma lista temporária nem ordená-la; empates continuam favorecendo P1. Em 120 mil chamadas sintéticas, a mediana caiu de 48,6 para 26,2 ms (−46%). Em três pares Chrome com 120 inimigos e 500 faíscas, p90 mediano de update+draw caiu de 2,9 para 2,6 ms e p95 de 3,2 para 3,1 ms. Resultado específico do cenário e desta máquina; não representa FPS universal. Suíte compartilhada: 112/112.

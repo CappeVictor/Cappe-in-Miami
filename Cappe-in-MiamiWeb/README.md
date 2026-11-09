@@ -1,4 +1,4 @@
-# Cappe in Miami Web — v90.0
+# Cappe in Miami Web — v91.0
 
 Versão para navegador com HTML, CSS e JavaScript; o jogo usa o renderer Canvas 2D em JavaScript e não depende de Rust nem WebAssembly.
 
@@ -51,6 +51,12 @@ O BFS da IA reutiliza uma tabela compacta de vizinhos caminháveis construída j
 ## Otimização v90 — seleção de alvo da IA sem ordenação
 
 `activeTarget` compara as distâncias quadráticas até P1 e P2 diretamente, sem criar uma lista temporária nem ordená-la; empates continuam favorecendo P1. Em 120 mil chamadas sintéticas, a mediana caiu de 48,6 para 26,2 ms (−46%). Em três pares Chrome com 120 inimigos e 500 faíscas, p90 mediano de update+draw caiu de 3,5 para 3,0 ms e p95 de 4,1 para 3,7 ms. Resultado específico do cenário e desta máquina; não representa FPS universal. Suíte compartilhada: 112/112.
+
+## Otimização v91 — rejeição rápida em colisões Web
+
+`hitWall` e `hitWallNG` descartam rapidamente retângulos fora do alcance do círculo antes do cálculo da distância. O teste geométrico final continua estrito: tangência não vira colisão, vidro continua ignorado pela linha de visão e nenhum dado dos mapas muda. Regressões determinísticas com 6.010 posições por função confirmaram equivalência com a referência na Web e em Rust/WASM; a suíte passou em 113/113.
+
+Em dois pares Chrome locais, com 120 inimigos e 500 faíscas, a Web melhorou de forma consistente no p95; as medianas dos pares passaram de 2,35 para 1,95 ms. O p90 mediano foi de 2,0 para 1,9 ms, e a média de 1,519 para 1,362 ms. Na medição Rust/WASM não houve ganho consistente nos tempos de quadro, então o runtime Rust permanece inalterado. Resultados deste computador e cenário, sem promessa de FPS geral; não houve revisão visual ampla.
 
 ## Otimização v87 — grade de colisão da IA
 

@@ -1268,6 +1268,24 @@ assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v304.0-active-target-rust');
     const buckets=exp.NAV.solidBuckets;assert.ok(buckets.some(bucket=>bucket?.includes(exp.NAV.solids[0])),'as células guardam referências aos sólidos sem marcas auxiliares');
     exp.navBuild();assert.notEqual(exp.NAV.solidBuckets,buckets);for(let i=0;i<3000;i++){const x=random()*420-10,y=random()*320-10,r=i%2?13:14;assert.equal(exp.NAV.circleHits(x,y,r),brute(x,y,r),`resultado diferente depois de reconstruir em ${x},${y},${r}`);}
   });
+  await test('Colisões circulares Web/Rust preservam tangências e vidro; pré-filtro rápido fica na Web', () => {
+    for(const project of ['Cappe-in-MiamiWeb','Cappe-in-MiamiRustWasm']) {
+      const html=fs.readFileSync(path.join(root,'..',project,'index.html'),'utf8');
+      const extract=name=>html.match(new RegExp(`function ${name}\\(x, y, r\\) \\{[\\s\\S]*?\\n\\}`))?.[0];
+      const edge=html.match(/function worldEdgeHit\(x, y, r\) \{[\s\S]*?\n\}/)?.[0],wall=extract('hitWall'),wallNG=extract('hitWallNG');
+      assert.ok(edge&&wall&&wallNG,`${project}: funções de colisão`);
+      assert.equal(/x \+ r <= wx0 \|\| x - r >= wx1 \|\| y \+ r <= wy0 \|\| y - r >= wy1/.test(wall),project==='Cappe-in-MiamiWeb',`${project}: pré-filtro alinhado ao resultado medido`);
+      const solids=[[-18,30,50,24],[180,0,40,220],[320,180,130,22],[0,0,400,8],[72,114,26,28],[250,240,38,22]];
+      solids[4].g=true;
+      const ctx={WW:400,WH:300,sol:solids,SG:{cs:64,cells:{get:()=>solids}}};ctx.SG.ref=ctx.sol;ctx.SG.len=solids.length;ctx.sgBuild=()=>{};vm.createContext(ctx);
+      vm.runInContext(edge+'\n'+wall+'\n'+wallNG,ctx);
+      const brute=(x,y,r,ignoreGlass=false)=>x-r<0||y-r<0||x+r>ctx.WW||y+r>ctx.WH||solids.some(w=>{if(ignoreGlass&&w.g)return false;const cx=Math.max(w[0],Math.min(x,w[0]+w[2])),cy=Math.max(w[1],Math.min(y,w[1]+w[3]));return (x-cx)**2+(y-cy)**2<r*r;});
+      const points=[[50,42,12],[62,42,12],[62.001,42,12],[90,128,13],[72,128,13],[72,128,12],[200,100,0],[0,0,0],[399,150,1],[200,8,0]];
+      let seed=0x7a11;const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
+      for(let i=0;i<6000;i++)points.push([random()*440-20,random()*340-20,[0,1,8,13,14,random()*22][i%6]]);
+      for(let i=0;i<points.length;i++){const [x,y,r]=points[i];assert.equal(ctx.hitWall(x,y,r),brute(x,y,r),`${project} hitWall #${i}: ${x},${y},${r}`);assert.equal(ctx.hitWallNG(x,y,r),brute(x,y,r,true),`${project} hitWallNG #${i}: ${x},${y},${r}`);}
+    }
+  });
   await test('Grade de colisões sem deduplicação mantém equivalência com 160 obstáculos', () => {
     const {ctx,exp}=environment();ctx.WW=1200;ctx.WH=800;ctx.sol=[];
     for(let i=0;i<160;i++){const col=i%20,row=(i/20)|0;ctx.sol.push([35+col*58,25+row*92,18+(i%4)*7,20+(i%3)*9]);}

@@ -889,7 +889,11 @@ function hitWall(x, y, r) {
   const x0 = Math.floor((x - r) / SG.cs), x1 = Math.floor((x + r) / SG.cs), y0 = Math.floor((y - r) / SG.cs), y1 = Math.floor((y + r) / SG.cs), r2 = r * r;
   for (let i = x0; i <= x1; i++) for (let j = y0; j <= y1; j++) {
     const c = SG.cells.get(i * 65536 + j); if (!c) continue;
-    for (let n = 0; n < c.length; n++) { const w = c[n], cx = Math.max(w[0], Math.min(x, w[0] + w[2])), cy = Math.max(w[1], Math.min(y, w[1] + w[3])); if ((x - cx) * (x - cx) + (y - cy) * (y - cy) < r2) return true; }
+    for (let n = 0; n < c.length; n++) { const w = c[n], wx0 = w[0], wy0 = w[1], wx1 = wx0 + w[2], wy1 = wy0 + w[3];
+      if (x + r <= wx0 || x - r >= wx1 || y + r <= wy0 || y - r >= wy1) continue;
+      const cx = Math.max(wx0, Math.min(x, wx1)), cy = Math.max(wy0, Math.min(y, wy1)), dx = x - cx, dy = y - cy;
+      if (dx * dx + dy * dy < r2) return true;
+    }
   }
   return false;
 }
@@ -899,7 +903,11 @@ function hitWallNG(x, y, r) {   // [otimização] igual a hitWall, mas ignora vi
   const x0 = Math.floor((x - r) / SG.cs), x1 = Math.floor((x + r) / SG.cs), y0 = Math.floor((y - r) / SG.cs), y1 = Math.floor((y + r) / SG.cs), r2 = r * r;
   for (let i = x0; i <= x1; i++) for (let j = y0; j <= y1; j++) {
     const c = SG.cells.get(i * 65536 + j); if (!c) continue;
-    for (let n = 0; n < c.length; n++) { const w = c[n]; if (w.g) continue; const cx = Math.max(w[0], Math.min(x, w[0] + w[2])), cy = Math.max(w[1], Math.min(y, w[1] + w[3])); if ((x - cx) * (x - cx) + (y - cy) * (y - cy) < r2) return true; }
+    for (let n = 0; n < c.length; n++) { const w = c[n]; if (w.g) continue; const wx0 = w[0], wy0 = w[1], wx1 = wx0 + w[2], wy1 = wy0 + w[3];
+      if (x + r <= wx0 || x - r >= wx1 || y + r <= wy0 || y - r >= wy1) continue;
+      const cx = Math.max(wx0, Math.min(x, wx1)), cy = Math.max(wy0, Math.min(y, wy1)), dx = x - cx, dy = y - cy;
+      if (dx * dx + dy * dy < r2) return true;
+    }
   }
   return false;
 }
