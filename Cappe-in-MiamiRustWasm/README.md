@@ -1,4 +1,12 @@
-# Cappe-in-Miami — preview Rust/WASM v304.0
+# Cappe-in-Miami — preview Rust/WASM v305.0
+
+## Otimização v305 — buffers reutilizáveis do desenho de inimigos
+
+O bridge Rust/WASM agora reutiliza buffers numéricos e a lista de imagens de texto ao enviar os inimigos para o renderer. Isso remove os arrays e conversões typed-array temporários recriados em cada quadro; os buffers crescem conforme necessário e mantêm o conteúdo limitado aos registros usados naquele quadro.
+
+Em dois pares locais do Chrome, com 120 inimigos e 500 faíscas, a amostra do HeapProfiler associada a `state.drawEnemies` caiu de mediana 4,89 MB para 1,98 MB (−59%). Os tempos totais de quadro variaram e não mostraram ganho consistente: o p90 mediano mudou de 2,7 para 2,6 ms, o p95 permaneceu em 2,85 ms e a média ficou praticamente empatada. São resultados do PC e cenário usados, sem promessa de FPS geral.
+
+A paridade Chrome de inimigos passou em três estados, com zero canais de pixel diferentes; regressão compartilhada: 113/113. `node tests/browser-performance.cjs --heap-profile` agora coleta amostras de alocação junto ao teste de gameplay. Não houve revisão visual ampla.
 
 ## Verificação cruzada de colisões
 

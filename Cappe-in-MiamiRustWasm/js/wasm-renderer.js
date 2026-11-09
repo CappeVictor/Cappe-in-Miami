@@ -26,6 +26,13 @@
   const weatherMoteDirectInputBuffer = new Float64Array(128 * 4);
   let dustInputBuffer = new Float64Array(96);
   let sparkInputBuffer = new Float64Array(160);
+  let enemyInputBuffer = new Float64Array(0);
+  let enemyTextPlacementBuffer = new Float64Array(0);
+  let enemyTextOffsetBuffer = new Uint32Array(0);
+  const enemyTextImageBuffer = [];
+  function ensureInputBuffer(buffer, Type, required) {
+    return buffer.length >= required ? buffer : new Type(Math.max(required, buffer.length * 2, 64));
+  }
   let bloodInputBuffer = new Float64Array(128);
   let corpseInputBuffer = new Float64Array(128);
   let darkOutlineInputBuffer = new Float64Array(128);
@@ -354,7 +361,10 @@
             typeof painters.textImage !== 'function' || !Number.isFinite(player.x) || !Number.isFinite(player.y) ||
             !Number.isFinite(nowMs) || !state.directReady || !state.direct || !state.direct.drawEnemies) return false;
         const sheet = enemySheet && enemySheet.complete && enemySheet.naturalWidth > 0 ? enemySheet : null;
-        const rows = [], textImages = [], textPlacements = [], textOffsets = [0];
+        enemyTextImageBuffer.length = 0;
+        enemyTextOffsetBuffer = ensureInputBuffer(enemyTextOffsetBuffer, Uint32Array, 1);
+        enemyTextOffsetBuffer[0] = 0;
+        let rowLength = 0, textPlacementLength = 0, textOffsetLength = 1;
         let visibleEnemies = 0, stunCount = 0;
         for (const enemy of enemies) {
           if (!enemy || !Number.isFinite(enemy.x) || !Number.isFinite(enemy.y)) return false;
@@ -367,14 +377,20 @@
           const alert = !knockout && !suspicious && (enemy.state === 'ALERT' || enemy.state === 'CHASE');
           const moving = !!(enemy.alert && !enemy.stun);
           const flags = (enemy.type ? 1 : 0) | (knockout ? 2 : 0) | (stunned ? 4 : 0) | (moving ? 8 : 0);
-          rows.push(enemy.x, enemy.y, angle, fall, color, flags);
+          enemyInputBuffer = ensureInputBuffer(enemyInputBuffer, Float64Array, rowLength + 6);
+          enemyInputBuffer[rowLength++] = enemy.x; enemyInputBuffer[rowLength++] = enemy.y;
+          enemyInputBuffer[rowLength++] = angle; enemyInputBuffer[rowLength++] = fall;
+          enemyInputBuffer[rowLength++] = color; enemyInputBuffer[rowLength++] = flags;
           visibleEnemies++;
           if (stunned) stunCount++;
           const addLabel = (label, yOffset) => {
             const entry = painters.textImage(enemy, label, enemy.x, enemy.y + yOffset);
             if (!entry || !entry.image || !Number.isFinite(entry.x) || !Number.isFinite(entry.y)) return false;
-            textPlacements.push(textImages.length, entry.x, entry.y);
-            textImages.push(entry.image);
+            enemyTextPlacementBuffer = ensureInputBuffer(enemyTextPlacementBuffer, Float64Array, textPlacementLength + 3);
+            enemyTextPlacementBuffer[textPlacementLength++] = enemyTextImageBuffer.length;
+            enemyTextPlacementBuffer[textPlacementLength++] = entry.x;
+            enemyTextPlacementBuffer[textPlacementLength++] = entry.y;
+            enemyTextImageBuffer.push(entry.image);
             return true;
           };
           if (knockout) {
@@ -384,12 +400,16 @@
             if (suspicious && !addLabel(2, -24)) return false;
             else if (alert && !addLabel(3, -24)) return false;
           }
-          textOffsets.push(textPlacements.length / 3);
+          enemyTextOffsetBuffer = ensureInputBuffer(enemyTextOffsetBuffer, Uint32Array, textOffsetLength + 1);
+          enemyTextOffsetBuffer[textOffsetLength++] = textPlacementLength / 3;
         }
         try {
-          const drawn = withCanvasBypass(() => state.direct.drawEnemies(context, Float64Array.from(rows),
-            player.x, player.y, sheet || null, nowMs, ACTOR_COLORS, textImages,
-            Float64Array.from(textPlacements), Uint32Array.from(textOffsets)));
+          const rows = enemyInputBuffer.subarray(0, rowLength);
+          const textPlacements = enemyTextPlacementBuffer.subarray(0, textPlacementLength);
+          const textOffsets = enemyTextOffsetBuffer.subarray(0, textOffsetLength);
+          const drawn = withCanvasBypass(() => state.direct.drawEnemies(context, rows,
+            player.x, player.y, sheet || null, nowMs, ACTOR_COLORS, enemyTextImageBuffer,
+            textPlacements, textOffsets));
           if (drawn !== visibleEnemies) return false;
           state.directActorFrames++;
           state.directEnemyBodyFrames++;

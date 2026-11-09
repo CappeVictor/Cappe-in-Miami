@@ -118,7 +118,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v304.0-active-target-rust');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v305.0-reuse-enemy-render-inputs-rust');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -353,7 +353,7 @@ async function run() {
     assert.match(html,/function kill\(e, bx = 0, by = 0\)[\s\S]*?renderer\.drawBloodSplatter\(g, puddleColor, dropColor, blobs, streaks, droplets\)/);assert.match(html,/function drawBloodSplatterFallback\([\s\S]*?quadraticCurveTo/);assert.match(bridge,/state\.direct\.drawBloodSplatter\(context, puddleColor, dropColor,/);assert.match(rust,/pub fn draw_blood_splatter\([\s\S]*?quadratic_curve_to[\s\S]*?context\.stroke\(\)[\s\S]*?context\.arc\(/);
     assert.match(rust,/pub fn draw_dust\([\s\S]*?context\.save\(\)[\s\S]*?context\.set_global_alpha\(alpha\)[\s\S]*?context\.restore\(\)/);
     assert.match(html,/wasmEnemyPass\.drawEnemies\(enemies, P, WASM_ENEMY_PAINTERS, ctx, ready\(ESHEET\) \? ESHEET : null, performance\.now\(\)\)/);
-    assert.match(bridge,/state\.direct\.drawEnemies\(context, Float64Array\.from\(rows\)/);
+    assert.match(bridge,/state\.direct\.drawEnemies\(context, rows,/);
     assert.match(rust,/pub fn draw_enemies_direct\([\s\S]*?set_global_alpha\(alpha\)[\s\S]*?ellipse\(x \+ 3\.0, y \+ 5\.0, 12\.0, 10\.0[\s\S]*?draw_image_at\(context, enemy_sheet[\s\S]*?text_images\.get\(placements\[offset\] as u32\)/);
     assert.doesNotMatch(bridge,/drawEnemyShadowDirect|wasm\.exports\.(?:enemy_input_ptr|draw_visible_enemies)/);
     assert.match(fx,/const trace = new Float64Array\(9 \* 7\)[\s\S]*?glassTraceRenderer\.drawGlassBreakTrace\(f, gl\.x, gl\.y, gl\.w, gl\.h, trace\)/);assert.match(bridge,/state\.direct\.drawGlassBreakTrace\(context, x, y, width, height, commands\)/);assert.match(rust,/pub fn draw_glass_break_trace\([\s\S]*?context\.fill_rect\(x, y, width, height\)[\s\S]*?context\.line_to\([\s\S]*?context\.fill\(\)/);
@@ -398,6 +398,9 @@ async function run() {
     assert.match(html,/wasmRenderer\.setCanvasImageSmoothing\(g, false\)/);assert.match(bridge,/state\.direct\.setCanvasImageSmoothing\(context, enabled\)/);assert.match(rust,/pub fn set_canvas_image_smoothing\([\s\S]*?set_image_smoothing_enabled\(enabled\)/);
     assert.match(fx,/renderer\.createTextImage\(k, s, font, col, false\)/);assert.match(html,/renderer\.createTextImage\(k, s, font, c, true\)/);assert.match(bridge,/state\.direct\.createTextImage\(canvas, text, font, color, outlined\)/);assert.match(rust,/pub fn create_text_image\([\s\S]*?measure_text\(text\)[\s\S]*?fill_text\(text, 2\.0, 17\.0\)/);assert.match(rust,/stroke_text\(text, 6\.0, baseline\)/);
     assert.match(bridge,/state\.drawEnemies = \(enemies, player, painters, context, enemySheet = null, nowMs = 0\)/);
+    assert.match(bridge,/let enemyInputBuffer = new Float64Array\(0\)/);assert.match(bridge,/const enemyTextImageBuffer = \[\]/);
+    assert.match(bridge,/enemyTextPlacementBuffer = ensureInputBuffer\(enemyTextPlacementBuffer, Float64Array/);assert.match(bridge,/enemyTextOffsetBuffer = ensureInputBuffer\(enemyTextOffsetBuffer, Uint32Array/);
+    assert.doesNotMatch(bridge,/Float64Array\.from\(rows\)|Float64Array\.from\(textPlacements\)|Uint32Array\.from\(textOffsets\)/);
     assert.doesNotMatch(bridge,/painters\.textImage\(enemy, commands\[offset \+ 1\]/);
     assert.match(rust,/pub fn draw_map_commands\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array[\s\S]*?Array/);assert.doesNotMatch(bridge,/draw_map_command|currentMapBatch|drawMapCommandsDirect|flushDirectMapCommands/);
     assert.match(rust,/draw_image_at\(context, &image, &\[placements\[offset \+ 1\], placements\[offset \+ 2\]\]\)/);
@@ -1129,7 +1132,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v304.0-active-target-rust');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v305.0-reuse-enemy-render-inputs-rust');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));

@@ -11,6 +11,7 @@ const net = require('node:net');
 const CHROME = process.env.CHROME_PATH || (process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : '/usr/bin/google-chrome');
 const RUST_ROOT = process.env.CAPPE_PERF_RUST_ROOT || path.resolve(__dirname, '..');
 const CPU_PROFILE = process.argv.includes('--profile');
+const HEAP_PROFILE = process.argv.includes('--heap-profile');
 const STRESS_ENEMIES = Math.max(0, Math.min(120, Number(process.env.CAPPE_PERF_ENEMIES) || 0));
 const STRESS_SPARKS = Math.max(0, Math.min(500, Number(process.env.CAPPE_PERF_SPARKS) || 0));
 const FORCE_CANVAS_SPARKS = process.env.CAPPE_PERF_FORCE_CANVAS_SPARKS === '1';
@@ -188,12 +189,16 @@ async function measure(build) {
       await cdp('Profiler.setSamplingInterval', { interval: 1000 });
       await cdp('Profiler.start');
     }
+    if (HEAP_PROFILE) {
+      await cdp('HeapProfiler.enable');
+      await cdp('HeapProfiler.startSampling', { samplingInterval: 32768, includeObjectsCollectedByMajorGC: true, includeObjectsCollectedByMinorGC: true });
+    }
     await until(async () => (await evaluate('__perf.work.length >= 180')).result?.value, 45000, '180 quadros de gameplay');
     const sample = (await evaluate('({work: __perf.work.slice(0, 180), gaps: __perf.gaps.slice(0, 180), navPathTimes: window.__navPerf.slice(), navigationCells: EXP.NAV.ok?.length || 0, adjacencyBytes: (EXP.NAV.neighbors?.byteLength || 0) + (EXP.NAV.neighborCounts?.byteLength || 0), tier: EXP.perfTier, state: st, canvas: [c.width, c.height], renderer: window.HM_WASM_RENDERER?.status || "Canvas", maskImageRequestCount: performance.getEntriesByType("resource").filter(r => window.__perfMaskPaths.includes(new URL(r.name).pathname)).length})')).result.value;
     if (sample.state !== 'play') throw new Error(`A amostra terminou fora do gameplay (${sample.state}).`);
     if (build.wasm && sample.renderer !== 'ready') throw new Error(`Renderer WASM não ficou ativo (${sample.renderer}).`);
     if (ASSERT_LAZY_MASKS && sample.maskImageRequestCount < 1) throw new Error('A máscara selecionada não foi requisitada após iniciar.');
-    let cpuHotspots, cpuCallers;
+    let cpuHotspots, cpuCallers, heapHotspots;
     if (CPU_PROFILE) {
       const { profile } = await cdp('Profiler.stop');
       const parentById = new Map();
@@ -226,6 +231,20 @@ async function measure(build) {
       }
       cpuCallers = [...pairs.values()].sort((a, b) => b.selfMs - a.selfMs).slice(0, 16);
     }
+    if (HEAP_PROFILE) {
+      const { profile } = await cdp('HeapProfiler.stopSampling');
+      const allocators = new Map();
+      const visit = node => {
+        if (node.selfSize > 0) {
+          const frame = node.callFrame || {}, name = frame.functionName || '(anonymous)', url = frame.url || '', line = (frame.lineNumber ?? -1) + 1;
+          const key = `${name}|${url}|${line}`, item = allocators.get(key) || { function: name, url, line, sampledBytes: 0 };
+          item.sampledBytes += node.selfSize; allocators.set(key, item);
+        }
+        for (const child of node.children || []) visit(child);
+      };
+      visit(profile.head);
+      heapHotspots = [...allocators.values()].sort((a, b) => b.sampledBytes - a.sampledBytes).slice(0, 16);
+    }
     return {
       build: build.name,
       renderer: sample.renderer,
@@ -241,6 +260,7 @@ async function measure(build) {
       finalCanvas: sample.canvas,
       ...(cpuHotspots ? { cpuHotspots } : {}),
       ...(cpuCallers ? { cpuCallers } : {}),
+      ...(heapHotspots ? { heapHotspots } : {}),
       beforeAdaptation: { work: summary(sample.work.slice(0, 120)), rafGap: summary(sample.gaps.slice(0, 120)) },
       afterAdaptation: { work: summary(sample.work.slice(120)), rafGap: summary(sample.gaps.slice(120)) },
     };

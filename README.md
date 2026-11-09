@@ -15,7 +15,7 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
 - **Web — HTML, CSS e JavaScript v91:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — v304:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v304-preview.zip)
+- **Rust/WASM — v305:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v305-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
@@ -23,9 +23,9 @@ Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. 
 
 A prévia v294 mantém painters Rust/WebSys diretos para as camadas amostradas de gameplay, incluindo Campanha, Horda e Invasão. O antigo trampoline Canvas deixou de ser compilado, servido e pré-cacheado. A auditoria instrumentada não encontrou chamadas Canvas do host em 23 cenas/estados amostrados. Os painters Canvas permanecem como fallback; lógica, simulação, aleatoriedade e seleção/cache de assets seguem em JavaScript. O pool de pontos de rota da IA reduz objetos temporários em um microbenchmark sintético; não há ganho de frame time medido.
 
-## Última atualização — 9 de novembro de 2026 · Web v91 e Rust/WASM v304
+## Última atualização — 9 de novembro de 2026 · Web v91 e Rust/WASM v305
 
-As duas versões servem HTML, JavaScript, CSS, JSON e SVG comprimidos em gzip quando o navegador suporta. No Chrome local, a transferência inicial observada caiu de 2,28 MB para 765 KB na Web e de 2,83 MB para 1,14 MB em Rust/WASM. Na v89/v303, o BFS da IA reutilizou vizinhos caminháveis pré-calculados, preservando as rotas; seu perfil indicou redução do custo amostrado de `EXP.navPath`, mas os quadros sob estresse variaram e não houve afirmação de ganho geral de FPS. Na v90/v304, a seleção do alvo da IA deixou de criar e ordenar uma lista temporária. Em três pares Chrome com 120 inimigos e 500 faíscas, o p90 mediano de update+draw caiu de 3,5 para 3,0 ms na Web e de 2,9 para 2,6 ms em Rust/WASM; os p95 caíram de 4,1 para 3,7 ms e de 3,2 para 3,1 ms. Microbenchmark sintético: 120 mil seleções caíram de 48,6 para 26,2 ms. A suíte então passou em 112/112. A Web v91 adiciona um pré-filtro geométrico em colisões; dois pares no mesmo cenário reduziram p95 mediano de 2,35 para 1,95 ms e média de 1,519 para 1,362 ms. O p90 mediano foi de 2,0 para 1,9 ms. Não houve ganho consistente nos quadros da Rust/WASM, cujo runtime ficou inalterado. A suíte atual passou em 113/113. São medições deste PC e cenário, não garantia para outros computadores; não houve revisão visual ampla.
+As duas versões servem HTML, JavaScript, CSS, JSON e SVG comprimidos em gzip quando o navegador suporta. No Chrome local, a transferência inicial observada caiu de 2,28 MB para 765 KB na Web e de 2,83 MB para 1,14 MB em Rust/WASM. Na v89/v303, o BFS da IA reutilizou vizinhos caminháveis pré-calculados, preservando as rotas; o custo amostrado de `EXP.navPath` caiu, mas quadros sob estresse variaram. Na v90/v304, a seleção de alvo da IA deixou de criar e ordenar uma lista temporária; em três pares Chrome com 120 inimigos e 500 faíscas, o p90 mediano caiu de 3,5 para 3,0 ms na Web e de 2,9 para 2,6 ms em Rust/WASM, e o p95 de 4,1 para 3,7 ms e de 3,2 para 3,1 ms. Microbenchmark: 120 mil seleções caíram de 48,6 para 26,2 ms. A Web v91 acrescentou rejeição rápida de retângulos distantes nas colisões; em dois pares, o p95 mediano caiu de 2,35 para 1,95 ms e a média de 1,519 para 1,362 ms. O Rust/WASM v305 reutiliza buffers ao compor inimigos: a amostra do HeapProfiler para essa ponte caiu 59% em dois pares; os tempos de quadro não mostraram ganho consistente. Regressões atuais: 113/113; paridade de inimigos Chrome: três estados, zero diferenças de pixel. Resultados locais, não garantia de FPS geral; não houve revisão visual ampla.
 
 ## Últimas melhorias incluídas
 
