@@ -1363,7 +1363,7 @@ export function drawShopPanelStage(context, values, outline_color) {
 }
 
 /**
- * Derives spark rectangles from simulation particle fields and paints them without the legacy WASM batch.
+ * Groups spark inputs once, then paints each color/alpha batch without JS element reads or a second command array.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} input
  * @param {Array<any>} colors

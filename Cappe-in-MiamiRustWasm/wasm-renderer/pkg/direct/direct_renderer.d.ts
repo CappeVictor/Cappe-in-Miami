@@ -403,7 +403,7 @@ export function drawShopDealerStage(context: CanvasRenderingContext2D, values: F
 export function drawShopPanelStage(context: CanvasRenderingContext2D, values: Float64Array, outline_color: string): boolean;
 
 /**
- * Derives spark rectangles from simulation particle fields and paints them without the legacy WASM batch.
+ * Groups spark inputs once, then paints each color/alpha batch without JS element reads or a second command array.
  */
 export function drawSparkInputs(context: CanvasRenderingContext2D, input: Float64Array, colors: Array<any>): number;
 
