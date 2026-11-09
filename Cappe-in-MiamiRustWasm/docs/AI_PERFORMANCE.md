@@ -1,6 +1,9 @@
 ## Preview v290 — escala adaptativa baseada no trabalho do quadro
 O escalonamento agora mede update+draw, sem contar a espera pelo VSync ou o limite de FPS escolhido. Dois níveis reduzem efeitos e resolução interna em dispositivos lentos; resolução manual e modo Máximo preservam as escolhas. Esta mudança não mede FPS real.
 
+## v291 — governador com cadência RAF e limite do usuário
+O governor agora combina custo síncrono update+draw com intervalo entre os quadros aceitos pelo limite configurado. Isso evita reduzir qualidade apenas porque o usuário escolheu 30 FPS, enquanto identifica queda abaixo da meta quando o limite é 60 ou automático. Teste de smoke no Chrome headless com o renderer ativo: nível 2 em Web e Rust; a escala do canvas foi de 1197×748 para 862×539. RAF mediano observado: Web 66,6→16,8 ms; Rust 66,6→16,7 ms; custo síncrono médio após ajuste: 0,56 ms e 1,08 ms, respectivamente. Captura única e sem controle, sujeita a jitter do navegador/host; não é benchmark controlado nem promessa de FPS em outros PCs. Ferramenta: `node tests/browser-performance.cjs` (Node 22+ e Chrome).
+
 ## Preview Rust/WASM local v283.0 — piso
 Remover as rotas legadas de granulado, FTILES, sombras e rejunte reduziu o WASM legado de 68.531 para 61.001 bytes, imports de 5 para 3 e exports de 45 para 36. Isso mede o arquivo e a ABI, não FPS, memória em execução ou tempo de quadro. Nenhum benchmark foi feito.
 

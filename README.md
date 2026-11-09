@@ -14,8 +14,8 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
-- **Web — HTML, CSS e JavaScript v78:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — v290:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v290-preview.zip)
+- **Web — HTML, CSS e JavaScript v79:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
+- **Rust/WASM — v291:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v291-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
@@ -84,8 +84,8 @@ A prévia v289 usa painters Rust/WebSys diretos para as camadas amostradas de ga
 - Color grade e overlays de fade/flash passaram a usar os painters diretos; os batches correspondentes saíram do WASM legado, preservando o fallback Canvas.
 - Regressões 102/102, ABI, browser bridge e comparações RGBA passaram. Sem benchmark ou revisão visual manual ampla.
 
-**Versões v78 Web e v290 Rust/WASM — 9 de novembro de 2026**
-- Medição adaptativa usa o tempo de update+draw por quadro, sem confundir limite de FPS/VSync com lentidão; dois níveis reduzem efeitos e resolução interna. Modo Máximo e resolução manual são respeitados. FPS comparativo não foi medido.
+**Versões v79 Web e v291 Rust/WASM — 9 de novembro de 2026**
+- Governador usa update+draw e cadência RAF, respeitando o limite de FPS escolhido. Reduz efeitos e escala interna em dois níveis quando a cadência não acompanha a meta. Smoke headless de uma execução ativou o tier 2 nas duas versões; a captura não é benchmark controlado.
 
 **Conteúdo Web v55.0 — 5 de novembro de 2026**
 - A seleção ativa de mapas foi organizada para remover títulos com dimensões, mapas de teste e protótipos.

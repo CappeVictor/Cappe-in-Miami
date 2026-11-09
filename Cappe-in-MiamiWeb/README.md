@@ -1,4 +1,4 @@
-# Cappe in Miami Web — v78.0
+# Cappe in Miami Web — v79.0
 
 Versão para navegador com HTML, CSS e JavaScript; o jogo usa o renderer Canvas 2D em JavaScript e não depende de Rust nem WebAssembly.
 
@@ -12,4 +12,4 @@ Também é possível abrir `index.html` pelo Live Server do VS Code. O servidor 
 
 ## Otimização de renderização v77
 
-O ajuste automático mede o tempo gasto pelo jogo atualizando e desenhando os primeiros 120 quadros jogando; não confunde o limite de FPS escolhido com lentidão. Usa dois níveis de redução de efeitos e resolução interna do canvas quando o trabalho de cada quadro está alto. A detecção é refeita em cada sessão. Resolução manual e modo Máximo são respeitados. FPS comparativo ainda não foi medido.
+O ajuste automático mede o custo de update+draw e o intervalo de quadros nos primeiros 120 quadros jogando. Compara a cadência ao limite de FPS escolhido, para não reduzir qualidade quando 30 FPS é a meta. Usa dois níveis de redução de efeitos e resolução interna em caso de lentidão; resolução manual e modo Máximo são respeitados. Em uma captura local headless, a Web passou do tier 0 ao tier 2 e o canvas foi de 1197×748 para 862×539; intervalo RAF mediano observado foi de 66,6 ms antes e 16,8 ms depois. É uma única captura de smoke, não um benchmark comparativo controlado nem garantia de FPS em outros PCs.
