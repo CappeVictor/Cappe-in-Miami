@@ -9,13 +9,15 @@ const path = require('node:path');
 const net = require('node:net');
 
 const CHROME = process.env.CHROME_PATH || (process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : '/usr/bin/google-chrome');
+const RUST_ROOT = process.env.CAPPE_PERF_RUST_ROOT || path.resolve(__dirname, '..');
 const CPU_PROFILE = process.argv.includes('--profile');
 const STRESS_ENEMIES = Math.max(0, Math.min(120, Number(process.env.CAPPE_PERF_ENEMIES) || 0));
 const STRESS_SPARKS = Math.max(0, Math.min(500, Number(process.env.CAPPE_PERF_SPARKS) || 0));
+const FORCE_CANVAS_SPARKS = process.env.CAPPE_PERF_FORCE_CANVAS_SPARKS === '1';
 const REPO = path.resolve(__dirname, '../..');
 const BUILDS = [
   { name: 'Web', root: path.join(REPO, 'Cappe-in-MiamiWeb'), wasm: false },
-  { name: 'Rust/WASM', root: path.join(REPO, 'Cappe-in-MiamiRustWasm'), wasm: true },
+  { name: 'Rust/WASM', root: RUST_ROOT, wasm: true },
 ];
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -132,6 +134,7 @@ async function measure(build) {
     await wait(250);
     const start = await evaluate("document.getElementById('comecar').click(); P.inv = 10000; ammo = 10000; keys.w = true; keys.d = true; mouse.x = W * .78; mouse.y = H * .5; mouse.down = true; window.__perf = { work: [], gaps: [] }; const previous = loop; let sampledDraw = lastDraw; window.loop = function(t) { window.__perfKeepSparks?.(); const before = performance.now(), priorDraw = lastDraw; previous(t); if (st === 'play' && lastDraw !== priorDraw) { __perf.work.push(performance.now() - before); __perf.gaps.push(lastDraw - (sampledDraw || lastDraw)); sampledDraw = lastDraw; } }; st");
     if (start.exceptionDetails) throw new Error(start.exceptionDetails.text);
+    if (FORCE_CANVAS_SPARKS) await evaluate('if (window.HM_WASM_RENDERER) window.HM_WASM_RENDERER.drawSparks = null');
 
     if (STRESS_ENEMIES) {
       await evaluate(`mouse.down = false; for (let i = 0; i < ${STRESS_ENEMIES}; i++) { const a = i * 2.399963229728653, r = 100 + (i % 8) * 38, e = EXP.spawnEnemy(P.x + Math.cos(a) * r, P.y + Math.sin(a) * r, i % 3 ? 'gun' : 'bat', null, true); e.state = 'CHASE'; e.lkp = { x: P.x, y: P.y }; }`);

@@ -1,4 +1,4 @@
-# Cappe-in-Miami — preview Rust/WASM v296.0
+# Cappe-in-Miami — preview Rust/WASM v297.0
 
 ## Otimização v295
 
@@ -11,6 +11,12 @@ Teste a compressão com `node tests/compression-regression.cjs`; a regressão pr
 Faíscas agora copiam os dados do TypedArray para um buffer Rust reutilizado, classificam cada partícula uma vez e reaproveitam seis grupos de opacidade por cor. O código não cria mais um segundo TypedArray de comandos a cada quadro nem lê cada elemento do TypedArray de origem repetidamente pela ponte JavaScript/WASM. O fallback Web também agrupa as faíscas em uma passagem.
 
 A regressão Chrome compara 506 faíscas no painter Rust e no Canvas: zero canais de pixel diferentes, com contagem e estado do contexto preservados. A suíte principal passou em 107/107. No GitHub Actions, três amostras com 120 inimigos e 500 faíscas mediram p90 de update+draw de 5,5 ms para 5,8 ms no Rust/WASM, uma pequena regressão neste cenário. A versão Web, no mesmo runner Ubuntu/Chrome, caiu de 5,1 para 4,3 ms. Build, paridade de pixels das 506 faíscas e 107/107 regressões passaram. O agrupamento reduz cópias e alocações na ponte, mas o perfil de tempo não mostra ganho no Rust neste teste; a otimização dessa rota deve continuar. Medições do runner não garantem FPS em outros PCs.
+
+## Otimização v297
+
+O agrupamento de faíscas já feito para o fallback Canvas agora preenche ao mesmo tempo o buffer reutilizável enviado ao WASM. O bridge deixa de percorrer de novo até 500 objetos JavaScript e deixa de procurar a cor de cada faísca na paleta. Se o painter direto não estiver ativo, a rota Canvas original segue disponível.
+
+No Chrome local, três pares de execuções com 120 inimigos e 500 faíscas compararam v296 e v297: p90 mediano de update+draw caiu de 5,0 para 4,4 ms, p95 de 5,7 para 5,0 ms e média de 3,109 para 2,595 ms. É um cenário de estresse nesta máquina, não uma garantia de FPS em outros computadores. A paridade Chrome confirmou os mesmos 466 comandos e zero canais de pixel diferentes para os caminhos direto e com buffer já preparado; a suíte passou em 107/107. Não houve revisão visual manual ampla.
 
 ## Experimento local Rust/WASM
 

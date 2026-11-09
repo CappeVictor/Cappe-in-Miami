@@ -1708,19 +1708,25 @@ function updateSparks(dt) {
   { let w = 0; for (let i = 0; i < sparks.length; i++) if (sparks[i].life > 0) sparks[w++] = sparks[i]; sparks.length = w; }
 }
 const SPK_C = [], SPK_GROUPS = new Map(), SPK_ACTIVE = [];
+let SPK_INPUT = new Float64Array(500 * 5);
 function drawSparks() {
   const n = sparks.length; if (!n) return;
+  const sparkRenderer = window.HM_WASM_RENDERER, useDirect = !!(sparkRenderer && sparkRenderer.active && sparkRenderer.drawSparks);
+  if (useDirect && SPK_INPUT.length < n * 5) SPK_INPUT = new Float64Array(Math.max(n * 5, SPK_INPUT.length * 2));
   for (const group of SPK_ACTIVE) { group.active = false; for (const bucket of group.buckets) bucket.length = 0; }
   SPK_ACTIVE.length = 0; SPK_C.length = 0;
   for (let i = 0; i < n; i++) {
     const p = sparks[i]; let group = SPK_GROUPS.get(p.c);
-    if (!group) { group = { color: p.c, active: false, buckets: [[], [], [], [], [], []] }; SPK_GROUPS.set(p.c, group); }
-    if (!group.active) { group.active = true; SPK_ACTIVE.push(group); SPK_C.push(p.c); }
+    if (!group) { group = { color: p.c, colorId: SPK_C.length, active: false, buckets: [[], [], [], [], [], []] }; SPK_GROUPS.set(p.c, group); }
+    if (!group.active) { group.active = true; group.colorId = SPK_C.length; SPK_ACTIVE.push(group); SPK_C.push(p.c); }
     const level = Math.ceil(Math.max(0, p.life / p.max) * 6), bucket = level > 6 ? 5 : level - 1;
     if (bucket >= 0 && bucket < 6) group.buckets[bucket].push(p);
+    if (useDirect) {
+      const offset = i * 5;
+      SPK_INPUT[offset] = p.x; SPK_INPUT[offset + 1] = p.y; SPK_INPUT[offset + 2] = p.life; SPK_INPUT[offset + 3] = p.max; SPK_INPUT[offset + 4] = group.colorId;
+    }
   }
-  if (window.HM_WASM_RENDERER && window.HM_WASM_RENDERER.drawSparks
-    && window.HM_WASM_RENDERER.drawSparks(ctx, sparks, SPK_C)) return;
+  if (useDirect && sparkRenderer.drawSparks(ctx, sparks, SPK_C, SPK_INPUT.subarray(0, n * 5))) return;
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   for (const group of SPK_ACTIVE) {
     ctx.fillStyle = group.color;

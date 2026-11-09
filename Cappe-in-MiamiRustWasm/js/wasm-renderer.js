@@ -517,15 +517,18 @@
         }
         return false;
       };
-      state.drawSparks = (context, particles, colors) => {
-        if (!state.active || !Array.isArray(particles) || particles.length > 8192) return false;
+      state.drawSparks = (context, particles, colors, packedInput = null) => {
+        if (!state.active || !Array.isArray(particles) || particles.length > 8192 || !Array.isArray(colors)) return false;
         const inputLength = particles.length * 5;
-        if (sparkInputBuffer.length < inputLength) sparkInputBuffer = new Float64Array(Math.max(inputLength, sparkInputBuffer.length * 2));
-        const input = sparkInputBuffer.subarray(0, inputLength);
-        for (let i = 0; i < particles.length; i++) {
-          const p = particles[i], offset = i * 5;
-          input[offset] = p.x; input[offset + 1] = p.y; input[offset + 2] = p.life; input[offset + 3] = p.max;
-          input[offset + 4] = colors.indexOf(p.c);
+        let input = packedInput;
+        if (!(input instanceof Float64Array) || input.length !== inputLength) {
+          if (sparkInputBuffer.length < inputLength) sparkInputBuffer = new Float64Array(Math.max(inputLength, sparkInputBuffer.length * 2));
+          input = sparkInputBuffer.subarray(0, inputLength);
+          for (let i = 0; i < particles.length; i++) {
+            const p = particles[i], offset = i * 5;
+            input[offset] = p.x; input[offset + 1] = p.y; input[offset + 2] = p.life; input[offset + 3] = p.max;
+            input[offset + 4] = colors.indexOf(p.c);
+          }
         }
         if (state.directReady && state.direct && state.direct.drawSparkInputs) {
           try {
