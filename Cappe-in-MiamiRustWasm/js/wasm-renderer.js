@@ -26,6 +26,10 @@
   const weatherMoteDirectInputBuffer = new Float64Array(128 * 4);
   let dustInputBuffer = new Float64Array(96);
   let sparkInputBuffer = new Float64Array(160);
+  const glassPanelInputBuffer = new Float64Array(96 * 4);
+  const glassShardInputBuffer = new Float64Array(160 * 7);
+  let glassPanelInputView = null, glassPanelInputViewLength = -1;
+  let glassShardInputView = null, glassShardInputViewLength = -1;
   let enemyInputBuffer = new Float64Array(0);
   let enemyTextPlacementBuffer = new Float64Array(0);
   let enemyTextOffsetBuffer = new Uint32Array(0);
@@ -1685,18 +1689,31 @@
         if (!state.active || !Array.isArray(panels) || !Array.isArray(shards) || panels.length > 96 || shards.length > 160 || !Number.isFinite(nowMs) || nowMs < 0 ||
             !Number.isFinite(baseAlpha) || baseAlpha < 0 || baseAlpha > 1) return false;
         if (!state.directReady || !state.direct || !state.direct.drawGlass) return false;
-        const directPanels = new Float64Array(panels.length * 4);
+        const panelInputLength = panels.length * 4;
+        if (glassPanelInputViewLength !== panelInputLength) {
+          glassPanelInputView = glassPanelInputBuffer.subarray(0, panelInputLength);
+          glassPanelInputViewLength = panelInputLength;
+        }
+        const directPanels = glassPanelInputView;
         for (let i = 0; i < panels.length; i++) {
           const p = panels[i], o = i * 4;
           if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y) || !Number.isFinite(p.w) || p.w <= 0 || !Number.isFinite(p.h) || p.h <= 0) return false;
           directPanels[o] = p.x; directPanels[o + 1] = p.y; directPanels[o + 2] = p.w; directPanels[o + 3] = p.h;
         }
-        const directShardValues = [];
+        let shardInputLength = 0;
         for (const p of shards) if (p && p.on) {
-          if (![p.x, p.y, p.rot, p.life, p.max, p.s, p.c].every(Number.isFinite)) return false;
-          directShardValues.push(p.x, p.y, p.rot, p.life, p.max, p.s, p.c);
+          if (!Number.isFinite(p.x) || !Number.isFinite(p.y) || !Number.isFinite(p.rot) || !Number.isFinite(p.life) ||
+              !Number.isFinite(p.max) || !Number.isFinite(p.s) || !Number.isFinite(p.c)) return false;
+          const o = shardInputLength;
+          glassShardInputBuffer[o] = p.x; glassShardInputBuffer[o + 1] = p.y; glassShardInputBuffer[o + 2] = p.rot;
+          glassShardInputBuffer[o + 3] = p.life; glassShardInputBuffer[o + 4] = p.max; glassShardInputBuffer[o + 5] = p.s;
+          glassShardInputBuffer[o + 6] = p.c; shardInputLength += 7;
         }
-        const directShards = new Float64Array(directShardValues);
+        if (glassShardInputViewLength !== shardInputLength) {
+          glassShardInputView = glassShardInputBuffer.subarray(0, shardInputLength);
+          glassShardInputViewLength = shardInputLength;
+        }
+        const directShards = glassShardInputView;
         try {
           const drawn = withCanvasBypass(() => state.direct.drawGlass(context, directPanels, directShards, nowMs, baseAlpha, FURNITURE_COLORS));
           if (drawn !== panels.length + directShards.length / 7) return false;

@@ -15,6 +15,7 @@ const HEAP_PROFILE = process.argv.includes('--heap-profile');
 const STRESS_ENEMIES = Math.max(0, Math.min(120, Number(process.env.CAPPE_PERF_ENEMIES) || 0));
 const STRESS_SPARKS = Math.max(0, Math.min(500, Number(process.env.CAPPE_PERF_SPARKS) || 0));
 const MIXED_AI_STRESS = process.env.CAPPE_PERF_MIXED_AI === '1';
+const VISIBLE_AI_STRESS = process.env.CAPPE_PERF_VISIBLE_AI === '1';
 const FORCE_CANVAS_SPARKS = process.env.CAPPE_PERF_FORCE_CANVAS_SPARKS === '1';
 const ASSERT_LAZY_MASKS = process.env.CAPPE_PERF_ASSERT_LAZY_MASKS === '1';
 const ASSERT_LAZY_MAPS = process.env.CAPPE_PERF_ASSERT_LAZY_MAPS === '1';
@@ -177,7 +178,7 @@ async function measure(build) {
     if (FORCE_CANVAS_SPARKS) await evaluate('if (window.HM_WASM_RENDERER) window.HM_WASM_RENDERER.drawSparks = null');
 
     if (STRESS_ENEMIES) {
-      await evaluate(`mouse.down = false; for (let i = 0; i < ${STRESS_ENEMIES}; i++) { const a = i * 2.399963229728653, r = 100 + (i % 8) * 38, e = EXP.spawnEnemy(P.x + Math.cos(a) * r, P.y + Math.sin(a) * r, i % 3 ? 'gun' : 'bat', null, true); e.state = ${MIXED_AI_STRESS ? "['CHASE','INVESTIGATE','IDLE','SEARCH'][i % 4]" : "'CHASE'"}; e.leader = MIXED_AI_STRESS && i % 20 === 0; e.talkT = 0; e.callT = 0; e.lkp = { x: P.x + Math.cos(a + 1) * 90, y: P.y + Math.sin(a + 1) * 90 }; e.goal = null; e.path = null; e.losT = 10; e.vis = false; }`);
+      await evaluate(`mouse.down = false; for (let i = 0; i < ${STRESS_ENEMIES}; i++) { const a = i * 2.399963229728653, r = 100 + (i % 8) * 38, e = EXP.spawnEnemy(P.x + Math.cos(a) * r, P.y + Math.sin(a) * r, i % 3 ? 'gun' : 'bat', null, true); e.state = ${MIXED_AI_STRESS ? "['CHASE','INVESTIGATE','IDLE','SEARCH'][i % 4]" : "'CHASE'"}; e.leader = MIXED_AI_STRESS && i % 20 === 0; e.talkT = 0; e.callT = 0; e.lkp = { x: P.x + Math.cos(a + 1) * 90, y: P.y + Math.sin(a + 1) * 90 }; e.goal = null; e.path = null; e.losT = 10; e.vis = ${VISIBLE_AI_STRESS ? 'true' : 'false'}; }`);
       if (MIXED_AI_STRESS) await evaluate("const perfNoise = { x: P.x, y: P.y, radius: 1800, kind: 'benchmark', t: 1 }; window.__perfKeepNoise = () => { soundEvents.length = 0; perfNoise.x = P.x; perfNoise.y = P.y; perfNoise.t = 1; soundEvents.push(perfNoise); }; window.__perfKeepNoise();");
     }
     if (STRESS_SPARKS) {
@@ -254,6 +255,7 @@ async function measure(build) {
       stressEnemies: STRESS_ENEMIES,
       stressSparks: STRESS_SPARKS,
       mixedAiStress: MIXED_AI_STRESS,
+      visibleAiStress: VISIBLE_AI_STRESS,
       sparkInputViewCalls: sample.sparkInputViewCalls,
       startup,
       ...(lazyMapLoad ? { lazyMapLoad } : {}),
@@ -289,4 +291,3 @@ async function measure(build) {
   for (const build of BUILDS) results.push(await measure(build));
   console.log(JSON.stringify({ chrome: CHROME, note: 'Tempo local de update+draw e intervalo RAF; resultados dependem do PC, navegador e carga.', results }, null, 2));
 })().catch(error => { console.error(error.stack || String(error)); process.exitCode = 1; });
-

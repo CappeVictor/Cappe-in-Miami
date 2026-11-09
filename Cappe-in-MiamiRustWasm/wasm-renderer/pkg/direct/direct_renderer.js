@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 20410)
-Total output lines: 2410
-
 /* @ts-self-types="./direct_renderer.d.ts" */
 
 /**
@@ -1254,7 +1251,58 @@ export function drawPlayerFrameRgba(output, palette_input, state, _phase, attack
 
 /**
  * Composes live players directly, preserving host-owned state and sprite assets.
- * @param {CanvasRenderin…410 tokens truncated…loat64Array} inputs
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} items
+ * @param {any} player_sheet
+ * @param {Array<any>} player_frames
+ * @param {Array<any>} skin_colors
+ * @param {Array<any>} furniture_colors
+ * @param {Array<any>} actor_colors
+ * @returns {number}
+ */
+export function drawPlayers(context, items, player_sheet, player_frames, skin_colors, furniture_colors, actor_colors) {
+    const ret = wasm.drawPlayers(context, items, player_sheet, player_frames, skin_colors, furniture_colors, actor_colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Draws JavaScript-owned rain segments as one Canvas path from Rust/WASM.
+ * The input is interleaved x, y, length values; invalid rows are skipped.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} input
+ * @param {number} count
+ * @param {number} step
+ * @returns {number}
+ */
+export function drawRain(context, input, count, step) {
+    const ret = wasm.drawRain(context, input, count, step);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Draws plain HUD text entries directly, leaving entry construction in JS.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Array<any>} entries
+ * @returns {number}
+ */
+export function drawRawHudTexts(context, entries) {
+    const ret = wasm.drawRawHudTexts(context, entries);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Projects world-space shell inputs and paints them without the legacy WASM command batch.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} inputs
  * @param {number} camera_x
  * @param {number} camera_y
  * @returns {number}
@@ -2359,4 +2407,3 @@ async function __wbg_init(module_or_path) {
 }
 
 export { initSync, __wbg_init as default };
-

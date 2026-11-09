@@ -33,4 +33,3 @@ assert.equal(last.life,.01999999999999999);
 assert.equal(last.x,-2.4);
 assert.equal(last.y,9.2);
 process.stdout.write('PASS updateSparks faz um percurso, mantém ordem/identidade e remove partículas expiradas\n');
-

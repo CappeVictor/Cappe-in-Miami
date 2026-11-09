@@ -1,3 +1,6 @@
+## v96/v312 — buffers de entrada reutilizados, sem medição de FPS
+
+Web e Rust/WASM agora reutilizam o vetor de direção do jogador em vez de alocar um par de coordenadas por chamada; o caminho Rust/WASM também reutiliza buffers tipados dos painéis de vidro e estilhaços da pausa. A regressão valida valores, identidade do vetor e estabilidade do desenho. Regressões cruzadas: 118/118; partículas Web e compressão passaram. Não houve benchmark de frame time/FPS nesta rodada.
 ## v294/v82 — pontos de rota reutilizados na IA
 A busca BFS aceita um buffer reutilizável para os pontos da rota. Cada inimigo conserva a rota visível e um pool com a capacidade máxima já necessária, de modo que recalcular trajetórias não crie um objeto por tile a cada vez. A comparação de rota segue idêntica em regressão, inclusive após encurtar e expandir o caminho. No microbenchmark sintético de 500 rotas repetidas em um labirinto 1200×800, foram criados 35.000 objetos de ponto sem pool e 0 novos objetos depois de aquecê-lo; a mediana permaneceu perto de 0,04 ms. Isso prova menor alocação de pontos no cenário sintético, não queda do heap total ou do frame time. No Chrome headless com 48 inimigos: p90 update+draw Web 1,1/1,1 ms e Rust/WASM 1,5/1,6 ms antes/depois da adaptação do governor; cadência p90 18,3 ms. Essas amostras são locais, variáveis e não demonstram melhoria mensurável do frame time.
 
@@ -558,4 +561,3 @@ O perfil `opt-level = "s"` reduziu `direct_renderer_bg.wasm` de 326.479 para 287
 ## v95/v311 — agrupamento de faíscas sem listas temporárias
 
 O agrupamento Canvas de faíscas usa índices encadeados em um buffer `Int32Array` reutilizável, preservando ordem, cor e opacidade. Em dois perfis locais Chrome com 500 faíscas, 120 inimigos e IA mista, as alocações amostradas em `drawSparks` na Web foram 4.623.316 e 4.000.848 bytes antes, contra 1.179.864 e 1.245.408 depois (média −71,9%). Rust/WASM teve 1.477.208 e 984.464 bytes antes; depois, a função não apareceu entre os 16 maiores alocadores, portanto não calculamos uma redução percentual. Médias de quadro: Web 0,454→0,449 ms (p90 mediano 0,55→0,5 ms; p95 0,6→0,6 ms); Rust/WASM 0,759→0,766 ms (p90 0,9→0,95 ms; p95 0,95→0,95 ms). A amostra não mostra ganho consistente de quadro/FPS. Regressões: 117/117; partículas Web e teste de compressão passaram.
-
