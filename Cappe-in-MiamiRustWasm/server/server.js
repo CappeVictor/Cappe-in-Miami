@@ -122,7 +122,7 @@ function createGameServer(options={}) {
     try {
       const url=new URL(req.url,'http://localhost');
       if(url.pathname.startsWith('/api/')) {
-if(req.method==='GET'&&url.pathname==='/api/health')return json(res,200,{ok:true,version:'v298.0-spatial-collision-grid-rust',rooms:listRooms().length});
+if(req.method==='GET'&&url.pathname==='/api/health')return json(res,200,{ok:true,version:'v299.0-lazy-mask-assets-rust',rooms:listRooms().length});
         if(req.method==='GET'&&url.pathname==='/api/rooms')return json(res,200,{rooms:listRooms(),updatedAt:Date.now()});
         if(req.method==='POST'&&url.pathname==='/api/rooms'){limitRoomAttempts(req);return json(res,201,createRoom((await body(req)).name));}
         const match=url.pathname.match(/^\/api\/rooms\/([A-Z2-9]{6})(?:\/(join|rejoin|state|leave))?$/);

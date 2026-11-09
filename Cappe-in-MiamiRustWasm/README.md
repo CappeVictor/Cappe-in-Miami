@@ -1,4 +1,8 @@
-# Cappe-in-Miami — preview Rust/WASM v298.0
+## Otimização v299 — carregamento sob demanda de máscaras
+
+As 14 imagens cosméticas de máscara deixaram de fazer parte do carregamento inicial e do pré-cache. Elas carregam quando o seletor é aberto ou a máscara é usada; após o primeiro uso, o service worker as mantém no cache offline. No Chrome local, a transferência inicial caiu 325.250 bytes (de 1.140.378 para 815.128; 28,5%). Ao abrir/usar o seletor, as 14 imagens são solicitadas. Regressões: 109/109; teste de compressão passou. Esta medição é de transferência inicial, não de FPS.
+
+# Cappe-in-Miami — preview Rust/WASM v299.0
 
 ## Otimização v298
 

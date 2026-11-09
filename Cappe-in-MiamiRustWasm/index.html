@@ -2136,6 +2136,7 @@ function newGame() {
   HI.start = HI.best; HI.beaten = false;
   cw = 'pistola'; ammo = 0;
   if (MASKS[sel].lock && !unlocked()) sel = 0;
+  ensureMaskImage(MASKS[sel]);
   S = Object.assign({}, BASE, MASKS[sel].fx); lvl = historia ? capIdx + 1 : 1;
   if (historia && dif === 'hardcore') { S.shield = 0; S.revive = false; } score = 0; combo = 0; kills = 0; revived = false;
   EXP.applyS();
@@ -3164,14 +3165,12 @@ function loop(t) {
 // ---------- MENU DE MÁSCARAS ----------
 function mark() { [...grade.children].forEach((b, i) => b.classList.toggle('sel', i === sel)); preview(sel); }
 function preview(i) { info.innerHTML = '<b>' + MASKS[i].nome + '</b><span>' + MASKS[i].desc + '</span>'; }
-const assetPromises = [];
+function ensureMaskImage(mask) { if (mask && mask.img && !mask.img.src) mask.img.src = 'assets/' + mask.id + '.png'; }
 MASKS.forEach((m, i) => {
   m.img = new Image();
-  assetPromises.push(new Promise(resolve => { m.img.onload = resolve; m.img.onerror = resolve; }));
-  m.img.src = 'assets/' + m.id + '.png';
   const b = document.createElement('button'); b.type = 'button'; b.className = 'm';
-  b.innerHTML = '<img src="assets/' + m.id + '.png" alt="" width="128" height="128"><span>' + m.nome + '</span>';
-  b.onclick = () => { sel = i; mark(); }; b.onmouseenter = b.onfocus = () => preview(i);
+  b.innerHTML = '<img loading="lazy" decoding="async" fetchpriority="low" src="assets/' + m.id + '.png" alt="" width="128" height="128"><span>' + m.nome + '</span>';
+  b.onclick = () => { sel = i; ensureMaskImage(m); mark(); }; b.onmouseenter = b.onfocus = () => { ensureMaskImage(m); preview(i); };
   grade.appendChild(b);
 });
 grade.onmouseleave = () => preview(sel);

@@ -14,8 +14,8 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
-- **Web — HTML, CSS e JavaScript v85:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — v298:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v298-preview.zip)
+- **Web — HTML, CSS e JavaScript v86:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
+- **Rust/WASM — v299:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v299-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
@@ -23,9 +23,9 @@ Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. 
 
 A prévia v294 mantém painters Rust/WebSys diretos para as camadas amostradas de gameplay, incluindo Campanha, Horda e Invasão. O antigo trampoline Canvas deixou de ser compilado, servido e pré-cacheado. A auditoria instrumentada não encontrou chamadas Canvas do host em 23 cenas/estados amostrados. Os painters Canvas permanecem como fallback; lógica, simulação, aleatoriedade e seleção/cache de assets seguem em JavaScript. O pool de pontos de rota da IA reduz objetos temporários em um microbenchmark sintético; não há ganho de frame time medido.
 
-## Última atualização — 9 de novembro de 2026 · Web v85 e Rust/WASM v298
+## Última atualização — 9 de novembro de 2026 · Web v86 e Rust/WASM v299
 
-As duas versões servem HTML, JavaScript, CSS, JSON e SVG comprimidos em gzip quando o navegador suporta. No Chrome local, a transferência inicial observada caiu de 2,28 MB para 765 KB na Web e de 2,83 MB para 1,14 MB em Rust/WASM. js/maps.js chega a 301.534 bytes transferidos para 1.616.616 bytes decodificados, com conteúdo idêntico. A v297 eliminou uma segunda passagem JavaScript pelas faíscas antes do WASM. Na v85/v298, a navegação da IA usa uma grade espacial para limitar os sólidos testados a cada colisão. Em três rodadas locais com 120 inimigos e 500 faíscas, a mediana do p90 caiu de 3,7 para 2,0 ms na Web e de 3,6 para 3,2 ms em Rust/WASM; no Rust a média subiu de 2,385 para 2,502 ms, então o ganho geral ainda precisa de investigação. A regressão determinística conferiu 3.000 posições contra a busca linear; a suíte passou em 108/108. São medidas deste PC e deste cenário, não garantia para outros computadores. Não houve revisão visual manual ampla.
+As duas versões servem HTML, JavaScript, CSS, JSON e SVG comprimidos em gzip quando o navegador suporta. No Chrome local, a transferência inicial observada caiu de 2,28 MB para 765 KB na Web e de 2,83 MB para 1,14 MB em Rust/WASM. js/maps.js chega a 301.534 bytes transferidos para 1.616.616 bytes decodificados, com conteúdo idêntico. A v297 eliminou uma segunda passagem JavaScript pelas faíscas antes do WASM. Na v85/v298, a navegação da IA usa uma grade espacial para limitar os sólidos testados a cada colisão. Em três rodadas locais com 120 inimigos e 500 faíscas, a mediana do p90 caiu de 3,7 para 2,0 ms na Web e de 3,6 para 3,2 ms em Rust/WASM; no Rust a média subiu de 2,385 para 2,502 ms, então o ganho geral ainda precisa de investigação. A regressão determinística conferiu 3.000 posições contra a busca linear. Na atualização v86/v299, as 14 imagens de máscara passaram a carregar sob demanda: no Chrome local, a transferência inicial caiu 325.246 bytes (42,5%) na Web e 325.250 bytes (28,5%) em Rust/WASM; as imagens continuam disponíveis offline após o primeiro uso. A suíte passou em 109/109 e a compressão foi verificada. São medidas deste PC e destes cenários, não garantia para outros computadores. Não houve revisão visual manual ampla.
 
 ## Últimas melhorias incluídas
 

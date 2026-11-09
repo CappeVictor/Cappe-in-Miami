@@ -63,15 +63,16 @@ async function test(name, fn) {
   try { await fn(); results.push({ name, status: 'PASS' }); }
   catch(e) { results.push({ name, status: 'FAIL', error: e.message }); }
 }
-function worker(scope = 'https://example.test/game/') {
+function worker(scope = 'https://example.test/game/', networkFetch = null) {
   const handlers = {}, deleted = [], entries = new Map(), fetched = [];
+  if (!networkFetch) networkFetch = async req => { fetched.push(req.url); throw Error('offline'); };
   const cache = { addAll: async list => { for(const f of list) assert.ok(fs.existsSync(path.join(root,f)), f); },
     match: async req => entries.get(typeof req === 'string' ? req : req.url),
     put: async (req,res) => { entries.set(typeof req === 'string' ? req : req.url,res); } };
   const ctx = { URL, location: new URL(scope), self: { registration: { scope },
     addEventListener: (name,fn) => handlers[name] = fn, skipWaiting: async()=>{}, clients: { claim: async()=>{} } },
     caches: { open: async()=>cache, match: cache.match, keys: async()=>['another-app','cappe-v33.0:/game/','cappe-v33.0:/other/','cappe-v34.0:/game/'],
-      delete: async key => deleted.push(key) }, fetch: async req => { fetched.push(req.url); throw Error('offline'); } };
+      delete: async key => deleted.push(key) }, fetch: networkFetch };
   vm.createContext(ctx); vm.runInContext(read('sw.js'),ctx);
   return { ctx, handlers, deleted, entries, fetched };
 }
@@ -117,7 +118,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v298.0-spatial-collision-grid-rust');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v299.0-lazy-mask-assets-rust');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -1118,10 +1119,20 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v298.0-spatial-collision-grid-rust');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v299.0-lazy-mask-assets-rust');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));
+  });
+  await test('Imagens de máscara são lazy e entram no cache offline ao serem usadas', async () => {
+    const maskPaths=['barbudo','capacete','cavalo','coelho','coruja','elefante','galo','leao','lobo','macaco','porco','sapo','tigre','unicornio'].map(id=>'assets/'+id+'.png');
+    const w=worker(undefined,async()=>new Response('mask image'));let install;w.handlers.install({waitUntil:p=>install=p});await install;
+    const list=vm.runInContext('ASSETS',w.ctx);assert.ok(maskPaths.every(asset=>!list.includes(asset)),'máscaras opcionais não entram no precache inicial');
+    const html=read('index.html');assert.match(html,/function ensureMaskImage\(mask\)/);assert.match(html,/loading="lazy" decoding="async" fetchpriority="low"/);
+    const url='https://example.test/game/assets/leao.png';let responsePromise,cachePromise;
+    w.handlers.fetch({request:{url,method:'GET',mode:'cors'},respondWith:p=>responsePromise=p,waitUntil:p=>cachePromise=p});
+    const response=await responsePromise;assert.equal(await response.text(),'mask image');await cachePromise;
+    assert.equal(await w.entries.get(url).text(),'mask image','a primeira requisição guarda a máscara para uso offline');
   });
   await test('Texto cacheado encaminha drawImage ao Rust com fallback Canvas', () => {
     const html=read('index.html');

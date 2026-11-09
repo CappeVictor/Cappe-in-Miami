@@ -14,6 +14,7 @@ const CPU_PROFILE = process.argv.includes('--profile');
 const STRESS_ENEMIES = Math.max(0, Math.min(120, Number(process.env.CAPPE_PERF_ENEMIES) || 0));
 const STRESS_SPARKS = Math.max(0, Math.min(500, Number(process.env.CAPPE_PERF_SPARKS) || 0));
 const FORCE_CANVAS_SPARKS = process.env.CAPPE_PERF_FORCE_CANVAS_SPARKS === '1';
+const ASSERT_LAZY_MASKS = process.env.CAPPE_PERF_ASSERT_LAZY_MASKS === '1';
 const REPO = path.resolve(__dirname, '../..');
 const BUILD_FILTER = (process.env.CAPPE_PERF_BUILD || '').toLowerCase();
 const BUILDS = [
@@ -111,6 +112,8 @@ async function measure(build) {
     const startup = (await evaluate(`(() => {
       const nav = performance.getEntriesByType('navigation')[0];
       const resources = performance.getEntriesByType('resource');
+      window.__perfMaskPaths = MASKS.map(m => new URL('assets/' + m.id + '.png', location.href).pathname);
+      const maskResources = resources.filter(r => window.__perfMaskPaths.includes(new URL(r.name).pathname));
       const top = [...resources].sort((a, b) => b.transferSize - a.transferSize).slice(0, 10).map(r => ({
         path: r.name.startsWith(location.origin) ? r.name.slice(location.origin.length) : r.name,
         transferBytes: r.transferSize || 0,
@@ -126,9 +129,13 @@ async function measure(build) {
         resourceCount: resources.length,
         totalTransferBytes: resources.reduce((n, r) => n + (r.transferSize || 0), 0),
         totalDecodedBytes: resources.reduce((n, r) => n + (r.decodedBodySize || 0), 0),
+        maskImageRequestCount: maskResources.length,
+        maskImageTransferBytes: maskResources.reduce((n, r) => n + (r.transferSize || 0), 0),
+        maskImagePaths: maskResources.map(r => new URL(r.name).pathname),
         largestResources: top,
       };
     })()`)).result.value;
+    if (ASSERT_LAZY_MASKS && startup.maskImageRequestCount !== 0) throw new Error('Máscaras foram carregadas antes de abrir o seletor.');
 
     await evaluate('CFG.fps = 60');
     await evaluate("document.getElementById('jogar').click()");
@@ -152,9 +159,10 @@ async function measure(build) {
       await cdp('Profiler.start');
     }
     await until(async () => (await evaluate('__perf.work.length >= 180')).result?.value, 45000, '180 quadros de gameplay');
-    const sample = (await evaluate('({work: __perf.work.slice(0, 180), gaps: __perf.gaps.slice(0, 180), tier: EXP.perfTier, state: st, canvas: [c.width, c.height], renderer: window.HM_WASM_RENDERER?.status || "Canvas"})')).result.value;
+    const sample = (await evaluate('({work: __perf.work.slice(0, 180), gaps: __perf.gaps.slice(0, 180), tier: EXP.perfTier, state: st, canvas: [c.width, c.height], renderer: window.HM_WASM_RENDERER?.status || "Canvas", maskImageRequestCount: performance.getEntriesByType("resource").filter(r => window.__perfMaskPaths.includes(new URL(r.name).pathname)).length})')).result.value;
     if (sample.state !== 'play') throw new Error(`A amostra terminou fora do gameplay (${sample.state}).`);
     if (build.wasm && sample.renderer !== 'ready') throw new Error(`Renderer WASM não ficou ativo (${sample.renderer}).`);
+    if (ASSERT_LAZY_MASKS && sample.maskImageRequestCount < 1) throw new Error('A máscara selecionada não foi requisitada após iniciar.');
     let cpuHotspots, cpuCallers;
     if (CPU_PROFILE) {
       const { profile } = await cdp('Profiler.stop');
@@ -194,6 +202,7 @@ async function measure(build) {
       stressEnemies: STRESS_ENEMIES,
       stressSparks: STRESS_SPARKS,
       startup,
+      maskImageRequestCountAfterStart: sample.maskImageRequestCount,
       governorTier: sample.tier,
       initialCanvas,
       finalCanvas: sample.canvas,

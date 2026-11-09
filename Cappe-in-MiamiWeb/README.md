@@ -1,4 +1,4 @@
-# Cappe in Miami Web — v85.0
+# Cappe in Miami Web — v86.0
 
 Versão para navegador com HTML, CSS e JavaScript; o jogo usa o renderer Canvas 2D em JavaScript e não depende de Rust nem WebAssembly.
 
@@ -33,3 +33,8 @@ A IA agora reutiliza os objetos dos pontos de rota BFS quando recalcula o caminh
 A colisão usada pela navegação da IA agora consulta uma grade espacial de sólidos próximos em vez de percorrer todos os retângulos do mapa em cada amostra de raio. Os sólidos, tiles e geometria dos mapas não mudam. Uma regressão compara 3.000 posições com a busca linear e confirma os mesmos resultados.
 
 Em três rodadas locais no Chrome, com 120 inimigos e 500 faíscas, a mediana do p90 de update+draw caiu de 3,7 ms na v84 para 2,0 ms; p95 caiu de 4,5 para 2,7 ms e a média de 2,272 para 1,613 ms. É um cenário de estresse local; os tempos variam por mapa e computador. Regressões compartilhadas: 108/108.
+
+
+## Otimização v86
+
+As 14 imagens de máscara não são mais baixadas no início do jogo. Elas são carregadas quando o seletor é aberto ou uma máscara é escolhida; depois do primeiro uso, o service worker as guarda no cache para uso offline. Em Chrome local, os bytes transferidos no carregamento inicial caíram 325.246 bytes (de 765.523 para 440.277; 42,5%). O seletor continua carregando as 14 imagens quando usado. Regressões: 109/109; verificação de compressão passou. É uma medição local de transferência, não de FPS.

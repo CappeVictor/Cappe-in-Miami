@@ -233,9 +233,9 @@
     MASKS.forEach((m, i) => {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'm r-' + m.rar;
       b.innerHTML = '<span>' + m.nome + '</span>';
-      const pic = m.img && m.img.tagName === 'CANVAS' ? m.img : Object.assign(document.createElement('img'), { src: (m.img && m.img.src) || ('assets/' + m.id + '.png'), alt: '', width: 128, height: 128 });
+      const pic = m.img && m.img.tagName === 'CANVAS' ? m.img : Object.assign(document.createElement('img'), { loading: 'lazy', decoding: 'async', fetchPriority: 'low', src: (m.img && m.img.src) || ('assets/' + m.id + '.png'), alt: '', width: 128, height: 128 });
       b.prepend(pic);
-      b.onclick = () => { if (!b.disabled) { sel = i; mark(); } }; b.onmouseenter = b.onfocus = () => preview(i);
+      b.onclick = () => { if (!b.disabled) { sel = i; ensureMaskImage(m); mark(); } }; b.onmouseenter = b.onfocus = () => { ensureMaskImage(m); preview(i); };
       grade.appendChild(b);
     });
   };
