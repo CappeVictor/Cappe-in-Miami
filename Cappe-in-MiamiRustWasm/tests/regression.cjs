@@ -118,7 +118,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v299.0-lazy-mask-assets-rust');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v300.0-collision-bucket-query-rust');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -1119,7 +1119,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v299.0-lazy-mask-assets-rust');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v300.0-collision-bucket-query-rust');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));
@@ -1228,6 +1228,15 @@ assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v299.0-lazy-mask-assets-rust'
     const brute=(x,y,r)=>ctx.EXP.NAV.solids.some(w=>{const cx=Math.max(w[0],Math.min(x,w[0]+w[2])),cy=Math.max(w[1],Math.min(y,w[1]+w[3]));return (x-cx)*(x-cx)+(y-cy)*(y-cy)<r*r;});
     let seed=0x1a2b3c4d;const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
     for(let i=0;i<3000;i++){const x=random()*420-10,y=random()*320-10,r=i%2?13:14;assert.equal(exp.NAV.circleHits(x,y,r),brute(x,y,r),`resultado diferente em ${x},${y},${r}`);}
+    const buckets=exp.NAV.solidBuckets;assert.ok(buckets.some(bucket=>bucket?.includes(exp.NAV.solids[0])),'as células guardam referências aos sólidos sem marcas auxiliares');
+    exp.navBuild();assert.notEqual(exp.NAV.solidBuckets,buckets);for(let i=0;i<3000;i++){const x=random()*420-10,y=random()*320-10,r=i%2?13:14;assert.equal(exp.NAV.circleHits(x,y,r),brute(x,y,r),`resultado diferente depois de reconstruir em ${x},${y},${r}`);}
+  });
+  await test('Grade de colisões sem deduplicação mantém equivalência com 160 obstáculos', () => {
+    const {ctx,exp}=environment();ctx.WW=1200;ctx.WH=800;ctx.sol=[];
+    for(let i=0;i<160;i++){const col=i%20,row=(i/20)|0;ctx.sol.push([35+col*58,25+row*92,18+(i%4)*7,20+(i%3)*9]);}
+    exp.navBuild();const brute=(x,y,r)=>exp.NAV.solids.some(w=>{const cx=Math.max(w[0],Math.min(x,w[0]+w[2])),cy=Math.max(w[1],Math.min(y,w[1]+w[3]));return (x-cx)*(x-cx)+(y-cy)*(y-cy)<r*r;});
+    let seed=0x51a7e;const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
+    for(let i=0;i<12000;i++){const x=random()*1250-25,y=random()*850-25,r=[2,13,14][i%3];assert.equal(exp.NAV.circleHits(x,y,r),brute(x,y,r),`divergência no obstáculo ${i%160} em ${x},${y},${r}`);}
   });
   await test('Replanejamento de IA reutiliza os pontos do caminho sem alterar a rota BFS', () => {
     const {ctx,exp}=environment();ctx.sol=[[180,0,40,220]];exp.navBuild();

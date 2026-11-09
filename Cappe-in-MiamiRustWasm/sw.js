@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v299.0-lazy-mask-assets-rust';
+const CACHE = 'cappe-v300.0-collision-bucket-query-rust';
 const ASSETS = [
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",

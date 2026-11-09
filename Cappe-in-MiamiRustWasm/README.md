@@ -1,8 +1,12 @@
+# Cappe-in-Miami — preview Rust/WASM v300.0
+
+## Otimização v300 — grade de colisão da IA
+
+As consultas de colisão da navegação da IA agora visitam as caixas armazenadas nas células espaciais tocadas pelo raio, sem expandir cada sólido e sem deduplicar referências em cada consulta. O teste exato círculo-retângulo e a geometria dos sólidos permanecem iguais. Regressões com 15.000 posições aleatórias contra busca linear passaram; suíte 110/110. Em três rodadas Chrome com 120 inimigos e 500 faíscas, p90 mediano de update+draw caiu de 2,8 para 2,7 ms; a mediana dos p95 permaneceu em 3,3 ms. A melhora é pequena e específica deste PC/cenário, não garantia de FPS.
+
 ## Otimização v299 — carregamento sob demanda de máscaras
 
 As 14 imagens cosméticas de máscara deixaram de fazer parte do carregamento inicial e do pré-cache. Elas carregam quando o seletor é aberto ou a máscara é usada; após o primeiro uso, o service worker as mantém no cache offline. No Chrome local, a transferência inicial caiu 325.250 bytes (de 1.140.378 para 815.128; 28,5%). Ao abrir/usar o seletor, as 14 imagens são solicitadas. Regressões: 109/109; teste de compressão passou. Esta medição é de transferência inicial, não de FPS.
-
-# Cappe-in-Miami — preview Rust/WASM v299.0
 
 ## Otimização v298
 

@@ -239,7 +239,7 @@
   'use strict';
   const EXP = window.EXP;
   EXP.glass = { list: [], map: new Map() };       // tiles de vidro vivos (preenchido por exp-world.js, quebrado em exp-fx.js)
-  const NAV = { cs: 20, cols: 0, rows: 0, ok: null, par: null, seen: null, q: null, stamp: 0, built: false, solids: [], solidBuckets: null, bucketSize: 64, bucketCols: 0, bucketRows: 0, solidSeen: new WeakMap(), solidQuery: 0 };
+  const NAV = { cs: 20, cols: 0, rows: 0, ok: null, par: null, seen: null, q: null, stamp: 0, built: false, solids: [], solidBuckets: null, bucketSize: 64, bucketCols: 0, bucketRows: 0 };
   const CLR = 14;   // folga da grade: raio do inimigo (13) + 1 px, para que nenhum caminho passe rente à quina
   EXP.NAV = NAV;
   const DI = [1, -1, 0, 0, 1, 1, -1, -1], DJ = [0, 0, 1, -1, 1, -1, 1, -1];
@@ -250,10 +250,9 @@
       const size = NAV.bucketSize, cols = NAV.bucketCols, rows = NAV.bucketRows, buckets = NAV.solidBuckets;
       const x0 = Math.max(0, Math.min(cols - 1, Math.floor((x - r) / size))), x1 = Math.max(0, Math.min(cols - 1, Math.floor((x + r) / size)));
       const y0 = Math.max(0, Math.min(rows - 1, Math.floor((y - r) / size))), y1 = Math.max(0, Math.min(rows - 1, Math.floor((y + r) / size)));
-      const query = ++NAV.solidQuery, seen = NAV.solidSeen;
       for (let by = y0; by <= y1; by++) for (let bx = x0; bx <= x1; bx++) {
         const bucket = buckets[by * cols + bx]; if (!bucket) continue;
-        for (let i = 0; i < bucket.length; i++) { const w = bucket[i]; if (seen.get(w) === query) continue; seen.set(w, query); if (test(w)) return true; }
+        for (let i = 0; i < bucket.length; i++) if (test(bucket[i])) return true;
       }
       return false;
     }
@@ -268,10 +267,10 @@
     NAV.cols = cols; NAV.rows = rows;
     const boxes = new Set(doors.map(d => d.box)); NAV.solids = sol.filter(s => !boxes.has(s));
     NAV.bucketCols = Math.max(1, Math.ceil(WW / NAV.bucketSize)); NAV.bucketRows = Math.max(1, Math.ceil(WH / NAV.bucketSize));
-    NAV.solidBuckets = new Array(NAV.bucketCols * NAV.bucketRows); NAV.solidSeen = new WeakMap(); NAV.solidQuery = 0;
+    NAV.solidBuckets = new Array(NAV.bucketCols * NAV.bucketRows);
     for (const solid of NAV.solids) {
-      const x0 = Math.max(0, Math.floor((solid[0] - CLR) / NAV.bucketSize)), x1 = Math.min(NAV.bucketCols - 1, Math.floor((solid[0] + solid[2] + CLR) / NAV.bucketSize));
-      const y0 = Math.max(0, Math.floor((solid[1] - CLR) / NAV.bucketSize)), y1 = Math.min(NAV.bucketRows - 1, Math.floor((solid[1] + solid[3] + CLR) / NAV.bucketSize));
+      const x0 = Math.max(0, Math.min(NAV.bucketCols - 1, Math.floor(solid[0] / NAV.bucketSize))), x1 = Math.max(0, Math.min(NAV.bucketCols - 1, Math.floor((solid[0] + solid[2]) / NAV.bucketSize)));
+      const y0 = Math.max(0, Math.min(NAV.bucketRows - 1, Math.floor(solid[1] / NAV.bucketSize))), y1 = Math.max(0, Math.min(NAV.bucketRows - 1, Math.floor((solid[1] + solid[3]) / NAV.bucketSize)));
       for (let by = y0; by <= y1; by++) for (let bx = x0; bx <= x1; bx++) { const idx = by * NAV.bucketCols + bx; (NAV.solidBuckets[idx] || (NAV.solidBuckets[idx] = [])).push(solid); }
     }
     for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) NAV.ok[j * cols + i] = circleHits(NAV.solids, i * cs + cs / 2, j * cs + cs / 2, CLR) ? 0 : 1;
