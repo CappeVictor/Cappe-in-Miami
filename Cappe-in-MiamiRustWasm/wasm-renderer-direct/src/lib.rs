@@ -1,4 +1,5 @@
 use js_sys::{Array, Float64Array, Reflect, Uint8Array, Uint8ClampedArray, Uint32Array};
+use std::cell::RefCell;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{
     CanvasPattern, CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageData,
@@ -7,6 +8,20 @@ use web_sys::{
 const MAP_TEXTURE_BUFFER_LEN: usize = 1600 * 1200 * 4;
 const MAP_TEXTURE_INPUT_LEN: usize = 8 * 24 * 24 * 4;
 static mut MAP_TEXTURE_OUTPUT: [u8; MAP_TEXTURE_BUFFER_LEN] = [0; MAP_TEXTURE_BUFFER_LEN];
+
+struct SparkBuffers {
+    input: Vec<f64>,
+    palette: Vec<String>,
+    buckets: Vec<Vec<usize>>,
+}
+
+std::thread_local! {
+    static SPARK_BUFFERS: RefCell<SparkBuffers> = RefCell::new(SparkBuffers {
+        input: Vec::new(),
+        palette: Vec::new(),
+        buckets: Vec::new(),
+    });
+}
 
 #[inline]
 fn blend_map_texture_pixel(
@@ -4995,7 +5010,7 @@ pub fn draw_sparks(
     Ok((length / STRIDE) as i32)
 }
 
-/// Derives spark rectangles from simulation particle fields and paints them without the legacy WASM batch.
+/// Groups spark inputs once, then paints each color/alpha batch without JS element reads or a second command array.
 #[wasm_bindgen(js_name = drawSparkInputs)]
 pub fn draw_spark_inputs(
     context: &CanvasRenderingContext2d,
@@ -5007,35 +5022,78 @@ pub fn draw_spark_inputs(
     if length % INPUT_STRIDE != 0 || length / INPUT_STRIDE > 65_536 || colors.length() > 256 {
         return Ok(-1);
     }
-    let mut commands = Vec::new();
-    for color in 0..colors.length() {
-        if colors.get(color).as_string().is_none() {
-            return Ok(-1);
+    let palette_len = colors.length() as usize;
+    SPARK_BUFFERS.with(|shared| {
+        let mut buffers = shared.borrow_mut();
+        buffers.input.resize(length as usize, 0.0);
+        input.copy_to(&mut buffers.input);
+        buffers.palette.resize_with(palette_len, String::new);
+        for color in 0..palette_len {
+            let Some(value) = colors.get(color as u32).as_string() else {
+                return Ok(-1);
+            };
+            buffers.palette[color].clone_from(&value);
         }
-        for bucket in 1..=6 {
-            for offset in (0..length).step_by(INPUT_STRIDE as usize) {
-                let x = input.get_index(offset);
-                let y = input.get_index(offset + 1);
-                let life = input.get_index(offset + 2);
-                let max_life = input.get_index(offset + 3);
-                let color_id = input.get_index(offset + 4);
-                if !x.is_finite() || !y.is_finite() || !life.is_finite() || !max_life.is_finite()
-                    || max_life <= 0.0 || life <= 0.0 || color_id != color as f64
-                {
-                    continue;
-                }
-                let level = ((life / max_life) * 6.0).ceil().max(1.0) as u32;
-                if level != bucket && !(bucket == 6 && level > 6) {
-                    continue;
-                }
-                commands.extend_from_slice(&[color as f64, bucket as f64 / 6.0, x - 2.0, y - 2.0, 4.0, 4.0]);
+        let bucket_count = palette_len * 6;
+        buffers.buckets.resize_with(bucket_count, Vec::new);
+        for bucket in &mut buffers.buckets[..bucket_count] {
+            bucket.clear();
+        }
+
+        for offset in (0..buffers.input.len()).step_by(INPUT_STRIDE as usize) {
+            let x = buffers.input[offset];
+            let y = buffers.input[offset + 1];
+            let life = buffers.input[offset + 2];
+            let max_life = buffers.input[offset + 3];
+            let color_id = buffers.input[offset + 4];
+            if !x.is_finite()
+                || !y.is_finite()
+                || !life.is_finite()
+                || !max_life.is_finite()
+                || max_life <= 0.0
+                || life <= 0.0
+                || !color_id.is_finite()
+                || color_id.fract() != 0.0
+                || color_id < 0.0
+                || color_id as usize >= palette_len
+            {
+                continue;
             }
+            let level = ((life / max_life) * 6.0).ceil().max(1.0) as usize;
+            let alpha_bucket = level.min(6) - 1;
+            buffers.buckets[color_id as usize * 6 + alpha_bucket].push(offset);
         }
-    }
-    let count = (commands.len() / 6) as i32;
-    let commands = Float64Array::from(commands.as_slice());
-    let drawn = draw_sparks(context, &commands, colors)?;
-    if drawn == count { Ok(count) } else { Ok(-1) }
+
+        let mut count = 0i32;
+        context.save();
+        let result = (|| -> Result<(), JsValue> {
+            context.set_global_composite_operation("lighter")?;
+            for color in 0..palette_len {
+                context.set_fill_style_str(&buffers.palette[color]);
+                for alpha_bucket in 0..6 {
+                    let grouped = &buffers.buckets[color * 6 + alpha_bucket];
+                    if grouped.is_empty() {
+                        continue;
+                    }
+                    context.begin_path();
+                    for &offset in grouped {
+                        context.rect(
+                            buffers.input[offset] - 2.0,
+                            buffers.input[offset + 1] - 2.0,
+                            4.0,
+                            4.0,
+                        )?;
+                    }
+                    context.set_global_alpha((alpha_bucket + 1) as f64 / 6.0);
+                    context.fill();
+                    count += grouped.len() as i32;
+                }
+            }
+            Ok(())
+        })();
+        context.restore();
+        result.map(|()| count)
+    })
 }
 
 /// Draws enemy shadow ellipses directly in Canvas while preserving the host painter's per-enemy alpha.

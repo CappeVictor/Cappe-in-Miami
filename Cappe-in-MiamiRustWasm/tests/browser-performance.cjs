@@ -8,9 +8,10 @@ const os = require('node:os');
 const path = require('node:path');
 const net = require('node:net');
 
-const CHROME = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const CHROME = process.env.CHROME_PATH || (process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : '/usr/bin/google-chrome');
 const CPU_PROFILE = process.argv.includes('--profile');
 const STRESS_ENEMIES = Math.max(0, Math.min(120, Number(process.env.CAPPE_PERF_ENEMIES) || 0));
+const STRESS_SPARKS = Math.max(0, Math.min(500, Number(process.env.CAPPE_PERF_SPARKS) || 0));
 const REPO = path.resolve(__dirname, '../..');
 const BUILDS = [
   { name: 'Web', root: path.join(REPO, 'Cappe-in-MiamiWeb'), wasm: false },
@@ -129,11 +130,14 @@ async function measure(build) {
     await evaluate('CFG.fps = 60');
     await evaluate("document.getElementById('jogar').click()");
     await wait(250);
-    const start = await evaluate("document.getElementById('comecar').click(); P.inv = 10000; ammo = 10000; keys.w = true; keys.d = true; mouse.x = W * .78; mouse.y = H * .5; mouse.down = true; window.__perf = { work: [], gaps: [] }; const previous = loop; let sampledDraw = lastDraw; window.loop = function(t) { const before = performance.now(), priorDraw = lastDraw; previous(t); if (st === 'play' && lastDraw !== priorDraw) { __perf.work.push(performance.now() - before); __perf.gaps.push(lastDraw - (sampledDraw || lastDraw)); sampledDraw = lastDraw; } }; st");
+    const start = await evaluate("document.getElementById('comecar').click(); P.inv = 10000; ammo = 10000; keys.w = true; keys.d = true; mouse.x = W * .78; mouse.y = H * .5; mouse.down = true; window.__perf = { work: [], gaps: [] }; const previous = loop; let sampledDraw = lastDraw; window.loop = function(t) { window.__perfKeepSparks?.(); const before = performance.now(), priorDraw = lastDraw; previous(t); if (st === 'play' && lastDraw !== priorDraw) { __perf.work.push(performance.now() - before); __perf.gaps.push(lastDraw - (sampledDraw || lastDraw)); sampledDraw = lastDraw; } }; st");
     if (start.exceptionDetails) throw new Error(start.exceptionDetails.text);
 
     if (STRESS_ENEMIES) {
       await evaluate(`mouse.down = false; for (let i = 0; i < ${STRESS_ENEMIES}; i++) { const a = i * 2.399963229728653, r = 100 + (i % 8) * 38, e = EXP.spawnEnemy(P.x + Math.cos(a) * r, P.y + Math.sin(a) * r, i % 3 ? 'gun' : 'bat', null, true); e.state = 'CHASE'; e.lkp = { x: P.x, y: P.y }; }`);
+    }
+    if (STRESS_SPARKS) {
+      await evaluate(`CFG.particles = 'alta'; window.__perfSparkColors = ['#fff','#ffd23f','#19f0e6','#ff2e93']; window.__perfKeepSparks = () => { for (let i = 0; i < ${STRESS_SPARKS}; i++) { let p = sparks[i]; if (!p) p = sparks[i] = {x:0,y:0,vx:0,vy:0,life:1,max:.95,c:window.__perfSparkColors[i % window.__perfSparkColors.length]}; p.x = P.x + (i % 25) * 12 - 140; p.y = P.y + (Math.floor(i / 25) % 20) * 12 - 115; p.life = p.max * (.18 + (i % 80) / 100); p.c = window.__perfSparkColors[i % window.__perfSparkColors.length]; } }; window.__perfKeepSparks();`);
     }
 
     const initialCanvas = (await evaluate('[c.width, c.height]')).result.value;
@@ -184,6 +188,7 @@ async function measure(build) {
       build: build.name,
       renderer: sample.renderer,
       stressEnemies: STRESS_ENEMIES,
+      stressSparks: STRESS_SPARKS,
       startup,
       governorTier: sample.tier,
       initialCanvas,

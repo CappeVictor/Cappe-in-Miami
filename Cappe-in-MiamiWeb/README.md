@@ -1,4 +1,4 @@
-# Cappe in Miami Web — v83.0
+# Cappe in Miami Web — v84.0
 
 Versão para navegador com HTML, CSS e JavaScript; o jogo usa o renderer Canvas 2D em JavaScript e não depende de Rust nem WebAssembly.
 
@@ -21,5 +21,9 @@ O bundle `js/maps.js` agora contém apenas os 61 mapas da allowlist; os 98 mapas
 O servidor comprime HTML, JavaScript, CSS, JSON e SVG com gzip quando o navegador aceita. Recursos binários e WASM seguem sem recompressão. Em Chrome local, `js/maps.js` transferiu 301.534 bytes para 1.616.616 bytes decodificados (81,4% menos no corpo); a transferência total observada no carregamento inicial passou de 2.278.696 para 764.981 bytes. São medidas desta máquina e sessão, não garantia de latência em outros ambientes.
 
 Valide a compressão com `node tests/compression-regression.cjs`; o teste confere igualdade dos bytes, negociação gzip, fallback identity, `q=0` e `HEAD`.
+
+## Otimização v84
+
+O desenho de faíscas agora agrupa cada partícula uma vez por cor e faixa de opacidade, reutilizando os grupos entre quadros. A regressão de pixels verifica o caminho Canvas com 500 faíscas; os dados da simulação e a aparência esperada permanecem iguais.
 
 A IA agora reutiliza os objetos dos pontos de rota BFS quando recalcula o caminho. A rota não muda; uma regressão verifica a igualdade com uma busca independente. O microbenchmark sintético registrou 0 objetos de ponto criados em 500 recálculos após aquecer o pool, contra 35.000 sem reutilização. A mediana ficou perto de 0,04 ms nos dois casos; não houve ganho demonstrado em tempo de quadro ou heap total.

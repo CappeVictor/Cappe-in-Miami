@@ -117,7 +117,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v295.0-gzip-static-rust');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v296.0-spark-batching-rust');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -400,7 +400,10 @@ async function run() {
     assert.doesNotMatch(bridge,/painters\.textImage\(enemy, commands\[offset \+ 1\]/);
     assert.match(rust,/pub fn draw_map_commands\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array[\s\S]*?Array/);assert.doesNotMatch(bridge,/draw_map_command|currentMapBatch|drawMapCommandsDirect|flushDirectMapCommands/);
     assert.match(rust,/draw_image_at\(context, &image, &\[placements\[offset \+ 1\], placements\[offset \+ 2\]\]\)/);
-    assert.match(bridge,/state\.direct\.drawDust\(context, input, alpha\)/);assert.match(bridge,/state\.direct\.drawSparkInputs\(context, input, colors\)/);assert.match(rust,/pub fn draw_spark_inputs\([\s\S]*?ceil\(\)[\s\S]*?draw_sparks\(context, &commands, colors\)/);assert.match(read('tests/wasm-particle-input-parity.cjs'),/differentChannels !== 0/);
+    assert.match(bridge,/state\.direct\.drawDust\(context, input, alpha\)/);assert.match(bridge,/state\.direct\.drawSparkInputs\(context, input, colors\)/);
+    assert.match(rust,/thread_local! \{[\s\S]*?static SPARK_BUFFERS: RefCell<SparkBuffers>/);assert.match(rust,/pub fn draw_spark_inputs\([\s\S]*?input\.copy_to\(&mut buffers\.input\)[\s\S]*?buffers\.buckets\[color_id as usize \* 6 \+ alpha_bucket\]\.push\(offset\)/);
+    assert.doesNotMatch(rust,/Float64Array::from\(commands\.as_slice\(\)\);\s*let drawn = draw_sparks\(context, &commands, colors\)/);
+    assert.match(html,/SPK_GROUPS = new Map\(\)/);assert.match(read('tests/wasm-particle-input-parity.cjs'),/differentChannels !== 0/);assert.match(read('tests/wasm-particle-input-parity.cjs'),/i<500/);
     assert.match(bridge,/state\.direct\.drawLiveBlood\(context, input, color\)/);assert.match(bridge,/state\.direct\.drawStaticBlood\(context, input, color\)/);assert.match(bridge,/state\.direct\.drawCorpseInputs\(context, input, colors\)/);assert.match(rust,/pub fn draw_corpse_inputs\([\s\S]*?15\.0, 11\.0, 0\.35, 3\.0[\s\S]*?13\.0, 8\.0, 0\.55[\s\S]*?draw_corpses_mode\(context, &commands, colors, true\)/);assert.match(read('tests/wasm-particle-input-parity.cjs'),/staticBlood:[\s\S]*?corpses:/);
     assert.match(build,/wasm-bindgen \$directTargetWasm --target web/);
     assert.match(worker,/wasm-renderer\/pkg\/direct\/direct_renderer_bg\.wasm/);
@@ -1113,7 +1116,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v295.0-gzip-static-rust');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v296.0-spark-batching-rust');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));

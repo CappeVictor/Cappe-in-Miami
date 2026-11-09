@@ -1,10 +1,16 @@
-# Cappe-in-Miami — preview Rust/WASM v295.0
+# Cappe-in-Miami — preview Rust/WASM v296.0
 
 ## Otimização v295
 
 O servidor comprime HTML, JavaScript, CSS, JSON e SVG com gzip quando o navegador aceita; WASM e outros binários seguem sem recompressão. No Chrome local, `js/maps.js` transferiu 301.534 bytes para 1.616.616 bytes decodificados (81,4% menos no corpo). A transferência total observada no carregamento inicial passou de 2.831.083 para 1.136.765 bytes. Resultados locais, sem garantia de latência noutros ambientes.
 
 Teste a compressão com `node tests/compression-regression.cjs`; a regressão principal também a executa.
+
+## Otimização v296
+
+Faíscas agora copiam os dados do TypedArray para um buffer Rust reutilizado, classificam cada partícula uma vez e reaproveitam seis grupos de opacidade por cor. O código não cria mais um segundo TypedArray de comandos a cada quadro nem lê cada elemento do TypedArray de origem repetidamente pela ponte JavaScript/WASM. O fallback Web também agrupa as faíscas em uma passagem.
+
+A regressão Chrome compara 506 faíscas no painter Rust e no Canvas, incluindo contagem de partículas e estado do contexto. A suíte principal permanece em 107 verificações; a compilação WASM e a comparação de desempenho sob 120 inimigos e 500 faíscas são executadas no GitHub Actions.
 
 ## Experimento local Rust/WASM
 
