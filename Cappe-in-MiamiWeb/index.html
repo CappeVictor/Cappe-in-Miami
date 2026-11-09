@@ -935,13 +935,12 @@ const SN_E = [], SN_P = [], SN_T = [], SN_E2 = [], SN_B = [];
 function snap(a, o) { o.length = a.length; for (let i = 0; i < a.length; i++) o[i] = a[i]; return o; }   // cópia sem criar array novo
 const popup = (x, y, txt, c = '#19f0e6') => popups.push({ x, y, txt, c, t: 1 });
 function activeTarget(x = P?.x || 0, y = P?.y || 0) {
-  const targets = [];
-  if (P && !P.dead) targets.push(P);
+  const primary = P && !P.dead ? P : null;
   const p2 = window.EXP?.MULTI?.P2;
-  if (p2 && !p2.dead) targets.push(p2);
-  if (!targets.length) return null;
-  targets.sort((a, b) => hyp(a.x - x, a.y - y) - hyp(b.x - x, b.y - y));
-  return targets[0];
+  if (!primary) return p2 && !p2.dead ? p2 : null;
+  if (!p2 || p2.dead) return primary;
+  const pdx = primary.x - x, pdy = primary.y - y, qdx = p2.x - x, qdy = p2.y - y;
+  return qdx * qdx + qdy * qdy < pdx * pdx + pdy * pdy ? p2 : primary;
 }
 window.EXP.targetActor = activeTarget;
 function focusActor() { return activeTarget(P?.x || 0, P?.y || 0) || P; }

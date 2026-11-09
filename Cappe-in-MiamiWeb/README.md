@@ -1,4 +1,4 @@
-# Cappe in Miami Web — v89.0
+# Cappe in Miami Web — v90.0
 
 Versão para navegador com HTML, CSS e JavaScript; o jogo usa o renderer Canvas 2D em JavaScript e não depende de Rust nem WebAssembly.
 
@@ -47,6 +47,10 @@ As 14 imagens de máscara não são mais baixadas no início do jogo. Elas são 
 ## Otimização v89 — vizinhos de navegação pré-calculados
 
 O BFS da IA reutiliza uma tabela compacta de vizinhos caminháveis construída junto com a grade de navegação. A ordem de exploração, os bloqueios diagonais e a rota resultante foram preservados; a regressão compara 700 rotas determinísticas com a implementação anterior. No perfil de CPU local, `EXP.navPath` acumulou 103 ms nesta versão, contra 135 ms na referência (uma captura por build). A tabela usa cerca de 17 bytes por célula e acrescenta alguns milissegundos à montagem da grade. O ensaio com 120 inimigos teve grande variação entre rodadas, portanto não há afirmação de ganho geral de FPS. Suíte: 111/111.
+
+## Otimização v90 — seleção de alvo da IA sem ordenação
+
+`activeTarget` compara as distâncias quadráticas até P1 e P2 diretamente, sem criar uma lista temporária nem ordená-la; empates continuam favorecendo P1. Em 120 mil chamadas sintéticas, a mediana caiu de 48,6 para 26,2 ms (−46%). Em três pares Chrome com 120 inimigos e 500 faíscas, p90 mediano de update+draw caiu de 3,5 para 3,0 ms e p95 de 4,1 para 3,7 ms. Resultado específico do cenário e desta máquina; não representa FPS universal. Suíte compartilhada: 112/112.
 
 ## Otimização v87 — grade de colisão da IA
 
