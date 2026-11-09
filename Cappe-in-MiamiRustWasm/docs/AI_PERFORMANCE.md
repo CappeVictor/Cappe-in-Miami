@@ -1,3 +1,6 @@
+## Preview v290 — escala adaptativa baseada no trabalho do quadro
+O escalonamento agora mede update+draw, sem contar a espera pelo VSync ou o limite de FPS escolhido. Dois níveis reduzem efeitos e resolução interna em dispositivos lentos; resolução manual e modo Máximo preservam as escolhas. Esta mudança não mede FPS real.
+
 ## Preview Rust/WASM local v283.0 — piso
 Remover as rotas legadas de granulado, FTILES, sombras e rejunte reduziu o WASM legado de 68.531 para 61.001 bytes, imports de 5 para 3 e exports de 45 para 36. Isso mede o arquivo e a ABI, não FPS, memória em execução ou tempo de quadro. Nenhum benchmark foi feito.
 

@@ -1,4 +1,4 @@
-# Cappe in Miami Web — v77.0
+# Cappe in Miami Web — v78.0
 
 Versão para navegador com HTML, CSS e JavaScript; o jogo usa o renderer Canvas 2D em JavaScript e não depende de Rust nem WebAssembly.
 
@@ -12,4 +12,4 @@ Também é possível abrir `index.html` pelo Live Server do VS Code. O servidor 
 
 ## Otimização de renderização v77
 
-O ajuste automático de desempenho mede os primeiros 120 quadros jogando e usa dois níveis de redução de efeitos e resolução interna do canvas quando o frame time está alto. A detecção é refeita em cada sessão (não fica bloqueada por uma preferência temporária salva anteriormente). Uma resolução escolhida manualmente continua respeitada, e o modo gráfico Máximo não recebe a redução automática. O navegador ainda pode suavizar a imagem ao exibi-la; não foi feito benchmark comparativo de FPS nesta versão.
+O ajuste automático mede o tempo gasto pelo jogo atualizando e desenhando os primeiros 120 quadros jogando; não confunde o limite de FPS escolhido com lentidão. Usa dois níveis de redução de efeitos e resolução interna do canvas quando o trabalho de cada quadro está alto. A detecção é refeita em cada sessão. Resolução manual e modo Máximo são respeitados. FPS comparativo ainda não foi medido.

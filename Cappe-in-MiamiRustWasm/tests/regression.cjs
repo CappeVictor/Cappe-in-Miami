@@ -117,7 +117,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v289.0-campaign-tile-walls-rust');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v290.0-adaptive-render-scale-rust');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -834,7 +834,7 @@ async function run() {
   });
   await test('Governador de desempenho usa tempo de quadro real e reduz efeitos sem trocar preferências', () => {
     const html=read('index.html'),fx=read('js/exp-fx.js');
-    assert.match(html,/const rawDt = Math\.max/);assert.match(html,/perfSamples\.push\(rawDt\)/);assert.match(html,/window\.EXP\.perfTier = 1/);
+    assert.match(html,/const rawDt = Math\.max/);assert.match(html,/perfSamples\.push\(performance\.now\(\) - frameStart\)/);assert.doesNotMatch(html,/perfSamples\.push\(rawDt\)/);assert.match(html,/window\.EXP\.perfTier = tier/);assert.match(html,/avgMs > 1000 \/ 26 \? 2 : avgMs > 1000 \/ 38 \? 1 : 0/);
     assert.match(html,/tier >= 1 \? \.55/);assert.match(fx,/EXP\.perfTier >= 1 \? 2 : 1/);assert.match(fx,/EXP\.perfTier < 2/);
   });
   await test('BuildFloor envia o piso ao Rust direto sem rota antiga no WASM', () => {
@@ -1101,7 +1101,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v289.0-campaign-tile-walls-rust');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v290.0-adaptive-render-scale-rust');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));

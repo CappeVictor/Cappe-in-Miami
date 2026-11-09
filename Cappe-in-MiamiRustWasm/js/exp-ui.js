@@ -188,16 +188,20 @@
 
   // ---------- 1) nitidez: resolução interna acompanha o tamanho exibido ----------
   let hiK = 1;
+  let appliedPerfTier = -1;
   function applyResolution() {
     const r = cv.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     const forced = (typeof CFG !== 'undefined' && CFG.res && CFG.res !== 'auto') ? +CFG.res : 0;
     // Escala automática limitada: 2x quadruplica pixels em telas de alta densidade e causa quedas de FPS.
-    const k = forced || (CFG.gfx === 'max' ? 1 : Math.min(1.5, Math.max(1.1, (r.width * dpr) / W)));
+    const tier = Math.max(0, Math.min(2, Number(EXP.perfTier) || 0));
+    const baseK = forced || (CFG.gfx === 'max' ? 1 : Math.min(1.5, Math.max(1.1, (r.width * dpr) / W)));
+    const k = forced ? baseK : baseK * (tier >= 2 ? .72 : tier >= 1 ? .88 : 1);
     const nw = Math.round(W * k), nh = Math.round(H * k);
     if (cv.width !== nw || cv.height !== nh) { cv.width = nw; cv.height = nh; }
     cv.style.imageRendering = 'auto';
     hiK = k;
+    appliedPerfTier = tier;
     const smooth = !!CFG.aa, quality = smooth ? (CFG.gfx === 'ultra' ? 2 : 1) : 0;
     const renderer = window.HM_WASM_RENDERER;
     if (!(renderer && renderer.setupCanvas && renderer.setupCanvas(ctx, hiK, smooth, quality, true))) {
@@ -208,6 +212,8 @@
   }
   const _draw = draw;
   draw = function () {
+    const tier = Math.max(0, Math.min(2, Number(EXP.perfTier) || 0));
+    if (tier !== appliedPerfTier) applyResolution();
     const smooth = !!CFG.aa, quality = smooth ? (CFG.gfx === 'ultra' ? 2 : 1) : 0;
     const renderer = window.HM_WASM_RENDERER;
     if (!(renderer && renderer.setupCanvas && renderer.setupCanvas(ctx, hiK, smooth, quality))) {

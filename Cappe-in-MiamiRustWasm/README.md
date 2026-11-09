@@ -1,8 +1,8 @@
-# Cappe-in-Miami — preview local Rust/WASM v289.0
+# Cappe-in-Miami — preview Rust/WASM v290.0
 
 ## Experimento local Rust/WASM
 
-Esta prévia v289 requer Node.js 18+ para INICIAR_EXPERIMENTO_WASM.bat. O módulo Rust/WebSys direto é a única implementação WASM compilada, carregada e armazenada pelo jogo; o antigo trampoline Canvas não é buildado, servido ou pré-cacheado. Paredes da Campanha e mapas de até 1600 × 1200 px usam os painters diretos. Regressões 105/105, ABI (114 exports/107 imports), bridge, auditoria ampliada no Chrome e paridade de paredes e pisos passaram. A auditoria não encontrou operações Canvas do host em 23 cenas/estados amostrados, incluindo Horda, Invasão e Campanha. Há fallback para falhas e situações fora da cobertura; não foram medidos FPS nem feita revisão visual ampla.
+Esta versão requer Node.js 18+ para INICIAR_EXPERIMENTO_WASM.bat. O módulo Rust/WebSys direto é a única implementação WASM compilada, carregada e armazenada pelo jogo; paredes da Campanha e mapas de até 1600 × 1200 px usam os painters diretos. No v290 o ajuste adaptativo mede o trabalho de update/draw por quadro, não o intervalo de VSync, e reduz resolução interna e efeitos em dois níveis quando necessário. A escolha manual de resolução e o modo Máximo são respeitados. Nesta atualização passaram 105/105 regressões, verificação ABI (114 exports/107 imports), bridge do renderer e sintaxe JS Web. FPS comparativo e revisão visual ampla não foram medidos.
 
 Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
 

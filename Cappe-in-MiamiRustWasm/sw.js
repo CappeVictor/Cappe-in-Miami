@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v289.0-campaign-tile-walls-rust';
+const CACHE = 'cappe-v290.0-adaptive-render-scale-rust';
 const ASSETS = [
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",

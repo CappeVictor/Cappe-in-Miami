@@ -2895,24 +2895,12 @@ function loop(t) {
     return;
   }
   lastDraw = t;
+  const frameStart = performance.now();
   const rawDt = Math.max((t - last) / 1000 || 0, 0);
   const dt = Math.min(rawDt, 1 / 30);
   last = t;
   if (window.EXP && EXP.multi) EXP.multi.tickFps(t);
   if (window.EXP && EXP.online && EXP.online.tick) EXP.online.tick(t);
-  if (st === 'play' && !perfAutoDone && rawDt > 0) {
-    perfSamples.push(rawDt);
-    if (perfSamples.length >= 120) {
-      perfAutoDone = true;
-      const avg = perfSamples.reduce((a, b) => a + b, 0) / perfSamples.length; perfSamples = null;
-      const tier = avg > 1 / 26 ? 2 : avg > 1 / 38 ? 1 : 0;
-      if (tier > 0 && CFG.gfx !== 'max') {
-        window.EXP.perfTier = tier;
-        // O ajuste continua audível/consultável no sistema de avisos, sem interromper a ação com banner.
-        if (window.EXP.toast) window.EXP.toast('DESEMPENHO AJUSTADO', tier >= 2 ? 'redução forte de efeitos e resolução' : 'efeitos e resolução reduzidos', '#19f0e6');
-      }
-    }
-  }
   if (screenShake > 0) {
     screenShake = Math.max(0, screenShake - dt);
     if (screenShake === 0) screenShakePower = 0;
@@ -2931,6 +2919,18 @@ function loop(t) {
   while (acc >= FIXED) { if (freeze > 0) freeze -= FIXED; else update(FIXED); acc -= FIXED; }
   if (st !== lastSt) { lastSt = st; document.body.classList.toggle('jogando', st === 'play' || st === 'paused'); }
   if (st !== 'paused' || t - lastPausedDraw > 200) { lastPausedDraw = t; draw(); }   // [otimização] em pausa a cena é estática: 5 redesenhos/s bastam
+  if (st === 'play' && !perfAutoDone) {
+    perfSamples.push(performance.now() - frameStart);
+    if (perfSamples.length >= 120) {
+      perfAutoDone = true;
+      const avgMs = perfSamples.reduce((a, b) => a + b, 0) / perfSamples.length; perfSamples = null;
+      const tier = avgMs > 1000 / 26 ? 2 : avgMs > 1000 / 38 ? 1 : 0;
+      if (tier > 0 && CFG.gfx !== 'max') {
+        window.EXP.perfTier = tier;
+        if (window.EXP.toast) window.EXP.toast('DESEMPENHO AJUSTADO', tier >= 2 ? 'redução forte de efeitos e resolução' : 'efeitos e resolução reduzidos', '#19f0e6');
+      }
+    }
+  }
   requestAnimationFrame(loop);
 }
 
