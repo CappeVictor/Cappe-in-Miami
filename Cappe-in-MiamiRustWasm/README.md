@@ -1,4 +1,8 @@
-# Cappe-in-Miami — preview Rust/WASM v308.0
+# Cappe-in-Miami — preview Rust/WASM v309.0
+
+## Pacote de jogo v309
+
+O ZIP de jogador inclui apenas o HTML, recursos, scripts, servidor Node e o renderer Rust/WASM compilado que o jogo realmente solicita. Fontes de compilação, relatórios e suítes de teste continuam no repositório do GitHub; não são necessários para executar o jogo. O pacote caiu de 1.504.334 para 1.065.800 bytes (438.534 bytes; 29,2%).
 
 ## Otimização v308 — atualização e remoção de faíscas em um percurso
 

@@ -14,8 +14,8 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
-- **Web — HTML, CSS e JavaScript v93:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — v308:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v308-preview.zip)
+- **Web — HTML, CSS e JavaScript v94:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
+- **Rust/WASM — v309:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v309-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
@@ -23,7 +23,7 @@ Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. 
 
 A prévia v294 mantém painters Rust/WebSys diretos para as camadas amostradas de gameplay, incluindo Campanha, Horda e Invasão. O antigo trampoline Canvas deixou de ser compilado, servido e pré-cacheado. A auditoria instrumentada não encontrou chamadas Canvas do host em 23 cenas/estados amostrados. Os painters Canvas permanecem como fallback; lógica, simulação, aleatoriedade e seleção/cache de assets seguem em JavaScript. O pool de pontos de rota da IA reduz objetos temporários em um microbenchmark sintético; não há ganho de frame time medido.
 
-## Última atualização — 9 de novembro de 2026 · Web v93 e Rust/WASM v308
+## Última atualização — 9 de novembro de 2026 · Web v94 e Rust/WASM v309
 
 As duas versões servem HTML, JavaScript, CSS, JSON e SVG comprimidos em gzip quando o navegador suporta. No Chrome local, a transferência inicial observada caiu de 2,28 MB para 765 KB na Web e de 2,83 MB para 1,14 MB em Rust/WASM. Na v89/v303, o BFS da IA reutilizou vizinhos caminháveis pré-calculados, preservando as rotas; o custo amostrado de `EXP.navPath` caiu, mas quadros sob estresse variaram. Na v90/v304, a seleção de alvo da IA deixou de criar e ordenar uma lista temporária; em três pares Chrome com 120 inimigos e 500 faíscas, o p90 mediano caiu de 3,5 para 3,0 ms na Web e de 2,9 para 2,6 ms em Rust/WASM, e o p95 de 4,1 para 3,7 ms e de 3,2 para 3,1 ms. Microbenchmark: 120 mil seleções caíram de 48,6 para 26,2 ms. A Web v91 acrescentou rejeição rápida de retângulos distantes nas colisões; em dois pares, o p95 mediano caiu de 2,35 para 1,95 ms e a média de 1,519 para 1,362 ms. O Rust/WASM v305 reutiliza buffers ao compor inimigos: a amostra do HeapProfiler para essa ponte caiu 59% em dois pares; os tempos de quadro não mostraram ganho consistente. Regressões atuais: 113/113; paridade de inimigos Chrome: três estados, zero diferenças de pixel. Resultados locais, não garantia de FPS geral; não houve revisão visual ampla.
 
@@ -32,6 +32,8 @@ Na Web v92 e Rust/WASM v306, filtros de proximidade da IA evitam raízes quadrad
 Na Rust/WASM v307, a ponte de desenho reaproveita a vista tipada das faíscas enquanto buffer e quantidade não mudam: em 180 quadros, criações de vista passaram de 179 para 1. O tempo total de quadro ficou praticamente igual; esta atualização reduz objetos de vista criados no caminho medido, sem ganho de FPS demonstrado. Regressões 115/115; paridade Chrome das partículas teve zero diferenças de pixel.
 
 Nas versões Web v93 e Rust/WASM v308, a atualização e remoção das partículas de faísca passaram de dois percursos para um, mantendo ordem, objetos sobreviventes e estado. Em três execuções locais com 120 inimigos/500 faíscas, a mediana p90 foi de 0,6→0,5 ms na Web e 0,9→0,9 ms em Rust/WASM; a média mediana foi de 0,433→0,430 ms e 0,762→0,712 ms, respectivamente. Regressões atuais: 116/116; resultados locais, sem promessa de FPS geral.
+
+As versões Web v94 e Rust/WASM v309 usam ZIPs de execução enxutos: testes, relatórios e arquivos de compilação ficam no repositório e foram retirados dos downloads. O manifesto offline contém 92 arquivos na Web e 95 no Rust/WASM; todos estão nos ZIPs, e ambas as versões abriram no Chrome. O ZIP Web caiu 7.212 bytes (0,78%); o Rust/WASM caiu 438.534 bytes (29,2%). O pacote Rust inclui apenas o renderer WASM compilado que o jogo carrega.
 
 ## Últimas melhorias incluídas
 

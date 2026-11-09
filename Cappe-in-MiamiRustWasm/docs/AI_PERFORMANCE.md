@@ -546,3 +546,7 @@ O desenho das faíscas reutiliza `Float64Array.subarray` enquanto a quantidade e
 
 `updateSparks` integra posição/vida e compacta as partículas sobreviventes no mesmo laço estável, reduzindo um percurso completo por quadro em Web e Rust/WASM. O teste determinístico verifica as duas versões, identidade/ordem das partículas sobreviventes e remoção após expiração. Em três execuções Chrome com 120 inimigos e 500 faíscas, as medianas de update+draw após adaptação foram: Web p90 0,6→0,5 ms, p95 0,6→0,5 ms e média 0,433→0,430 ms; Rust/WASM p90 0,9→0,9 ms, p95 1,0→0,9 ms e média 0,762→0,712 ms. São amostras de 60 quadros por execução, em uma máquina; não demonstram redução de memória nem garantem FPS em geral.
 
+## v94/v309 — ZIPs de execução
+
+Os downloads agora incluem somente os arquivos usados para jogar: recursos, CSS/JS, HTML, service worker, launcher, servidor e (em Rust/WASM) o renderer direto compilado. O manifesto offline foi comparado com os caminhos dentro dos ZIPs: 92/92 arquivos Web e 95/95 Rust/WASM existem; os dois jogos abriram no Chrome e o renderer Rust/WASM ficou pronto. Relatórios, testes e código-fonte de compilação permanecem no repositório. O ZIP Web caiu 7.212 bytes (0,78%); o Rust/WASM caiu 438.534 bytes (29,2%).
+
