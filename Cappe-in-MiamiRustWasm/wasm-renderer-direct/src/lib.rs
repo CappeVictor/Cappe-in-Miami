@@ -5082,7 +5082,7 @@ pub fn draw_spark_inputs(
                             buffers.input[offset + 1] - 2.0,
                             4.0,
                             4.0,
-                        )?;
+                        );
                     }
                     context.set_global_alpha((alpha_bucket + 1) as f64 / 6.0);
                     context.fill();
