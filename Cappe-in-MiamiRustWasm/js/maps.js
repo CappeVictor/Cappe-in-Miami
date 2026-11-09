@@ -6,3 +6,4 @@ const LEVEL_TREE = {
   club:     { next: 'mafia' },
   mafia:    { next: null },
 };
+if (typeof window !== 'undefined') window.HM_NEON_MAPS = MAPS;

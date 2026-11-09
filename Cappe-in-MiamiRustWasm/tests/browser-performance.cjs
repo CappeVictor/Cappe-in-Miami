@@ -15,6 +15,7 @@ const STRESS_ENEMIES = Math.max(0, Math.min(120, Number(process.env.CAPPE_PERF_E
 const STRESS_SPARKS = Math.max(0, Math.min(500, Number(process.env.CAPPE_PERF_SPARKS) || 0));
 const FORCE_CANVAS_SPARKS = process.env.CAPPE_PERF_FORCE_CANVAS_SPARKS === '1';
 const ASSERT_LAZY_MASKS = process.env.CAPPE_PERF_ASSERT_LAZY_MASKS === '1';
+const ASSERT_LAZY_MAPS = process.env.CAPPE_PERF_ASSERT_LAZY_MAPS === '1';
 const REPO = path.resolve(__dirname, '../..');
 const BUILD_FILTER = (process.env.CAPPE_PERF_BUILD || '').toLowerCase();
 const BUILDS = [
@@ -109,10 +110,12 @@ async function measure(build) {
       await until(async () => (await evaluate('HM_WASM_RENDERER.directReady === true')).result?.value, 15000, 'o renderer direto Rust/WASM');
     }
 
-    const startup = (await evaluate(`(() => {
+    const startupResult = await evaluate(`(() => {
       const nav = performance.getEntriesByType('navigation')[0];
       const resources = performance.getEntriesByType('resource');
       window.__perfMaskPaths = MASKS.map(m => new URL('assets/' + m.id + '.png', location.href).pathname);
+      const mapDataPath = new URL('js/maps.js', location.href).pathname;
+      const mapDataResources = resources.filter(r => new URL(r.name).pathname === mapDataPath);
       const maskResources = resources.filter(r => window.__perfMaskPaths.includes(new URL(r.name).pathname));
       const top = [...resources].sort((a, b) => b.transferSize - a.transferSize).slice(0, 10).map(r => ({
         path: r.name.startsWith(location.origin) ? r.name.slice(location.origin.length) : r.name,
@@ -132,15 +135,42 @@ async function measure(build) {
         maskImageRequestCount: maskResources.length,
         maskImageTransferBytes: maskResources.reduce((n, r) => n + (r.transferSize || 0), 0),
         maskImagePaths: maskResources.map(r => new URL(r.name).pathname),
+        mapDataRequestCount: mapDataResources.length,
+        mapDataTransferBytes: mapDataResources.reduce((n, r) => n + (r.transferSize || 0), 0),
         largestResources: top,
       };
-    })()`)).result.value;
+    })()`);
+    if (startupResult.exceptionDetails) throw new Error(startupResult.exceptionDetails.text);
+    const startup = startupResult.result.value;
     if (ASSERT_LAZY_MASKS && startup.maskImageRequestCount !== 0) throw new Error('Máscaras foram carregadas antes de abrir o seletor.');
+    let lazyMapLoad = null;
+    if (ASSERT_LAZY_MAPS) {
+      if (startup.mapDataRequestCount !== 0) throw new Error('maps.js foi carregado antes de iniciar a campanha ou escolher um mapa Neon.');
+    }
 
     await evaluate('CFG.fps = 60');
-    await evaluate("document.getElementById('jogar').click()");
-    await wait(250);
-    const start = await evaluate("document.getElementById('comecar').click(); P.inv = 10000; ammo = 10000; keys.w = true; keys.d = true; mouse.x = W * .78; mouse.y = H * .5; mouse.down = true; window.__perf = { work: [], gaps: [] }; const previous = loop; let sampledDraw = lastDraw; window.loop = function(t) { window.__perfKeepSparks?.(); const before = performance.now(), priorDraw = lastDraw; previous(t); if (st === 'play' && lastDraw !== priorDraw) { __perf.work.push(performance.now() - before); __perf.gaps.push(lastDraw - (sampledDraw || lastDraw)); sampledDraw = lastDraw; } }; st");
+    const instrument = "P.inv = 10000; ammo = 10000; keys.w = true; keys.d = true; mouse.x = W * .78; mouse.y = H * .5; mouse.down = true; window.__perf = { work: [], gaps: [] }; const previous = loop; let sampledDraw = lastDraw; window.loop = function(t) { window.__perfKeepSparks?.(); const before = performance.now(), priorDraw = lastDraw; previous(t); if (st === 'play' && lastDraw !== priorDraw) { __perf.work.push(performance.now() - before); __perf.gaps.push(lastDraw - (sampledDraw || lastDraw)); sampledDraw = lastDraw; } }; st";
+    let start;
+    if (ASSERT_LAZY_MAPS) {
+      const newGameStart = await evaluate("window.__lazyMapStarted = performance.now(); window.addEventListener('error', e => (window.__lazyErrors ||= []).push(String(e.error?.stack || e.error || e.message))); window.__neonStoryIndex = STORY.findIndex(phase => phase.neon); if (window.__neonStoryIndex < 1) throw new Error('A campanha não possui uma fase Neon posterior ao início.'); historia = true; capIdx = window.__neonStoryIndex - 1; st = 'play'; advance()");
+      if (newGameStart.exceptionDetails) throw new Error(newGameStart.exceptionDetails.text);
+      await until(async () => (await evaluate("Array.isArray(window.HM_NEON_MAPS) && capIdx === window.__neonStoryIndex")).result?.value, 12000, 'transição da campanha até a primeira fase Neon');
+      const campaignTransition = (await evaluate("({ index: capIdx, map: STORY[capIdx].neon, selectedByCampaign: neonFor(capIdx + 1)?.name })")).result.value;
+      if (!campaignTransition || campaignTransition.map !== campaignTransition.selectedByCampaign) throw new Error(`A campanha apontou para o mapa errado: ${JSON.stringify(campaignTransition)}`);
+      const storyStart = await evaluate("st = 'pick'; newGame()");
+      if (storyStart.exceptionDetails) throw new Error(storyStart.exceptionDetails.text);
+      await until(async () => (await evaluate("st === 'play' && curNeon?._ready")).result?.value, 12000, 'início de partida no mapa Neon');
+      await evaluate('P.inv = 10000');
+      const lazyDebug = (await evaluate("({ state: st, mapSel, historia, capIdx, first: NEON_ALLOWED_MAP_NAMES[0], loaded: Array.isArray(window.HM_NEON_MAPS), maps: NEON_PLAYABLE.length, bySize: NEON_BY.size, has: NEON_BY.has(mapSel.slice(5)), target: NEON_BY.get(mapSel.slice(5))?._ready, selected: curNeon?.name, ready: curNeon?._ready, pending: neonGameStartPending, promise: !!neonDefinitionsPromise, banner: banner?.txt, prepare: window.__neonPrepareState, errors: window.__lazyErrors || [] })")).result.value;
+      if (!(lazyDebug.state === 'play' && lazyDebug.selected && lazyDebug.ready)) throw new Error(`Início Neon não completou: ${JSON.stringify(lazyDebug)}`);
+      lazyMapLoad = (await evaluate("({ playable: NEON_PLAYABLE.length, requests: performance.getEntriesByType('resource').filter(r => new URL(r.name).pathname === new URL('js/maps.js', location.href).pathname).length, loadAndStartMs: +(performance.now() - window.__lazyMapStarted).toFixed(1), map: curNeon.name })")).result.value;
+      if (!lazyMapLoad || lazyMapLoad.playable !== 61 || lazyMapLoad.requests !== 1 || lazyMapLoad.map !== campaignTransition.map) throw new Error(`Carregamento sob demanda inválido: ${JSON.stringify(lazyMapLoad)}`);
+      start = await evaluate(instrument);
+    } else {
+      await evaluate("document.getElementById('jogar').click()");
+      await wait(250);
+      start = await evaluate("document.getElementById('comecar').click(); " + instrument);
+    }
     if (start.exceptionDetails) throw new Error(start.exceptionDetails.text);
     if (FORCE_CANVAS_SPARKS) await evaluate('if (window.HM_WASM_RENDERER) window.HM_WASM_RENDERER.drawSparks = null');
 
@@ -202,6 +232,7 @@ async function measure(build) {
       stressEnemies: STRESS_ENEMIES,
       stressSparks: STRESS_SPARKS,
       startup,
+      ...(lazyMapLoad ? { lazyMapLoad } : {}),
       maskImageRequestCountAfterStart: sample.maskImageRequestCount,
       governorTier: sample.tier,
       initialCanvas,

@@ -118,7 +118,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v301.0-static-blood-no-copy-rust');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v302.0-lazy-neon-maps-rust');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -983,7 +983,8 @@ async function run() {
     assert.equal(c.neonAllowed.length,61);assert.equal(c.playable.length,61);assert.equal(new Set(c.neonAllowed).size,c.neonAllowed.length);
     assert.equal(c.neonData.length,c.neonAllowed.length,'bundle carrega só dados dos mapas permitidos');
     assert.deepEqual(Array.from(c.neonData,m=>m.name).sort(),Array.from(c.neonAllowed).sort(),'catálogo baixado coincide com allowlist');
-    const webCtx=vm.createContext({});vm.runInContext(read('../Cappe-in-MiamiWeb/js/maps.js'),webCtx);
+    const webCtx=vm.createContext({window:{}});vm.runInContext(read('../Cappe-in-MiamiWeb/js/maps.js'),webCtx);
+    assert.equal(vm.runInContext('window.HM_NEON_MAPS === MAPS',webCtx),true,'maps.js exporta os dados apenas quando é carregado');
     const webMaps=vm.runInContext('MAPS.map(m=>({name:m.name,w:m.w,h:m.h,tiles:m.tiles,objects:m.objects}))',webCtx);
     const rustMaps=c.neonData.map(m=>({name:m.name,w:m.w,h:m.h,tiles:m.tiles,objects:m.objects}));
     assert.equal(JSON.stringify(webMaps),JSON.stringify(rustMaps),'Web e Rust mantêm geometria idêntica nos mapas ativos');
@@ -991,7 +992,7 @@ async function run() {
     assert.deepEqual(Array.from(c.gridAllowed),['metro','overdose']);assert.equal(c.grids.length,2);
     const selectorValues=[...c.modes,...c.fixed.map(m=>m.id),...c.grids.map(g=>'grid:'+g.id),...c.playable.map(m=>'neon:'+m.name)];
     assert.ok(selectorValues.every(value=>c.selectorAllowed.has(value)),'cada opção de mapa vem da allowlist global');
-    assert.match(html,/const MAP_SELECTOR_OPTIONS = \[[\s\S]*\.\.\.MAPAS\.map[\s\S]*\.\.\.GRIDS_PERMITIDAS\.map[\s\S]*\.\.\.NEON_PLAYABLE\.map[\s\S]*\.filter\(\(\[value\]\) => MAP_SELECTOR_ALLOWED\.has\(value\)\)/);
+    assert.match(html,/const MAP_SELECTOR_OPTIONS = \[[\s\S]*\.\.\.MAPAS\.map[\s\S]*\.\.\.GRIDS_PERMITIDAS\.map[\s\S]*\.\.\.NEON_ALLOWED_MAP_NAMES\.filter[\s\S]*\.map\(name => \['neon:' \+ name, neonMapTitle\(\{ name \}\)\]\)[\s\S]*\.filter\(\(\[value\]\) => MAP_SELECTOR_ALLOWED\.has\(value\)\)/);
     assert.ok(c.playable.every(m=>m.objects.some(o=>/enemy|guard|thug|mobster|assassin|patrol|gangster/i.test(o[0]))));
     for(const name of ['rmTrailer','rmTestRoom','rmSequence12c','rmHouse1Downstairs','rmHouse1Upstairs',...Array.from({length:10},(_,i)=>`rmTestLevel${i+1}`)]){
       assert.ok(c.neonExcluded.has(name),`${name} explicitamente excluído`);
@@ -1003,8 +1004,14 @@ async function run() {
     const titleProbe={...c.neonData.find(m=>c.neonAllowed.includes(m.name)),title:'Trailer 640 x 580'};
     assert.equal(c.mapAllowed(titleProbe),false,'título com dimensões bloqueado pela mesma regra do seletor');
     assert.ok(c.playable.every(m=>!c.hasDimensions(c.neonTitle(m))),'títulos ativos sem dimensões');
-    assert.match(html,/NEON_PLAYABLE\.map\(m => \['neon:' \+ m\.name, neonMapTitle\(m\)\]/);
-    assert.match(html,/const NEON_PLAYABLE = MAPS\.filter\(neonMapIsAllowed\)/);
+    assert.match(html,/NEON_PLAYABLE\.map\(m => \[m\.name, m\]\)/);
+    assert.match(html,/NEON_PLAYABLE = maps\.filter\(neonMapIsAllowed\)/);
+    assert.match(html,/function ensureNeonDefinitions\(\)[\s\S]*?script\.src = 'js\/maps\.js'[\s\S]*?window\.HM_NEON_MAPS/);
+    assert.doesNotMatch(html,/<script src="js\/maps\.js"><\/script>/,'maps.js não entra no carregamento inicial');
+    assert.match(html,/const initialNeonName = historia \? STORY\[capIdx\]\?\.neon : mapSel\.startsWith\('neon:'\)/);
+    assert.match(html,/if \(initialNeonName && !Array\.isArray\(window\.HM_NEON_MAPS\)\)[\s\S]*?neonGameStartPending[\s\S]*?ensureNeonDefinitions\(\)\.then\(\(\) => \{ neonGameStartPending = false; newGame\(\); \}\)/);
+    assert.match(html,/function advance\(\)[\s\S]*?STORY\[capIdx \+ 1\]\?\.neon[\s\S]*?neonAdvancePending[\s\S]*?ensureNeonDefinitions\(\)\.then\(\(\) => \{ neonAdvancePending = false; advance\(\); \}\)/);
+    assert.doesNotMatch(read('sw.js'),/"js\/maps\.js"/,'maps.js fica fora do pré-cache inicial');
     assert.doesNotMatch(html,/NEON_PLAYABLE\.map\(m => \['neon:' \+ m\.name, .*m\.w.*m\.h/);
     assert.doesNotMatch(html,/const NEON_SIZE_BLOCK|MAPAS_BASE\.filter\(m => !\(Math\.abs\(m\.iw/);
     const fixedIds=new Set(c.fixed.map(m=>m.id)),neonIds=new Set(c.neonAllowed);
@@ -1122,7 +1129,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v301.0-static-blood-no-copy-rust');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v302.0-lazy-neon-maps-rust');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));
@@ -1289,13 +1296,13 @@ assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v301.0-static-blood-no-copy-r
     const html=read('index.html'),extract=re=>html.match(re)?.[0],noop=()=>{},config=mapConfiguration();
     const blocks=[extract(/function worldEdgeHit\(x, y, r\) \{[\s\S]*?\n\}/),extract(/function fitWorldPosition\(x, y, r\) \{[\s\S]*?\n\}/),
       extract(/function sgBuild\(\) \{[\s\S]*?\n\}/),extract(/function hitWall\(x, y, r\) \{[\s\S]*?\n\}/),extract(/function unstick\(e\) \{[\s\S]*?\n\}/),
-      extract(/function refreshSol\(\) \{[\s\S]*?\n\}/),extract(/function neonSafePoint\(x, y, r, avoid = \[\], gap = 28\) \{[\s\S]*?\n\}/),extract(/function buildNeonFloor\(m\) \{[\s\S]*?\n\}/)];
+      extract(/function refreshSol\(\) \{[\s\S]*?\n\}/),extract(/function neonSprites\(\) \{[\s\S]*?\n\}/),extract(/function neonSafePoint\(x, y, r, avoid = \[\], gap = 28\) \{[\s\S]*?\n\}/),extract(/function buildNeonFloor\(m\) \{[\s\S]*?\n\}/)];
     assert.ok(blocks.every(Boolean));const g={setTransform:noop,fillRect:noop,drawImage:noop,clearRect:noop,save:noop,restore:noop,translate:noop,rotate:noop};
     const canvas=()=>({width:0,height:0,getContext:()=>g});
     const ctx={WW:0,WH:0,SG:{ref:null,len:-1,cs:64,cells:new Map()},sol:[],walls:[],furn:[],decor:[],posts:[],keep:[],rooms:[],doors:[],transp:[],enemies:[],pickups:[],corpses:[],blood:[],liveBlood:[],throws:[],predio:[{}],andar:0,curNeon:null,SPRITES:Object.fromEntries(Array.from(new Set(config.neonData.flatMap(m=>m.objects.map(o=>o[3]).filter(sp=>sp&&sp!=='<undefined>'))),sp=>[sp,{ox:0,oy:0,frames:[]}])) ,neonCar:false,fixedMap:false,mapName:'',startPos:[96,96],exitR:[0,0,0,0],
       NEON_SKIP_RE:/player|enemy|guard|thug|gangster|patrol|mobster|assassin|weapon|spawn|lanestart|door|carenter/i,NEON_ENEMY_RE:/enemy|guard|thug|mobster|assassin|patrol|gangster/i,
-      NEON_WEAPONS:['taco','faca','cano','martelo','pe_de_cabra','pistola','revolver','escopeta','smg','rifle','uzi'],NEON_AMMO:{},neonMapTitle:config.neonTitle,fl:canvas(),tp:canvas(),neonImg:()=>null,neonLoaded:()=>false,neonDrawProp:noop,saveFloor:noop,hyp:Math.hypot};
-    vm.createContext(ctx);vm.runInContext(read('js/maps.js'),ctx);vm.runInContext(read('js/collision_sizes.js'),ctx);vm.runInContext(blocks.join('\n'),ctx);
+      NEON_WEAPONS:['taco','faca','cano','martelo','pe_de_cabra','pistola','revolver','escopeta','smg','rifle','uzi'],NEON_AMMO:{},neonMapTitle:config.neonTitle,window:{},fl:canvas(),tp:canvas(),neonImg:()=>null,neonLoaded:()=>false,neonDrawProp:noop,saveFloor:noop,hyp:Math.hypot};
+    ctx.window.HM_NEON_SPRITES=ctx.SPRITES;vm.createContext(ctx);vm.runInContext(read('js/maps.js'),ctx);vm.runInContext(read('js/collision_sizes.js'),ctx);vm.runInContext(blocks.join('\n'),ctx);
     const maps=config.playable;assert.equal(maps.length,61);
     let enemies=0,pickups=0;const invalidExits=[];
     const originalMapData=JSON.stringify(maps.map(m=>({name:m.name,w:m.w,h:m.h,tiles:m.tiles,objects:m.objects})));

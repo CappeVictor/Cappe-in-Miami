@@ -1,4 +1,8 @@
-# Cappe-in-Miami — preview Rust/WASM v301.0
+# Cappe-in-Miami — preview Rust/WASM v302.0
+
+## Otimização v302 — carregamento adiado dos mapas Neon
+
+`js/maps.js` só é requisitado quando a campanha chega à primeira fase Neon ou quando o jogador escolhe um mapa Neon. A lista de 61 mapas permanece disponível no seletor; depois do primeiro uso, o service worker pode guardar os dados para jogar offline. No Chrome local, a abertura inicial transferiu 301.534 bytes a menos e decodificou 1.616.616 bytes a menos. O teste no navegador percorreu a transição da campanha e iniciou `rmHospitalEntrance` em uma única requisição. Suíte: 110/110. O carregamento do módulo WASM continua fazendo parte da inicialização da versão Rust; esta alteração adia somente os dados Neon. Não houve medição de FPS nem revisão visual ampla.
 
 ## Otimização v301 — camada de sangue sem cópia temporária
 

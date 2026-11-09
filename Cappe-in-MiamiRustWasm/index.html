@@ -593,7 +593,6 @@ const STORY = [
 
 
 </script>
-  <script src="js/maps.js"></script>
   <script src="js/collision_sizes.js"></script>
   <script>
 // Cappe in Miami - feito por Victor Cappellesso e Davi Gehart
@@ -1557,6 +1556,16 @@ function toMenu() {
   menu.classList.remove('oculto');
 }
 function advance() {
+  if (historia && STORY[capIdx + 1]?.neon && !Array.isArray(window.HM_NEON_MAPS)) {
+    if (window.EXP && EXP.toast) EXP.toast('CARREGANDO MAPAS', 'preparando a próxima fase', '#19f0e6');
+    if (neonAdvancePending) return;
+    neonAdvancePending = true;
+    ensureNeonDefinitions().then(() => { neonAdvancePending = false; advance(); }).catch(error => {
+      neonAdvancePending = false;
+      if (window.EXP && EXP.toast) EXP.toast('MAPAS INDISPONÍVEIS', error.message, '#ff2e93');
+    });
+    return;
+  }
   saveHi();
   if (!historia) { lvl++; startLevel(); return; }
   capIdx++; if (capIdx >= STORY.length) endStory(); else brief();
@@ -1909,7 +1918,7 @@ function drawDoors() {
   for (const d of doors) {
     if (d.spr) {
       flush();
-      const sprite = SPRITES[d.spr];
+      const sprite = neonSprites()[d.spr];
       if (!sprite || !sprite.frames.length) { flushNeon(); neonDrawDoor(d); continue; }
       neonBatch.push({ spriteKey: d.spr, image: neonImg(sprite.frames[0]), px: d.px, py: d.py,
         baseAngle: d.base, swingAngle: d.th, ox: sprite.ox, oy: sprite.oy, fallback: d });
@@ -1996,8 +2005,24 @@ function neonMapIsAllowed(m) {
   return NEON_ALLOWED_MAPS.has(m.name) && !NEON_EXCLUDED_MAPS.has(m.name) &&
     !neonTitleHasDimensions(neonMapTitle(m)) && m.objects.some(o => NEON_ENEMY_RE.test(o[0]));
 }
-const NEON_PLAYABLE = MAPS.filter(neonMapIsAllowed);
-const NEON_BY = new Map(NEON_PLAYABLE.map(m => [m.name, m]));
+let NEON_PLAYABLE = [], NEON_BY = new Map(), neonDefinitionsPromise = null, neonGameStartPending = false, neonAdvancePending = false;
+function neonSprites() { return window.HM_NEON_SPRITES || {}; }
+function ensureNeonDefinitions() {
+  if (Array.isArray(window.HM_NEON_MAPS)) return Promise.resolve(NEON_PLAYABLE);
+  if (neonDefinitionsPromise) return neonDefinitionsPromise;
+  neonDefinitionsPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script'); script.src = 'js/maps.js';
+    script.onload = () => {
+      const maps = window.HM_NEON_MAPS;
+      if (!Array.isArray(maps)) { neonDefinitionsPromise = null; reject(new Error('Dados dos mapas indisponíveis.')); return; }
+      NEON_PLAYABLE = maps.filter(neonMapIsAllowed); NEON_BY = new Map(NEON_PLAYABLE.map(m => [m.name, m]));
+      resolve(NEON_PLAYABLE);
+    };
+    script.onerror = () => { neonDefinitionsPromise = null; reject(new Error('Não foi possível carregar os mapas.')); };
+    document.head.appendChild(script);
+  });
+  return neonDefinitionsPromise;
+}
 const NEON_WEAPONS = ['taco', 'faca', 'cano', 'martelo', 'pe_de_cabra', 'pistola', 'revolver', 'escopeta', 'smg', 'rifle', 'uzi'];
 const NEON_AMMO = { escopeta: 6, smg: 24, pistola: 8, revolver: 6, rifle: 10, uzi: 24 };
 let curNeon = null, neonCar = false, exitArmed = false;
@@ -2007,7 +2032,7 @@ const neonLoaded = im => !!im && im.complete && im.naturalWidth > 0;
 // Carrega as imagens da sala antes de montar o piso (o piso é assado num canvas).
 function neonPrepare(m) {
   const paths = new Set();
-  for (const o of m.objects) { const sp = SPRITES[o[3]]; if (sp && sp.frames.length) paths.add(sp.frames[0]); }
+  for (const o of m.objects) { const sp = neonSprites()[o[3]]; if (sp && sp.frames.length) paths.add(sp.frames[0]); }
   for (const t of m.tiles) if (t[0] && !/undefined/.test(t[0])) paths.add('assets/background/images/' + t[0] + '.png');
   const waits = [...paths].map(p => new Promise(res => {
     const im = neonImg(p); if (neonLoaded(im)) return res();
@@ -2022,12 +2047,12 @@ function neonFor(n) {                       // mapa original da fase n (históri
   return name && NEON_ALLOWED_MAPS.has(name) && !NEON_EXCLUDED_MAPS.has(name) ? (NEON_BY.get(name) || null) : null;
 }
 function neonDrawProp(g, sp, x, y, rot) {
-  const s = SPRITES[sp], im = neonImg(s.frames[0]);
+  const s = neonSprites()[sp], im = neonImg(s.frames[0]);
   if (!neonLoaded(im)) return;
   g.save(); g.translate(x, y); g.rotate(-rot * Math.PI / 180); g.drawImage(im, -s.ox, -s.oy); g.restore();
 }
 function neonDrawDoor(d) {
-  const s = SPRITES[d.spr], im = neonImg(s.frames[0]);
+  const s = neonSprites()[d.spr], im = neonImg(s.frames[0]);
   if (!neonLoaded(im)) return;
   ctx.save(); ctx.translate(d.px, d.py); ctx.rotate(d.base + d.th); ctx.drawImage(im, -s.ox, -s.oy); ctx.restore();
 }
@@ -2070,10 +2095,10 @@ function buildNeonFloor(m) {
   if (!(renderer && renderer.clearCanvasRect && renderer.clearCanvasRect(tpContext, 0, 0, WW, WH))) tpContext.clearRect(0, 0, WW, WH);
   for (const o of m.objects.slice().sort((a, b) => b[4] - a[4])) {
     const [name, x, y, sp, , rot] = o;
-    if (!sp || sp === '<undefined>' || !SPRITES[sp] || NEON_SKIP_RE.test(name) || /BackgroundColor/.test(name)) continue;
+    if (!sp || sp === '<undefined>' || !neonSprites()[sp] || NEON_SKIP_RE.test(name) || /BackgroundColor/.test(name)) continue;
     neonDrawProp(g, sp, x, y, rot);
     if (/wall|solid|block|collision|glass|window|counter/i.test(name)) {
-      const s = SPRITES[sp], sz = COLLISION_SIZES[sp] || [16, 16];
+      const s = neonSprites()[sp], sz = COLLISION_SIZES[sp] || [16, 16];
       walls.push([x - s.ox, y - s.oy, Math.min(256, Math.max(4, sz[0])), Math.min(256, Math.max(4, sz[1]))]);
     }
   }
@@ -2086,8 +2111,8 @@ function buildNeonFloor(m) {
   g.strokeStyle = 'rgba(25,240,230,.65)'; g.lineWidth = 2;
   if (g.strokeRect) g.strokeRect(edge + 1, edge + 1, WW - edge * 2 - 2, WH - edge * 2 - 2);
   for (const o of m.objects) {                 // portas: objetos dinâmicos (abrem, giram e atordoam)
-    if (!/door/i.test(o[0]) || !SPRITES[o[3]] || !SPRITES[o[3]].frames.length) continue;
-    const s = SPRITES[o[3]], sz = COLLISION_SIZES[o[3]] || [16, 16];
+    if (!/door/i.test(o[0]) || !neonSprites()[o[3]] || !neonSprites()[o[3]].frames.length) continue;
+    const s = neonSprites()[o[3]], sz = COLLISION_SIZES[o[3]] || [16, 16];
     const w = Math.min(256, Math.max(4, sz[0])), h = Math.min(256, Math.max(4, sz[1]));
     const x = o[1] - s.ox, y = o[2] - s.oy;
     doors.push({ x, y, w, h, vert: h > w, len: Math.max(w, h), th: 0, target: 0, swing: false, open: false, fast: false,
@@ -2130,6 +2155,17 @@ function buildNeonFloor(m) {
   saveFloor();
 }
 function newGame() {
+  const initialNeonName = historia ? STORY[capIdx]?.neon : mapSel.startsWith('neon:') ? mapSel.slice(5) : null;
+  if (initialNeonName && !Array.isArray(window.HM_NEON_MAPS)) {
+    if (neonGameStartPending) return;
+    neonGameStartPending = true;
+    if (window.EXP && EXP.toast) EXP.toast('CARREGANDO MAPAS', 'preparando a primeira fase', '#19f0e6');
+    ensureNeonDefinitions().then(() => { neonGameStartPending = false; newGame(); }).catch(error => {
+      neonGameStartPending = false;
+      if (window.EXP && EXP.toast) EXP.toast('MAPAS INDISPONÍVEIS', error.message, '#ff2e93');
+    });
+    return;
+  }
   const NM = neonFor(historia ? capIdx + 1 : 1);
   if (NM && !NM._ready) { banner = { txt: 'CARREGANDO', sub: NM.name, t: 2 }; neonPrepare(NM).then(() => newGame()); return; }
   musStop(0); musStart(1.5);
@@ -3181,7 +3217,8 @@ const MAP_SELECTOR_ALLOWED = new Set([...MAP_SELECTOR_MODES, ...MAPAS_PERMITIDOS
 const MAP_SELECTOR_OPTIONS = [
   ['seq', 'Sequência (todos os mapas)'], ['proc', 'Apartamento aleatório'],
   ...MAPAS.map(m => [m.id, m.nome]), ...GRIDS_PERMITIDAS.map(g => ['grid:' + g.id, 'Grade: ' + g.nome]),
-  ...NEON_PLAYABLE.map(m => ['neon:' + m.name, neonMapTitle(m)]),
+  ...NEON_ALLOWED_MAP_NAMES.filter(name => !NEON_EXCLUDED_MAPS.has(name) && !neonTitleHasDimensions(neonMapTitle({ name })))
+    .map(name => ['neon:' + name, neonMapTitle({ name })]),
 ].filter(([value]) => MAP_SELECTOR_ALLOWED.has(value));
 MAP_SELECTOR_OPTIONS.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; msel.appendChild(o); });
 msel.onchange = () => { mapSel = msel.value; msel.blur(); };

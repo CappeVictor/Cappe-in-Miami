@@ -1,4 +1,4 @@
-# Cappe in Miami Web — v87.0
+# Cappe in Miami Web — v88.0
 
 Versão para navegador com HTML, CSS e JavaScript; o jogo usa o renderer Canvas 2D em JavaScript e não depende de Rust nem WebAssembly.
 
@@ -39,6 +39,10 @@ Em três rodadas locais no Chrome, com 120 inimigos e 500 faíscas, a mediana do
 
 As 14 imagens de máscara não são mais baixadas no início do jogo. Elas são carregadas quando o seletor é aberto ou uma máscara é escolhida; depois do primeiro uso, o service worker as guarda no cache para uso offline. Em Chrome local, os bytes transferidos no carregamento inicial caíram 325.246 bytes (de 765.523 para 440.277; 42,5%). As miniaturas carregam sob demanda conforme entram na área visível; a imagem da máscara selecionada também é carregada quando necessária. Regressões: 109/109; verificação de compressão passou. É uma medição local de transferência, não de FPS.
 
+
+## Otimização v88 — carregamento adiado dos mapas Neon
+
+`js/maps.js` agora só é requisitado quando a campanha chega à primeira fase Neon ou quando o jogador escolhe um mapa Neon. A lista de 61 mapas permanece no seletor, sem baixar a geometria antes da hora; depois do primeiro uso, o service worker pode armazenar o arquivo para uso offline. Em Chrome local, a abertura inicial transferiu 301.534 bytes a menos e decodificou 1.616.616 bytes a menos. O início da campanha foi conferido até a primeira expansão e o mapa correto carregou em uma única requisição. Suíte de regressão: 110/110. Os tempos variam por computador; não houve medição de FPS nem revisão visual ampla.
 
 ## Otimização v87 — grade de colisão da IA
 

@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v87.0-collision-bucket-query-web';
+const CACHE = 'cappe-v88.0-lazy-neon-maps-web';
 const ASSETS = [
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",
@@ -93,7 +93,6 @@ const ASSETS = [
   "js/exp-shop.js",
   "js/exp-ui.js",
   "js/exp-world.js",
-  "js/maps.js",
 ];
 const SCOPE = new URL(self.registration.scope);
 const CACHE_KEY = CACHE + ':' + SCOPE.pathname;

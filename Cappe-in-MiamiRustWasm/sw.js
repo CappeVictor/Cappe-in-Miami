@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v301.0-static-blood-no-copy-rust';
+const CACHE = 'cappe-v302.0-lazy-neon-maps-rust';
 const ASSETS = [
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",
@@ -93,7 +93,6 @@ const ASSETS = [
   "js/exp-shop.js",
   "js/exp-ui.js",
   "js/exp-world.js",
-  "js/maps.js",
   "js/wasm-renderer.js",
   "wasm-renderer/pkg/direct/direct_renderer.js",
   "wasm-renderer/pkg/direct/direct_renderer_bg.wasm"
