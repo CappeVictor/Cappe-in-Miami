@@ -532,3 +532,9 @@ Os wrappers de métodos/propriedades Canvas agora só são instalados em sessõe
 ## v288.0 — painel de pausa e auditoria de chamadas
 A caixa de resumo da pausa chama Rust direto. Na sessão de auditoria Chrome, 12 estados não geraram chamadas Canvas no host; a instrumentação estava ativada e, portanto, essa sessão serve como amostra funcional, não benchmark de desempenho. O painel/diagnóstico têm custo de execução e não medem FPS, CPU média ou p95. Sem ganho de performance comprovado.
 
+## v92/v306 — filtros de alcance da IA sem raiz quadrada; destino reutilizado
+
+Os filtros de proximidade para comunicação, chamados de reforço e propagação de alerta comparam dx²+dy² com r², preservando a desigualdade estrita. A IA também reaproveita o objeto goal enquanto atualiza suas coordenadas no estado de investigação. A regressão verifica 19.200 pontos determinísticos por implementação, tangências e identidade/posição do destino nas duas versões.
+
+Em dois pares locais do Chrome com 120 inimigos e 500 faíscas, usando CAPPE_PERF_MIXED_AI=1, o p90 mediano de update+draw mudou de 0,55 para 0,5 ms na Web e de 0,9 para 0,85 ms em Rust/WASM. O p95 Rust ficou em 0,95 ms; médias não mostraram ganho consistente (Web 0,463→0,474 ms; Rust 0,736→0,756 ms). A amostra é pequena e local; não comprova aumento geral de FPS.
+

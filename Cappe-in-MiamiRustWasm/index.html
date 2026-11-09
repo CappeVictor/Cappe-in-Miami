@@ -670,6 +670,7 @@ const cv = document.getElementById('c'), ctx = cv.getContext('2d', { alpha: fals
 try { ctx.imageSmoothingEnabled = !!CFG.aa; ctx.imageSmoothingQuality = CFG.aa ? 'medium' : 'low'; } catch (e) {}
 // [otimização] raiz direta: Math.hypot é bem mais lento no V8
 function hyp(x, y) { return Math.sqrt(x * x + y * y); }
+function withinRadius(dx, dy, radius) { return dx * dx + dy * dy < radius * radius; }
 const W = 960, H = 600, T = 12;
 let screenShake = 0, screenShakePower = 0;
 let freeze = 0, kickX = 0, kickY = 0;
@@ -2445,7 +2446,7 @@ function update(dt) {
       let face = Math.atan2(targetActor.y - e.y, targetActor.x - e.x) - e.a; face = Math.abs(Math.atan2(Math.sin(face), Math.cos(face)));
       const aware = e.state === 'CHASE' || e.state === 'ALERT' || e.state === 'SEARCH';
       e.vis = d < S.sight * D().sight && (aware || d < 90 || face < 1.22) && los(e, targetActor);
-      if (e.vis && !aware) for (const o of enemies) if (o !== e && !o.ko && !(o.stun > 0) && o.state !== 'CHASE' && hyp(o.x - e.x, o.y - e.y) < 280 && los(o, e)) { o.lkp = { x: targetActor.x, y: targetActor.y }; o.goal = { x: targetActor.x, y: targetActor.y }; o.path = null; setEnemyState(o, 'INVESTIGATE', 3); }
+      if (e.vis && !aware) for (const o of enemies) if (o !== e && !o.ko && !(o.stun > 0) && o.state !== 'CHASE' && withinRadius(o.x - e.x, o.y - e.y, 280) && los(o, e)) { o.lkp = { x: targetActor.x, y: targetActor.y }; o.goal = { x: targetActor.x, y: targetActor.y }; o.path = null; setEnemyState(o, 'INVESTIGATE', 3); }
     }
     const canSee = !!e.vis;
     EXP.brain(e, d, canSee, dt);   // [IA] reação, esquiva de balas e inteligência por dificuldade

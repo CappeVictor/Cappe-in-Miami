@@ -1,4 +1,10 @@
-# Cappe-in-Miami — preview Rust/WASM v305.0
+# Cappe-in-Miami — preview Rust/WASM v306.0
+
+## Otimização v306 — alcance da IA sem raiz quadrada e alvo reutilizado
+
+Os filtros de proximidade da IA usam comparação ao quadrado em vez de calcular a distância euclidiana. O destino de investigação atualiza o mesmo objeto quando recebe uma posição nova, evitando recriá-lo nesse ramo. Regressões comparam os limites estritos em 19.200 pontos determinísticos por versão e confirmam a identidade do objeto e suas coordenadas nas versões Web e Rust/WASM.
+
+Dois pares locais no Chrome, com 120 inimigos e 500 faíscas, no cenário misto de IA, tiveram p90 mediano de update+draw de 0,9 ms antes e 0,85 ms depois; p95 mediano permaneceu em 0,95 ms. As médias não melhoraram consistentemente (0,736→0,756 ms), então não há evidência de ganho geral de quadro nem promessa de FPS. A regressão principal passou em 115/115.
 
 ## Otimização v305 — buffers reutilizáveis do desenho de inimigos
 

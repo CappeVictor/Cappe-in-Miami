@@ -95,6 +95,36 @@ async function run() {
     new vm.Script(read('tests/wasm-direct-draw-parity.cjs'),{filename:'tests/wasm-direct-draw-parity.cjs'});
     for(const m of read('index.html').matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) new vm.Script(m[1]);
   });
+  await test('Filtros de alcance da IA preservam os raios nas versões Web e Rust/WASM', () => {
+    for(const dir of [root, path.resolve(root, '..', 'Cappe-in-MiamiWeb')]) {
+      const html=fs.readFileSync(path.join(dir,'index.html'),'utf8'),world=fs.readFileSync(path.join(dir,'js/exp-world.js'),'utf8');
+      const htmlHelper=declaration(html,'function withinRadius('),worldHelper=declaration(world,'function withinRadius(');
+      assert.ok(html.includes('withinRadius(o.x - e.x, o.y - e.y, 280)'));
+      assert.ok(world.includes('withinRadius(o.x - e.x, o.y - e.y, callRadius)'));
+      assert.ok(world.includes('withinRadius(o.x - e.x, o.y - e.y, 560)'));
+      for(const helper of [htmlHelper,worldHelper]) {
+        const ctx=vm.createContext({});vm.runInContext(helper,ctx);
+        for(const radius of [0.5,18,90,210,230,280,520,560]) {
+          for(let i=0;i<1200;i++) {
+            const dx=Math.sin(i*12.9898+radius)*900,dy=Math.cos(i*78.233-radius)*900;
+            assert.equal(ctx.withinRadius(dx,dy,radius),Math.hypot(dx,dy)<radius,'raio '+radius+', ponto '+dx+','+dy);
+          }
+          assert.equal(ctx.withinRadius(radius,0,radius),false,'tangência '+radius);
+          assert.equal(ctx.withinRadius(radius-0.001,0,radius),true,'ponto interno '+radius);
+        }
+      }
+    }
+  });
+  await test('IA reutiliza o objeto do destino de investigação sem alterar sua posição', () => {
+    for(const dir of [root, path.resolve(root, '..', 'Cappe-in-MiamiWeb')]) {
+      const source=fs.readFileSync(path.join(dir,'js/exp-core.js'),'utf8');
+      assert.ok(source.includes('const goal = e.goal || (e.goal = { x: 0, y: 0 }); goal.x = e.lkp.x; goal.y = e.lkp.y;'));
+    }
+    const {ctx,exp}=environment(),enemy={x:40,y:40,state:'INVESTIGATE',lkp:{x:180,y:100},path:null,ko:0,stun:0};
+    ctx.enemies=[enemy];ctx.doors=[];ctx.sol=[];exp.navBuild();exp.aiExtTick(.016);
+    const goal=enemy.goal;assert.ok(goal);enemy.lkp={x:220,y:160};exp.aiExtTick(.016);
+    assert.equal(enemy.goal,goal,'o mesmo objeto é mantido');assert.equal(goal.x,220);assert.equal(goal.y,160);
+  });
   await test('Servidor online: rotas, IDs públicos, reconexão, validação, relay e autorização', async () => {
     delete require.cache[require.resolve('../server/server.js')];
     const {createGameServer,rooms,createRoom,joinRoom,rejoinRoom,publishState,roomView,listRooms,limitRoomAttempts}=require('../server/server.js');
@@ -118,7 +148,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v305.0-reuse-enemy-render-inputs-rust');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v306.0-ai-distance-rust');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -1132,7 +1162,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v305.0-reuse-enemy-render-inputs-rust');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v306.0-ai-distance-rust');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));

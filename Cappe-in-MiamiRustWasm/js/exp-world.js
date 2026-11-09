@@ -70,6 +70,8 @@
   };
 
   // ================= IA (um passe por quadro, antes do laço de inimigos do jogo) =================
+  // A mesma comparação euclidiana de hyp(dx,dy) < r, sem calcular a raiz quadrada.
+  function withinRadius(dx, dy, radius) { return dx * dx + dy * dy < radius * radius; }
   function aiTick(dt) {
     const n = enemies.length;
     for (let i = 0; i < n; i++) {
@@ -84,9 +86,10 @@
         e.talkT = (e.talkT || 0) - dt;
         if (e.talkT <= 0) {
           e.talkT = 1.3;
+          const callRadius = e.leader ? 520 : 210;
           for (let j = 0; j < n; j++) {
             const o = enemies[j]; if (o === e || o.ko > 0 || o.stun > 0) continue;
-            if ((o.state === 'IDLE' || o.state === 'SUSPICIOUS') && hyp(o.x - e.x, o.y - e.y) < (e.leader ? 520 : 210)) {
+            if ((o.state === 'IDLE' || o.state === 'SUSPICIOUS') && withinRadius(o.x - e.x, o.y - e.y, callRadius)) {
               o.heard = { x: target.x, y: target.y }; o.lkp = { x: target.x, y: target.y }; setEnemyState(o, 'INVESTIGATE', 2.4);
             }
           }
@@ -103,7 +106,7 @@
       }
       if (e.leader && chasing) {                           // líder: chama reforços (alarme local)
         e.callT -= dt;
-        if (e.callT <= 0) { e.callT = 6; let c = 0; for (let j = 0; j < n; j++) { const o = enemies[j]; if (o !== e && o.state === 'IDLE' && hyp(o.x - e.x, o.y - e.y) < 560) { o.lkp = { x: target.x, y: target.y }; o.heard = o.lkp; setEnemyState(o, 'SEARCH', 3); c++; } } if (c) popup(e.x, e.y - 30, 'REFORÇOS!', '#b06bff'); }
+        if (e.callT <= 0) { e.callT = 6; let c = 0; for (let j = 0; j < n; j++) { const o = enemies[j]; if (o !== e && o.state === 'IDLE' && withinRadius(o.x - e.x, o.y - e.y, 560)) { o.lkp = { x: target.x, y: target.y }; o.heard = o.lkp; setEnemyState(o, 'SEARCH', 3); c++; } } if (c) popup(e.x, e.y - 30, 'REFORÇOS!', '#b06bff'); }
       }
       if (e.retreater && chasing && n <= 2 && EXP.enemyCount0 >= 5) {        // recuo quando em desvantagem
         const d = hyp(target.x - e.x, target.y - e.y);
@@ -115,7 +118,7 @@
   function comradeFell(e) {
     for (const o of enemies) {
       if (o.ko > 0 || o.stun > 0 || o.state === 'CHASE' || o.state === 'ALERT') continue;
-      if (hyp(o.x - e.x, o.y - e.y) < 230) { o.heard = { x: e.x, y: e.y }; o.lkp = { x: e.x, y: e.y }; setEnemyState(o, 'INVESTIGATE', 2.6); }
+      if (withinRadius(o.x - e.x, o.y - e.y, 230)) { o.heard = { x: e.x, y: e.y }; o.lkp = { x: e.x, y: e.y }; setEnemyState(o, 'INVESTIGATE', 2.6); }
     }
   }
 

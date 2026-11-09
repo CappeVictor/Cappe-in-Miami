@@ -14,8 +14,8 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
-- **Web — HTML, CSS e JavaScript v91:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — v305:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v305-preview.zip)
+- **Web — HTML, CSS e JavaScript v92:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
+- **Rust/WASM — v306:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v306-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
@@ -23,9 +23,11 @@ Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. 
 
 A prévia v294 mantém painters Rust/WebSys diretos para as camadas amostradas de gameplay, incluindo Campanha, Horda e Invasão. O antigo trampoline Canvas deixou de ser compilado, servido e pré-cacheado. A auditoria instrumentada não encontrou chamadas Canvas do host em 23 cenas/estados amostrados. Os painters Canvas permanecem como fallback; lógica, simulação, aleatoriedade e seleção/cache de assets seguem em JavaScript. O pool de pontos de rota da IA reduz objetos temporários em um microbenchmark sintético; não há ganho de frame time medido.
 
-## Última atualização — 9 de novembro de 2026 · Web v91 e Rust/WASM v305
+## Última atualização — 9 de novembro de 2026 · Web v92 e Rust/WASM v306
 
 As duas versões servem HTML, JavaScript, CSS, JSON e SVG comprimidos em gzip quando o navegador suporta. No Chrome local, a transferência inicial observada caiu de 2,28 MB para 765 KB na Web e de 2,83 MB para 1,14 MB em Rust/WASM. Na v89/v303, o BFS da IA reutilizou vizinhos caminháveis pré-calculados, preservando as rotas; o custo amostrado de `EXP.navPath` caiu, mas quadros sob estresse variaram. Na v90/v304, a seleção de alvo da IA deixou de criar e ordenar uma lista temporária; em três pares Chrome com 120 inimigos e 500 faíscas, o p90 mediano caiu de 3,5 para 3,0 ms na Web e de 2,9 para 2,6 ms em Rust/WASM, e o p95 de 4,1 para 3,7 ms e de 3,2 para 3,1 ms. Microbenchmark: 120 mil seleções caíram de 48,6 para 26,2 ms. A Web v91 acrescentou rejeição rápida de retângulos distantes nas colisões; em dois pares, o p95 mediano caiu de 2,35 para 1,95 ms e a média de 1,519 para 1,362 ms. O Rust/WASM v305 reutiliza buffers ao compor inimigos: a amostra do HeapProfiler para essa ponte caiu 59% em dois pares; os tempos de quadro não mostraram ganho consistente. Regressões atuais: 113/113; paridade de inimigos Chrome: três estados, zero diferenças de pixel. Resultados locais, não garantia de FPS geral; não houve revisão visual ampla.
+
+Na Web v92 e Rust/WASM v306, filtros de proximidade da IA evitam raízes quadradas e destinos de investigação reutilizam objetos. Em dois pares com 120 inimigos, 500 faíscas e estados mistos, os p90 medianos mudaram de 0,55 para 0,5 ms na Web e de 0,9 para 0,85 ms em Rust/WASM; médias variaram ligeiramente para cima, portanto não há evidência de ganho consistente no quadro total. Regressões atuais: 115/115. Resultados locais, não garantia de FPS geral; não houve revisão visual ampla.
 
 ## Últimas melhorias incluídas
 

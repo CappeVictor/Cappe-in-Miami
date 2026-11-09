@@ -423,7 +423,7 @@
       if (e.route && e.route.length && (s === 'IDLE' || s === 'PATROL')) { if (s === 'IDLE') e.state = 'PATROL'; e.goal = null; patrol(e, dt); }
       else if (s === 'PATROL') e.state = 'IDLE';
       if (s === 'INVESTIGATE' || s === 'SEARCH') {
-        if (e.lkp && e.lkp !== e.navPt) e.goal = { x: e.lkp.x, y: e.lkp.y };          // alvo novo (ruído, última posição vista)
+        if (e.lkp && e.lkp !== e.navPt) { const goal = e.goal || (e.goal = { x: 0, y: 0 }); goal.x = e.lkp.x; goal.y = e.lkp.y; } // atualiza o alvo sem criar objeto por quadro
         e.invT = (e.invT || 0) + dt;
         if (e.invT > 14) { e.goal = null; e.lkp = null; e.heard = null; e.invT = 0; e.state = 'IDLE'; continue; }
         if (e.goal) {

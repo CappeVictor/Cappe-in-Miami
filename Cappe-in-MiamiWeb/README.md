@@ -1,4 +1,10 @@
-# Cappe in Miami Web — v91.0
+# Cappe in Miami Web — v92.0
+
+## Otimização v92 — verificações de alcance da IA
+
+As verificações de proximidade entre inimigos comparam a distância ao quadrado com o raio ao quadrado, sem calcular uma raiz quadrada, nos filtros de comunicação, reforço e alerta visual. A lógica preserva o limite estrito do raio; a regressão compara os resultados com a distância euclidiana em pontos determinísticos e tangências. A IA também reutiliza o objeto do alvo de investigação ao atualizar suas coordenadas.
+
+Dois pares locais no Chrome, com 120 inimigos e 500 faíscas, usando o cenário misto de IA, tiveram p90 mediano de update+draw de 0,55 ms antes e 0,5 ms depois; p95 mediano de 0,6 para 0,55 ms. As médias ficaram praticamente iguais (0,463→0,474 ms), portanto não há evidência de ganho consistente no quadro total. Resultados locais, sem promessa de FPS geral.
 
 Versão para navegador com HTML, CSS e JavaScript; o jogo usa o renderer Canvas 2D em JavaScript e não depende de Rust nem WebAssembly.
 
