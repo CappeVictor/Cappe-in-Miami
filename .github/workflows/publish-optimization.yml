@@ -92,13 +92,15 @@ jobs:
               target = root / name
               with ZipFile(target, 'w', compression=ZIP_DEFLATED, compresslevel=9) as archive:
                   for item in sorted(root.rglob('*')):
-                      if item.is_file() and item.suffix.lower() != '.zip' and '.git' not in item.parts:
+                      if item.is_file() and item.suffix.lower() != '.zip' and not any(part in {'.git', 'target', 'node_modules', '.cache'} for part in item.parts):
                           archive.write(item, item.relative_to(root).as_posix())
               with ZipFile(target) as archive:
                   assert archive.testzip() is None, f'CRC inválido: {target}'
                   names = archive.namelist()
                   assert 'server/server.js' in names and 'js/maps.js' in names
                   assert 'tests/compression-regression.cjs' in names
+                  assert all('/target/' not in f'/{entry}/' for entry in names), 'cache Rust target vazou para o ZIP'
+              assert target.stat().st_size < 5_000_000, f'ZIP inesperadamente grande: {target.stat().st_size} bytes'
               print(f'ZIP validado: {target} ({target.stat().st_size} bytes)')
           obsolete = Path('Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v295-preview.zip')
           obsolete.unlink(missing_ok=True)
