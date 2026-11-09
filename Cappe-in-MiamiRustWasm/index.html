@@ -1718,6 +1718,14 @@ function updateSparks(dt) {
 }
 const SPK_C = [], SPK_GROUPS = new Map(), SPK_ACTIVE = [];
 let SPK_INPUT = new Float64Array(500 * 5);
+let SPK_INPUT_VIEW = null, SPK_INPUT_VIEW_LENGTH = -1, SPK_INPUT_VIEW_BUFFER = null;
+function sparkInputView(length) {
+  if (SPK_INPUT_VIEW_BUFFER !== SPK_INPUT.buffer || SPK_INPUT_VIEW_LENGTH !== length) {
+    SPK_INPUT_VIEW = SPK_INPUT.subarray(0, length);
+    SPK_INPUT_VIEW_LENGTH = length; SPK_INPUT_VIEW_BUFFER = SPK_INPUT.buffer;
+  }
+  return SPK_INPUT_VIEW;
+}
 function drawSparks() {
   const n = sparks.length; if (!n) return;
   const sparkRenderer = window.HM_WASM_RENDERER, useDirect = !!(sparkRenderer && sparkRenderer.active && sparkRenderer.drawSparks);
@@ -1735,7 +1743,9 @@ function drawSparks() {
       SPK_INPUT[offset] = p.x; SPK_INPUT[offset + 1] = p.y; SPK_INPUT[offset + 2] = p.life; SPK_INPUT[offset + 3] = p.max; SPK_INPUT[offset + 4] = group.colorId;
     }
   }
-  if (useDirect && sparkRenderer.drawSparks(ctx, sparks, SPK_C, SPK_INPUT.subarray(0, n * 5))) return;
+  if (useDirect) {
+    if (sparkRenderer.drawSparks(ctx, sparks, SPK_C, sparkInputView(n * 5))) return;
+  }
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   for (const group of SPK_ACTIVE) {
     ctx.fillStyle = group.color;

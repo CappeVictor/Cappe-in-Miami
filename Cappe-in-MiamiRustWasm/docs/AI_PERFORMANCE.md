@@ -538,3 +538,7 @@ Os filtros de proximidade para comunicação, chamados de reforço e propagaçã
 
 Em dois pares locais do Chrome com 120 inimigos e 500 faíscas, usando CAPPE_PERF_MIXED_AI=1, o p90 mediano de update+draw mudou de 0,55 para 0,5 ms na Web e de 0,9 para 0,85 ms em Rust/WASM. O p95 Rust ficou em 0,95 ms; médias não mostraram ganho consistente (Web 0,463→0,474 ms; Rust 0,736→0,756 ms). A amostra é pequena e local; não comprova aumento geral de FPS.
 
+## v307 — vista reutilizada para entrada de faíscas Rust/WASM
+
+O desenho das faíscas reutiliza `Float64Array.subarray` enquanto a quantidade e o buffer permanecem iguais. Com 500 faíscas em 180 quadros, o contador instrumentado caiu de 179 vistas criadas para 1. A mediana da média de quadro ficou praticamente igual (0,797→0,803 ms), p90 igual (0,9 ms) e p95 mudou de 1,1 para 1,0 ms. Isso reduz a criação de objetos de vista no caminho medido, mas não comprova redução de heap bytes nem aumento consistente de FPS. Regressões 115/115 e paridade Chrome de partículas: zero diferenças de pixel.
+

@@ -183,6 +183,7 @@ async function measure(build) {
     if (STRESS_SPARKS) {
       await evaluate(`CFG.particles = 'alta'; window.__perfSparkColors = ['#fff','#ffd23f','#19f0e6','#ff2e93']; window.__perfKeepSparks = () => { for (let i = 0; i < ${STRESS_SPARKS}; i++) { let p = sparks[i]; if (!p) p = sparks[i] = {x:0,y:0,vx:0,vy:0,life:1,max:.95,c:window.__perfSparkColors[i % window.__perfSparkColors.length]}; p.x = P.x + (i % 25) * 12 - 140; p.y = P.y + (Math.floor(i / 25) % 20) * 12 - 115; p.life = p.max * (.18 + (i % 80) / 100); p.c = window.__perfSparkColors[i % window.__perfSparkColors.length]; } }; window.__perfKeepSparks();`);
     }
+    if (build.wasm && STRESS_SPARKS) await evaluate("window.__perfSparkInputViewCalls = 0; const perfSparkSubarray = SPK_INPUT.subarray.bind(SPK_INPUT); SPK_INPUT.subarray = (start, end) => { window.__perfSparkInputViewCalls++; return perfSparkSubarray(start, end); };");
 
     const initialCanvas = (await evaluate('[c.width, c.height]')).result.value;
     await wait(250);
@@ -196,7 +197,7 @@ async function measure(build) {
       await cdp('HeapProfiler.startSampling', { samplingInterval: 32768, includeObjectsCollectedByMajorGC: true, includeObjectsCollectedByMinorGC: true });
     }
     await until(async () => (await evaluate('__perf.work.length >= 180')).result?.value, 45000, '180 quadros de gameplay');
-    const sample = (await evaluate('({work: __perf.work.slice(0, 180), gaps: __perf.gaps.slice(0, 180), navPathTimes: window.__navPerf.slice(), navigationCells: EXP.NAV.ok?.length || 0, adjacencyBytes: (EXP.NAV.neighbors?.byteLength || 0) + (EXP.NAV.neighborCounts?.byteLength || 0), tier: EXP.perfTier, state: st, canvas: [c.width, c.height], renderer: window.HM_WASM_RENDERER?.status || "Canvas", maskImageRequestCount: performance.getEntriesByType("resource").filter(r => window.__perfMaskPaths.includes(new URL(r.name).pathname)).length})')).result.value;
+    const sample = (await evaluate('({work: __perf.work.slice(0, 180), gaps: __perf.gaps.slice(0, 180), navPathTimes: window.__navPerf.slice(), navigationCells: EXP.NAV.ok?.length || 0, adjacencyBytes: (EXP.NAV.neighbors?.byteLength || 0) + (EXP.NAV.neighborCounts?.byteLength || 0), tier: EXP.perfTier, state: st, canvas: [c.width, c.height], renderer: window.HM_WASM_RENDERER?.status || "Canvas", sparkInputViewCalls: window.__perfSparkInputViewCalls ?? null, maskImageRequestCount: performance.getEntriesByType("resource").filter(r => window.__perfMaskPaths.includes(new URL(r.name).pathname)).length})')).result.value;
     if (sample.state !== 'play') throw new Error(`A amostra terminou fora do gameplay (${sample.state}).`);
     if (build.wasm && sample.renderer !== 'ready') throw new Error(`Renderer WASM não ficou ativo (${sample.renderer}).`);
     if (ASSERT_LAZY_MASKS && sample.maskImageRequestCount < 1) throw new Error('A máscara selecionada não foi requisitada após iniciar.');
@@ -253,6 +254,7 @@ async function measure(build) {
       stressEnemies: STRESS_ENEMIES,
       stressSparks: STRESS_SPARKS,
       mixedAiStress: MIXED_AI_STRESS,
+      sparkInputViewCalls: sample.sparkInputViewCalls,
       startup,
       ...(lazyMapLoad ? { lazyMapLoad } : {}),
       maskImageRequestCountAfterStart: sample.maskImageRequestCount,

@@ -1,4 +1,8 @@
-# Cappe-in-Miami — preview Rust/WASM v306.0
+# Cappe-in-Miami — preview Rust/WASM v307.0
+
+## Otimização v307 — vista reutilizada para entrada de faíscas
+
+No renderer Rust/WASM, a ponte agora reutiliza a vista tipada da entrada de faíscas quando o buffer e a quantidade permanecem iguais. Em 180 quadros com 500 faíscas, as criações de vista caíram de 179 para 1. O tempo total de quadro ficou praticamente igual; não há ganho de FPS demonstrado. Testes: regressões 115/115 e paridade Chrome das partículas com zero diferenças de pixels.
 
 ## Otimização v306 — alcance da IA sem raiz quadrada e alvo reutilizado
 
