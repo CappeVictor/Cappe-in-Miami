@@ -16,6 +16,6 @@ version = "=0.3.106"
 features = ["CanvasGradient", "CanvasRenderingContext2d", "CanvasPattern", "HtmlCanvasElement", "HtmlImageElement", "ImageData", "TextMetrics"]
 
 [profile.release]
-opt-level = 3
+opt-level = "s"
 lto = true
 codegen-units = 1

@@ -1,8 +1,12 @@
-# Cappe-in-Miami — preview Rust/WASM v309.0
+# Cappe-in-Miami — preview Rust/WASM v310.0
 
 ## Pacote de jogo v309
 
 O ZIP de jogador inclui apenas o HTML, recursos, scripts, servidor Node e o renderer Rust/WASM compilado que o jogo realmente solicita. Fontes de compilação, relatórios e suítes de teste continuam no repositório do GitHub; não são necessários para executar o jogo. O pacote caiu de 1.504.334 para 1.065.800 bytes (438.534 bytes; 29,2%).
+
+## Otimização v310 — WASM compilado para tamanho
+
+O perfil `opt-level = "s"` reduziu o renderer transferido de 326.779 para 287.730 bytes (−39.049; −12,0%). O ZIP v310 tem 1.060.621 bytes, mais 5.179 bytes (0,49%) menor que o runtime v309. Em seis pares de medições com 120 inimigos e 500 faíscas, p90 e p95 medianos de update+draw ficaram em 0,9 e 1,0 ms antes e depois; a média mediana mudou de 0,727 para 0,759 ms. A diferença média é pequena e pode refletir variação do cenário; não há ganho de velocidade alegado. Os testes de paridade do renderer, piso, partículas, browser e regressão passaram.
 
 ## Otimização v308 — atualização e remoção de faíscas em um percurso
 

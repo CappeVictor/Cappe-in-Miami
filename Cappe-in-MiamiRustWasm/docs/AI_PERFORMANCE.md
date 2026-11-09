@@ -550,3 +550,7 @@ O desenho das faíscas reutiliza `Float64Array.subarray` enquanto a quantidade e
 
 Os downloads agora incluem somente os arquivos usados para jogar: recursos, CSS/JS, HTML, service worker, launcher, servidor e (em Rust/WASM) o renderer direto compilado. O manifesto offline foi comparado com os caminhos dentro dos ZIPs: 92/92 arquivos Web e 95/95 Rust/WASM existem; os dois jogos abriram no Chrome e o renderer Rust/WASM ficou pronto. Relatórios, testes e código-fonte de compilação permanecem no repositório. O ZIP Web caiu 7.212 bytes (0,78%); o Rust/WASM caiu 438.534 bytes (29,2%).
 
+## v310 — perfil Rust de redução de tamanho
+
+O perfil `opt-level = "s"` reduziu `direct_renderer_bg.wasm` de 326.479 para 287.430 bytes no arquivo, e de 326.779 para 287.730 bytes transferidos pelo servidor (−39.049; −12,0%). O ZIP runtime passou de 1.065.800 bytes para 1.060.621 (−5.179; −0,49%); a compressão ZIP já reduzia bastante o binário. Seis pares de execuções Chrome, cada build com 60 quadros após adaptação, mantiveram p90 mediano de 0,9 ms e p95 mediano de 1,0 ms; a média mediana mudou de 0,727 para 0,759 ms. Essa pequena diferença não prova regressão estável ou melhora; o objetivo mensurado aqui é reduzir bytes de download. Regressões 116/116, paridade direta, piso, partículas e renderer-browser passaram.
+
