@@ -635,10 +635,10 @@ const PRESET = {
 };
 let CFG = Object.assign({}, CFG_DEF);
 let perfSamples = [], perfAutoDone = false;
-function perfTierFor(avgWorkMs, avgFrameMs, fpsLimit) {
+function perfTierFor(p90WorkMs, p90FrameMs, fpsLimit) {
   const targetFrameMs = 1000 / (fpsLimit || 60);
-  if (avgWorkMs > 1000 / 26 || avgFrameMs > Math.max(1000 / 26, targetFrameMs * 2)) return 2;
-  if (avgWorkMs > 1000 / 38 || avgFrameMs > Math.max(1000 / 38, targetFrameMs * 1.5)) return 1;
+  if (p90WorkMs > 1000 / 26 || p90FrameMs > Math.max(1000 / 26, targetFrameMs * 2)) return 2;
+  if (p90WorkMs > 1000 / 38 || p90FrameMs > Math.max(1000 / 38, targetFrameMs * 1.5)) return 1;
   return 0;
 }
 try { loadSavedCfg(JSON.parse(localStorage.getItem('hm_cfg') || '{}')); } catch (e) {}
@@ -2930,9 +2930,9 @@ function loop(t) {
     perfSamples.push({ work: performance.now() - frameStart, gap: frameGap });
     if (perfSamples.length >= 120) {
       perfAutoDone = true;
-      const total = perfSamples.reduce((a, b) => ({ work: a.work + b.work, gap: a.gap + b.gap }), { work: 0, gap: 0 });
-      const avgWorkMs = total.work / perfSamples.length, avgFrameMs = total.gap / perfSamples.length; perfSamples = null;
-      const tier = perfTierFor(avgWorkMs, avgFrameMs, CFG.fps);
+      const p90 = values => values.sort((a, b) => a - b)[Math.floor((values.length - 1) * .9)];
+      const p90WorkMs = p90(perfSamples.map(sample => sample.work)), p90FrameMs = p90(perfSamples.map(sample => sample.gap)); perfSamples = null;
+      const tier = perfTierFor(p90WorkMs, p90FrameMs, CFG.fps);
       if (tier > 0 && CFG.gfx !== 'max') {
         window.EXP.perfTier = tier;
         if (window.EXP.toast) window.EXP.toast('DESEMPENHO AJUSTADO', tier >= 2 ? 'redução forte de efeitos e resolução' : 'efeitos e resolução reduzidos', '#19f0e6');

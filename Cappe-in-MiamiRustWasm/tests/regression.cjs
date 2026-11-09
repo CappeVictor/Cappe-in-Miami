@@ -117,7 +117,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v291.0-adaptive-frame-pacing-rust');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v292.0-p90-frame-governor-rust');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -834,9 +834,9 @@ async function run() {
   });
   await test('Governador de desempenho usa tempo de quadro real e reduz efeitos sem trocar preferências', () => {
     const html=read('index.html'),fx=read('js/exp-fx.js');
-    assert.match(html,/const rawDt = Math\.max/);assert.match(html,/perfSamples\.push\(\{ work: performance\.now\(\) - frameStart, gap: frameGap \}\)/);assert.doesNotMatch(html,/perfSamples\.push\(rawDt\)/);assert.match(html,/window\.EXP\.perfTier = tier/);assert.match(html,/function perfTierFor\(avgWorkMs, avgFrameMs, fpsLimit\)/);
-    const tierFn=html.match(/function perfTierFor\(avgWorkMs, avgFrameMs, fpsLimit\) \{[\s\S]*?\n\}/)?.[0];assert.ok(tierFn);const tier=Function(tierFn+';return perfTierFor')();
-    assert.equal(tier(1,33.3,30),0);assert.equal(tier(1,33.3,60),1);assert.equal(tier(40,16,30),2);
+    assert.match(html,/const rawDt = Math\.max/);assert.match(html,/perfSamples\.push\(\{ work: performance\.now\(\) - frameStart, gap: frameGap \}\)/);assert.doesNotMatch(html,/perfSamples\.push\(rawDt\)/);assert.match(html,/window\.EXP\.perfTier = tier/);assert.match(html,/function perfTierFor\(p90WorkMs, p90FrameMs, fpsLimit\)/);assert.match(html,/const p90 = values => values\.sort\(\(a, b\) => a - b\)\[Math\.floor\(\(values\.length - 1\) \* \.9\)\]/);
+    const tierFn=html.match(/function perfTierFor\(p90WorkMs, p90FrameMs, fpsLimit\) \{[\s\S]*?\n\}/)?.[0];assert.ok(tierFn);const tier=Function(tierFn+';return perfTierFor')();
+    assert.equal(tier(1,16.7,60),0);assert.equal(tier(1,33.3,30),0);assert.equal(tier(1,33.3,60),1);assert.equal(tier(40,16,30),2);
     assert.match(html,/tier >= 1 \? \.55/);assert.match(fx,/EXP\.perfTier >= 1 \? 2 : 1/);assert.match(fx,/EXP\.perfTier < 2/);
   });
   await test('BuildFloor envia o piso ao Rust direto sem rota antiga no WASM', () => {
@@ -1103,7 +1103,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v291.0-adaptive-frame-pacing-rust');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v292.0-p90-frame-governor-rust');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));

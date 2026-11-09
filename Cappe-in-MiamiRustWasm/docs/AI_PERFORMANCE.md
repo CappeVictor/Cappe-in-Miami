@@ -1,3 +1,6 @@
+## v292 — governor resistente a picos de frame isolados
+O tier adaptativo agora usa o percentil 90 do custo update+draw e da cadência nos primeiros 120 quadros aceitos, com o limite de FPS como meta. Isso evita reduzir escala/efeitos por poucos atrasos grandes durante a inicialização. Em um smoke headless com movimento e disparos, Web e Rust permaneceram no tier 0: p90 RAF 18,3 ms nas duas; p90 update+draw 2,2 ms Web e 3,4 ms Rust. O processo executa em um único Chrome, mas a amostra é local e não é benchmark controlado. `node tests/browser-performance.cjs`; perfil: `node tests/browser-performance.cjs --profile` (Node 22+).
+
 ## Preview v290 — escala adaptativa baseada no trabalho do quadro
 O escalonamento agora mede update+draw, sem contar a espera pelo VSync ou o limite de FPS escolhido. Dois níveis reduzem efeitos e resolução interna em dispositivos lentos; resolução manual e modo Máximo preservam as escolhas. Esta mudança não mede FPS real.
 

@@ -9,6 +9,7 @@ const path = require('node:path');
 const net = require('node:net');
 
 const CHROME = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const CPU_PROFILE = process.argv.includes('--profile');
 const REPO = path.resolve(__dirname, '../..');
 const BUILDS = [
   { name: 'Web', root: path.join(REPO, 'Cappe-in-MiamiWeb'), wasm: false },
@@ -42,6 +43,7 @@ function summary(values) {
     count: values.length,
     meanMs: +(values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(3),
     p50Ms: +percentile(.5).toFixed(3),
+    p90Ms: +percentile(.9).toFixed(3),
     p95Ms: +percentile(.95).toFixed(3),
   };
 }
@@ -59,7 +61,7 @@ async function measure(build) {
   const debugPort = await freePort();
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'cappe-browser-perf-'));
   const chrome = spawn(CHROME, [
-    '--headless=new', '--no-sandbox', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
+    '--headless=new', '--no-sandbox', '--no-first-run', '--no-default-browser-check',
     '--disable-background-networking', '--disable-background-timer-throttling', '--disable-renderer-backgrounding',
     '--remote-allow-origins=*', `--remote-debugging-port=${debugPort}`, `--user-data-dir=${profile}`,
     '--window-size=1280,900', `http://127.0.0.1:${port}/${build.wasm ? '?renderer=wasm' : ''}`,
@@ -89,11 +91,12 @@ async function measure(build) {
       pending.delete(message.id);
       message.error ? reject(new Error(message.error.message)) : resolve(message.result);
     });
-    const evaluate = expression => new Promise((resolve, reject) => {
+    const cdp = (method, params = {}) => new Promise((resolve, reject) => {
       const id = ++nextId;
       pending.set(id, { resolve, reject });
-      socket.send(JSON.stringify({ id, method: 'Runtime.evaluate', params: { expression, returnByValue: true } }));
+      socket.send(JSON.stringify({ id, method, params }));
     });
+    const evaluate = expression => cdp('Runtime.evaluate', { expression, returnByValue: true });
 
     await wait(1200);
     if (build.wasm) {
@@ -103,20 +106,61 @@ async function measure(build) {
     await evaluate('CFG.fps = 60');
     await evaluate("document.getElementById('jogar').click()");
     await wait(250);
-    const start = await evaluate("document.getElementById('comecar').click(); P.inv = 10000; window.__perf = { work: [], gaps: [] }; const previous = loop; window.loop = function(t) { const before = performance.now(); previous(t); if (st === 'play') { __perf.work.push(performance.now() - before); __perf.gaps.push(t - (__perf.last || t)); __perf.last = t; } }; st");
+    const start = await evaluate("document.getElementById('comecar').click(); P.inv = 10000; ammo = 10000; keys.w = true; keys.d = true; mouse.x = W * .78; mouse.y = H * .5; mouse.down = true; window.__perf = { work: [], gaps: [] }; const previous = loop; let sampledDraw = lastDraw; window.loop = function(t) { const before = performance.now(), priorDraw = lastDraw; previous(t); if (st === 'play' && lastDraw !== priorDraw) { __perf.work.push(performance.now() - before); __perf.gaps.push(lastDraw - (sampledDraw || lastDraw)); sampledDraw = lastDraw; } }; st");
     if (start.exceptionDetails) throw new Error(start.exceptionDetails.text);
 
     const initialCanvas = (await evaluate('[c.width, c.height]')).result.value;
+    await wait(250);
+    if (CPU_PROFILE) {
+      await cdp('Profiler.enable');
+      await cdp('Profiler.setSamplingInterval', { interval: 1000 });
+      await cdp('Profiler.start');
+    }
     await until(async () => (await evaluate('__perf.work.length >= 180')).result?.value, 45000, '180 quadros de gameplay');
     const sample = (await evaluate('({work: __perf.work.slice(0, 180), gaps: __perf.gaps.slice(0, 180), tier: EXP.perfTier, state: st, canvas: [c.width, c.height], renderer: window.HM_WASM_RENDERER?.status || "Canvas"})')).result.value;
     if (sample.state !== 'play') throw new Error(`A amostra terminou fora do gameplay (${sample.state}).`);
     if (build.wasm && sample.renderer !== 'ready') throw new Error(`Renderer WASM não ficou ativo (${sample.renderer}).`);
+    let cpuHotspots, cpuCallers;
+    if (CPU_PROFILE) {
+      const { profile } = await cdp('Profiler.stop');
+      const parentById = new Map();
+      for (const parent of profile.nodes) for (const child of parent.children || []) parentById.set(child, parent);
+      const selfMs = new Map();
+      for (let i = 0; i < profile.samples.length; i++) {
+        const id = profile.samples[i], deltaMs = (profile.timeDeltas?.[i] || 1000) / 1000;
+        selfMs.set(id, (selfMs.get(id) || 0) + deltaMs);
+      }
+      cpuHotspots = profile.nodes
+        .filter(node => selfMs.has(node.id))
+        .map(node => ({
+          function: node.callFrame.functionName || '(anonymous)',
+          url: node.callFrame.url,
+          line: node.callFrame.lineNumber + 1,
+          selfMs: +selfMs.get(node.id).toFixed(1),
+        }))
+        .sort((a, b) => b.selfMs - a.selfMs)
+        .slice(0, 12);
+      const pairs = new Map();
+      for (const node of profile.nodes) {
+        if (!selfMs.has(node.id)) continue;
+        const parent = parentById.get(node.id);
+        const callee = node.callFrame.functionName || '(anonymous)';
+        const caller = parent?.callFrame.functionName || '(root)';
+        const key = `${callee} ← ${caller}`;
+        const item = pairs.get(key) || { call: key, selfMs: 0, url: parent?.callFrame.url || '', line: (parent?.callFrame.lineNumber ?? -1) + 1 };
+        item.selfMs += selfMs.get(node.id);
+        pairs.set(key, item);
+      }
+      cpuCallers = [...pairs.values()].sort((a, b) => b.selfMs - a.selfMs).slice(0, 16);
+    }
     return {
       build: build.name,
       renderer: sample.renderer,
       governorTier: sample.tier,
       initialCanvas,
       finalCanvas: sample.canvas,
+      ...(cpuHotspots ? { cpuHotspots } : {}),
+      ...(cpuCallers ? { cpuCallers } : {}),
       beforeAdaptation: { work: summary(sample.work.slice(0, 120)), rafGap: summary(sample.gaps.slice(0, 120)) },
       afterAdaptation: { work: summary(sample.work.slice(120)), rafGap: summary(sample.gaps.slice(120)) },
     };
