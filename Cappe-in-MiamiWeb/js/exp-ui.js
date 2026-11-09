@@ -188,19 +188,25 @@
 
   // ---------- 1) nitidez: resolução interna acompanha o tamanho exibido ----------
   let hiK = 1;
+  let appliedPerfTier = -1;
   function applyResolution() {
     const r = cv.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     const forced = (typeof CFG !== 'undefined' && CFG.res && CFG.res !== 'auto') ? +CFG.res : 0;
     // Escala automática limitada: 2x quadruplica pixels em telas de alta densidade e causa quedas de FPS.
-    const k = forced || (CFG.gfx === 'max' ? 1 : Math.min(1.5, Math.max(1.1, (r.width * dpr) / W)));
+    const tier = Math.max(0, Math.min(2, Number(EXP.perfTier) || 0));
+    const baseK = forced || (CFG.gfx === 'max' ? 1 : Math.min(1.5, Math.max(1.1, (r.width * dpr) / W)));
+    // Preserve an explicit resolution choice; automatic mode scales back raster work
+    // after the game's frame-time monitor detects a slow device.
+    const k = forced ? baseK : baseK * (tier >= 2 ? .72 : tier >= 1 ? .88 : 1);
     const nw = Math.round(W * k), nh = Math.round(H * k);
     if (cv.width !== nw || cv.height !== nh) { cv.width = nw; cv.height = nh; }
     cv.style.imageRendering = 'auto';
     hiK = k;
+    appliedPerfTier = tier;
   }
   const _draw = draw;
-  draw = function () { ctx.setTransform(hiK, 0, 0, hiK, 0, 0); ctx.imageSmoothingEnabled = !!CFG.aa; ctx.imageSmoothingQuality = CFG.aa ? (CFG.gfx === 'ultra' ? 'high' : 'medium') : 'low'; _draw(); if (EXP.overlay) EXP.overlay(ctx); };
+  draw = function () { const tier = Math.max(0, Math.min(2, Number(EXP.perfTier) || 0)); if (tier !== appliedPerfTier) applyResolution(); ctx.setTransform(hiK, 0, 0, hiK, 0, 0); ctx.imageSmoothingEnabled = !!CFG.aa; ctx.imageSmoothingQuality = CFG.aa ? (CFG.gfx === 'ultra' ? 'high' : 'medium') : 'low'; _draw(); if (EXP.overlay) EXP.overlay(ctx); };
 
   // ---------- 2) tamanho da tela ----------
   const SIZES = {

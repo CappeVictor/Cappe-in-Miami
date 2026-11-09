@@ -635,7 +635,6 @@ const PRESET = {
 };
 let CFG = Object.assign({}, CFG_DEF);
 let perfSamples = [], perfAutoDone = false;
-try { perfAutoDone = localStorage.getItem('hm_perf_auto') === '1'; } catch (e) {}
 try { loadSavedCfg(JSON.parse(localStorage.getItem('hm_cfg') || '{}')); } catch (e) {}
 // cor do sangue: 0 = rosa original (255,46,147), 100 = vermelho intenso
 function bloodRGB(a) {
@@ -2904,12 +2903,13 @@ function loop(t) {
   if (st === 'play' && !perfAutoDone && rawDt > 0) {
     perfSamples.push(rawDt);
     if (perfSamples.length >= 120) {
-      perfAutoDone = true; try { localStorage.setItem('hm_perf_auto', '1'); } catch (e) {}
+      perfAutoDone = true;
       const avg = perfSamples.reduce((a, b) => a + b, 0) / perfSamples.length; perfSamples = null;
-      if (avg > 1 / 38 && CFG.gfx !== 'max') {
-        window.EXP.perfTier = 1;
+      const tier = avg > 1 / 26 ? 2 : avg > 1 / 38 ? 1 : 0;
+      if (tier > 0 && CFG.gfx !== 'max') {
+        window.EXP.perfTier = tier;
         // O ajuste continua audível/consultável no sistema de avisos, sem interromper a ação com banner.
-        if (window.EXP.toast) window.EXP.toast('DESEMPENHO AJUSTADO', 'efeitos reduzidos automaticamente', '#19f0e6');
+        if (window.EXP.toast) window.EXP.toast('DESEMPENHO AJUSTADO', tier >= 2 ? 'redução forte de efeitos e resolução' : 'efeitos e resolução reduzidos', '#19f0e6');
       }
     }
   }

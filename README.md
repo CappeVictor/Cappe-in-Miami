@@ -14,26 +14,116 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
-- **Web — HTML, CSS e JavaScript:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — prévia híbrida v176:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v176-preview.zip)
+- **Web — HTML, CSS e JavaScript v77:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
+- **Rust/WASM — prévia híbrida v289:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v289-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
 ### Sobre a prévia Rust/WASM
 
-A prévia v176 amplia as camadas gráficas que chamam diretamente o módulo Rust/WebAssembly, incluindo os passes de gradação de cor e overlays finais de fade/flash, além de projéteis, imagens HUD, textos, efeitos e partes do cenário. Ela ainda é híbrida: lógica e estado continuam em JavaScript, algumas imagens são preparadas no host, e outros callbacks Canvas permanecem em migração. A paridade automatizada passou nos casos cobertos; não é ainda uma conversão integral do motor gráfico e não há ganho de desempenho medido.
+A prévia v289 usa painters Rust/WebSys diretos para as camadas amostradas de gameplay, incluindo Campanha, Horda e Invasão. O antigo trampoline Canvas deixou de ser compilado, servido e pré-cacheado. A auditoria instrumentada não encontrou chamadas Canvas do host em 23 cenas/estados amostrados. Os painters Canvas permanecem como fallback; lógica, simulação, aleatoriedade e seleção/cache de assets seguem em JavaScript. Não há ganho de desempenho medido.
 
 ## Últimas melhorias incluídas
 
-**Versão Web v55.0 — 5 de novembro de 2026**
+**Prévia Rust/WASM v289.0 — 8 de novembro de 2026**
+- Paredes da Campanha migradas ao painter direto. Texturas/piso cobrem canvases de até 1600×1200, incluindo Invasão (1456×1148) e salas com geometria fracionária.
+- Build, regressões 105/105, ABI (114 exports/107 imports), bridge, paridade Chrome e auditoria em 23 cenas/estados passaram; não houve chamadas Canvas do host nas cenas amostradas. Piso e paredes tiveram paridade RGBA exata nos cenários exercitados.
+- Fallback Canvas permanece para falhas/casos não exercitados. Sem benchmark FPS ou revisão visual ampla.
+
+**Prévia Rust/WASM v288.0 — 8 de novembro de 2026**
+- A caixa de resumo na pausa passou ao painter Rust/WebSys stage 4 com fallback Canvas. Regressões 105/105 e paridade Chrome do estágio passaram.
+- Auditoria opt-in em 12 cenas não encontrou operações Canvas executadas no host; modos adicionais ainda precisavam de cobertura.
+
+**Prévia Rust/WASM v287.0 — 8 de novembro de 2026**
+- Build/teste 104/104; o único módulo WASM servido é o renderer Rust/WebSys direto. Wrappers Canvas de diagnóstico são opt-in. A migração permanece híbrida, sem FPS medido.
+
+**Prévia Rust/WASM v276.0 — 8 de novembro de 2026**
+- Fantasmas e a arma migrados ao painter Rust/WebSys direto; removidos `draw_ghosts`, `ghost_input_ptr` e o buffer do WASM legado. O painter Canvas original permanece como fallback. P1/P2 usam o painter direto desde v275.
+- Build, regressão 104/104, ABI, browser bridge, paridade direta e auditoria de pixels passaram; fantasmas com Taco tiveram zero diferenças RGBA contra o Canvas original.
+- WASM legado: 103.429 bytes, 7 imports e 59 exports. Sem benchmark ou revisão visual manual ampla.
+
+**Prévia Rust/WASM v273.0 — 8 de novembro de 2026**
+- A Madame Piranha da loja passou ao painter Rust/WebSys direto; removidos o batch e o buffer de entrada do WASM legado. O Canvas original continua como fallback.
+- Estados normal e caindo tiveram zero diferenças RGBA contra uma referência independente do Canvas no Chrome. Regressão 103/103, ABI, browser bridge, paridade direta e pixels passaram.
+- WASM legado: 126.802 bytes, 8 imports e 65 exports (v272: 128.777 bytes e 67 exports). Sem benchmark nem revisão visual manual ampla.
+
+**Prévia Rust/WASM v272.0 — 8 de novembro de 2026**
+- Painéis de balão, card e rerolar da loja usam Rust/WebSys direto; removidos dois exports do WASM legado. O fallback Canvas original continua no jogo; o dealer ainda usa o fallback antigo enquanto a paridade independente é investigada.
+- Regressões 103/103, ABI, browser bridge, paridade Chrome e auditoria de pixels passaram. WASM legado: 128.777 bytes, 8 imports e 67 exports (v271: 129.725 bytes, 8 imports e 69 exports). Sem benchmark ou revisão visual manual ampla.
+
+**Prévia Rust/WASM v264.0 — 8 de novembro de 2026**
+- Saída de fase migrou ao painter Rust/WebSys direto; módulo legado: 138.556 bytes, 10 imports e 81 exports.
+
+**Prévia Rust/WASM v263.0 — 8 de novembro de 2026**
+- Overlays FX de tela passaram aos painters Rust/WebSys diretos. WASM legado: 140.548 bytes, 12 imports e 84 exports.
+
+**Prévia Rust/WASM v262.0 — 8 de novembro de 2026**
+- Luzes do mundo e anéis de efeito migraram aos painters Rust/WebSys diretos. WASM legado: 142.552 bytes, 13 imports e 87 exports.
+
+**Prévia Rust/WASM v258.0 — 8 de novembro de 2026**
+- Escadas e elevadores agora usam o painter Rust/WebSys direto; os buffers e callbacks do batch legado foram removidos. Chrome comparou escadas/elevadores com zero diferenças RGBA.
+- Regressões 102/102, ABI, bridge, paridade direta e piso passaram na fonte e no ZIP. WASM legado: 163.672 bytes, 18 imports e 109 exports. Sem benchmark ou revisão visual manual ampla.
+
+**Prévia Rust/WASM v257.0 — 8 de novembro de 2026**
+- O marcador da zona pulsante de Invasão passou ao painter Rust/WebSys direto. Chrome comparou o painter com o Canvas original em zero diferenças RGBA.
+- Regressões 102/102, ABI, bridge, paridade direta e piso passaram na fonte e no ZIP extraído. WASM legado: 168.837 bytes, 20 imports e 112 exports. Sem benchmark nem revisão visual manual ampla.
+
+**Prévia Rust/WASM v256.0 — 8 de novembro de 2026**
+- A seta da Invasão passou a chamar somente o painter Rust/WebSys direto. Cinco ângulos/posições comparados no Chrome tiveram zero diferenças RGBA.
+- Regressões 102/102, ABI, browser bridge, paridade direta, teste focado e piso passaram na fonte e no ZIP extraído. WASM legado: 169.636 bytes, 21 imports e 115 exports. Sem benchmark nem revisão visual manual ampla.
+
+**Prévia Rust/WASM v255.0 — 8 de novembro de 2026**
+- Imagens e vinhetas do HUD passaram ao painter Rust/WebSys direto. Chrome comparou cinco etapas com o Canvas original sem diferenças RGBA.
+- Regressões 102/102, ABI, browser bridge, paridade direta e piso passaram na fonte e no ZIP extraído. WASM legado: 170.183 bytes, 22 imports e 117 exports. Sem benchmark nem revisão visual manual ampla.
+
+**Prévia Rust/WASM v254.0 — 8 de novembro de 2026**
+- Texto do combo e do alarme agora usa somente os painters Rust/WebSys diretos, com fallback Canvas do jogo. Chrome comparou os dois caminhos e encontrou zero diferenças RGBA nos casos exercitados.
+- Regressões 102/102, ABI, browser bridge, paridade direta e piso passaram na fonte e no ZIP extraído. WASM legado: 171.027 bytes, 23 imports e 119 exports. Sem benchmark ou revisão visual manual ampla.
+
+**Prévia Rust/WASM v253.0 — 8 de novembro de 2026**
+- Color grade e overlays de fade/flash passaram a usar os painters diretos; os batches correspondentes saíram do WASM legado, preservando o fallback Canvas.
+- Regressões 102/102, ABI, browser bridge e comparações RGBA passaram. Sem benchmark ou revisão visual manual ampla.
+
+**Versão Web v77.0 — 8 de novembro de 2026**
+- Renderização adaptativa: mede os primeiros 120 quadros por sessão e, em dois níveis, reduz efeitos e resolução interna do canvas quando o frame time está alto. Resolução manual e modo Máximo preservam as escolhas; FPS não foi medido.
+
+**Conteúdo Web v55.0 — 5 de novembro de 2026**
 - A seleção ativa de mapas foi organizada para remover títulos com dimensões, mapas de teste e protótipos.
 - Apartamentos foi mantido: suas dimensões são dados internos do mapa, não parte do nome exibido.
 - Referências da campanha e expansões passaram a ser verificadas contra as listas de mapas permitidos.
 - Saídas de mapas Neon fora do piso caminhável passaram a ser ancoradas em uma posição livre próxima.
 - A regressão automatizada registrada para essa entrega passou em **57/57**. Não houve validação visual nem medição de FPS nessa entrega.
 
-**Prévia Rust/WASM v176.0 — 7 de novembro de 2026**
-- Gradação de cor e overlays finais de fade/flash passaram a chamar o painter Rust direto, preservando os passes Canvas existentes.
+**Prévia Rust/WASM v193.0 — 7 de novembro de 2026**
+- Vidros, shimmer e estilhaços passaram ao painter Rust direto; paridade Chrome teve zero diferenças RGBA.
+- Build Rust/WASM, regressões 85/85 e renderer, browser bridge e mapa/piso passaram na fonte e no ZIP extraído (155 arquivos, 86 PNGs). Migração parcial, sem benchmark nem revisão visual ampla.
+
+**Prévia Rust/WASM v192.0 — 7 de novembro de 2026**
+- Realces de inimigos, barras, mira de atirador e carga de chefe passaram ao painter Rust direto; Chrome confirmou zero diferenças RGBA.
+- Build Rust/WASM, regressões 85/85, renderer, browser bridge e mapa/piso passaram na fonte e no ZIP extraído (155 arquivos, 86 PNGs). Migração parcial, sem benchmark nem revisão visual ampla.
+
+**Prévia Rust/WASM v191.0 — 7 de novembro de 2026**
+- Barris explosivos e câmeras passaram à rasterização Rust direta; comparação Chrome teve zero diferenças RGBA. Regressões 85/85.
+- Build Rust/WASM, renderer, browser bridge e integração mapa/piso passaram na fonte e no ZIP extraído (155 arquivos, 86 PNGs). Migração parcial, sem benchmark nem revisão visual ampla.
+
+**Prévia Rust/WASM v190.0 — 7 de novembro de 2026**
+- Portas Neon animadas passaram ao painter Rust direto; Chrome teve zero diferenças com sprites e transforms. Regressões 85/85 e testes do renderer/bridge browser passaram.
+- Build Rust, regressões 85/85 e paridade Chrome passaram; a cópia extraída do ZIP também passou. Migração parcial, sem benchmark nem revisão visual ampla.
+
+**Prévia Rust/WASM v185.0 — 7 de novembro de 2026**
+- Compositor RGBA de texturas do mapa movido ao módulo Rust direto, com saída igual ao compositor anterior e fallback mantido.
+- Build Rust, regressões 85/85 e paridade Chrome passaram; a cópia extraída do ZIP também passou. Migração parcial, sem benchmark nem revisão visual ampla.
+
+**Prévia Rust/WASM v184.0 — 7 de novembro de 2026**
+- Leitura de fontes Canvas/imagem para texturas de mapa/piso movida ao WebSys/Rust nos tamanhos aceitos, com fallback mantido. Chrome confirmou bytes idênticos; regressões 85/85.
+- Migração segue parcial. Não houve benchmark nem validação visual ampla.
+
+**Prévia Rust/WASM v180.0 — 7 de novembro de 2026**
+- Formas do HUD, barra de vida do chefe e seta da Invasão agora passam a rasterizar pelo painter Rust, preservando geometria e cores produzidas pela camada existente.
+- Transformações/brilhos de pickups e armas arremessadas passaram ao painter Rust; o ícone existente é chamado durante a transformação, sem mudar a lógica da arma.
+- O desenho da saída de fase — brilho, gradiente, hachuras e bordas — agora vai ao painter Rust direto; o gradiente cacheado continua como imagem de entrada.
+- Geometria e rasterização de escadas/elevadores passaram do callback JavaScript ao painter Rust direto; os gradientes RGBA continuam preparados/cacheados como imagens.
+- Gradação de cor e overlays finais de fade/flash também chamam o painter Rust direto, preservando os passes Canvas existentes.
 - Projéteis, imagens HUD, textos de alarme e combo, estojos de munição, muzzle flashes, arcos de impacto, composição de escuridão/lanterna, névoa, luzes, anéis e zona de invasão também usam Rust nos casos cobertos; callback Canvas segue como fallback.
 - Build Rust/WASM, testes de ABI/browser, regressões 82/82 e paridade RGBA em Chrome passaram.
 - A migração segue híbrida; não houve benchmark, revisão visual ampla nem campanha completa.

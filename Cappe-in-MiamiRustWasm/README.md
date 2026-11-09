@@ -1,8 +1,8 @@
-# Cappe-in-Miami — preview local Rust/WASM v176.0
+# Cappe-in-Miami — preview local Rust/WASM v289.0
 
 ## Experimento local Rust/WASM
 
-Esta cópia contém um modo opcional de migração do renderer: execute INICIAR_EXPERIMENTO_WASM.bat com Node.js 18+ ao lado de index.html. v176 moveu para Rust direto os passes de gradação de cor e overlays finais de fade/flash; v175 moveu projéteis. Chrome 156 confirmou paridade RGBA exata nos casos cobertos; regressões 82/82. Módulo direto: 158.600 bytes WASM + glue de 41.212 bytes. Migração parcial, sem benchmark ou validação visual ampla. Consulte docs/WASM_RENDERER_MIGRATION.md.
+Esta prévia v289 requer Node.js 18+ para INICIAR_EXPERIMENTO_WASM.bat. O módulo Rust/WebSys direto é a única implementação WASM compilada, carregada e armazenada pelo jogo; o antigo trampoline Canvas não é buildado, servido ou pré-cacheado. Paredes da Campanha e mapas de até 1600 × 1200 px usam os painters diretos. Regressões 105/105, ABI (114 exports/107 imports), bridge, auditoria ampliada no Chrome e paridade de paredes e pisos passaram. A auditoria não encontrou operações Canvas do host em 23 cenas/estados amostrados, incluindo Horda, Invasão e Campanha. Há fallback para falhas e situações fora da cobertura; não foram medidos FPS nem feita revisão visual ampla.
 
 Abra `index.html` no navegador (ou use o Live Server do VS Code se o navegador bloquear algum recurso local).
 
@@ -292,3 +292,4 @@ Perfil de CPU na v18: a thread principal ficou ~93% ociosa (o JavaScript deixou 
 - Melhorada a adaptação para telas menores e telas com pouca altura; os cartões de modos, opções e formulários também receberam ajustes.
 - Ajustes de foco, estados desabilitados, feedback de clique e rolagem das telas para facilitar a navegação.
 - Validada a sintaxe de todos os arquivos JavaScript com Node.js. A execução completa ainda deve ser conferida no navegador, pois depende de interação, áudio e APIs do navegador.
+

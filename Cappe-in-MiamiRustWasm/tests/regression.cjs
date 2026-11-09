@@ -117,9 +117,9 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v176.0-screen-compositing');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v289.0-campaign-tile-walls-rust');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
-    const wasm=await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm');assert.equal(wasm.status,200);assert.equal(wasm.headers['content-type'],'application/wasm');assert.ok(wasm.body.length>0);
+    assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
     assert.equal((await apiRequest(server,'GET','/server/server.js')).status,404);
     const badType=await apiRequest(server,'POST','/api/rooms','{}',{'content-type':'text/plain'});assert.equal(badType.status,415);
@@ -269,57 +269,143 @@ async function run() {
     assert.match(html,/g\.shadowColor = 'rgba\(0,0,0,\.62\)'/);assert.match(content,/g\.shadowColor = 'rgba\(0,0,0,\.62\)'/);
     assert.match(core,/EXP\.SKINS = SKINS/);assert.match(core,/settings\.skin = id/);
   });
-  await test('Renderer WASM pinta o fundo de cada frame em Rust com fallback Canvas', () => {
+  await test('Sombra e aura do jogador usam painter Rust direto e fallback Canvas', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),legacy=read('wasm-renderer/src/lib.rs'),direct=read('wasm-renderer-direct/src/lib.rs');
+    assert.match(html,/renderer\.drawPlayerAura\(context, isP2, CFG\.shadows !== false, CFG\.glow !== false\)/);
+    assert.match(renderer,/state\.direct\.drawPlayerAura\(context, !!isP2, !!shadowsEnabled, !!glowEnabled\)/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.draw_player_aura/);
+    assert.doesNotMatch(legacy,/draw_player_aura/);
+    assert.match(direct,/js_name = drawPlayerAura[\s\S]*?context\.ellipse\(2\.0, 5\.0, 13\.0, 8\.0/);
+  });
+  await test('Composição P1/P2 usa só o painter Rust direto e preserva fallback Canvas', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),legacy=read('wasm-renderer/src/lib.rs'),direct=read('wasm-renderer-direct/src/lib.rs');
+    assert.match(renderer,/state\.direct\.drawPlayers\(context, directItems/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.draw_players|wasm\.exports\.player_draw_data_ptr/);
+    assert.doesNotMatch(legacy,/draw_players|player_draw_data_ptr|PlayerDrawData/);
+    assert.match(direct,/js_name = drawPlayers/);
+    assert.match(html,/renderer\.drawPlayers\(drawData, ctx, PSHEET\)\) return/);
+    assert.match(html,/for \(const visual of players\) drawOnePlayerFallback/);
+  });
+  await test('Renderer direto pinta o fundo de cada frame e mantém fallback Canvas', () => {
     const html=read('index.html'),wasm=read('js/wasm-renderer.js');
     assert.match(html,/backgroundRenderer\.drawFrameBackground\(ctx, W, H\)/);
     assert.match(html,/ctx\.fillRect\(-20, -20, W \+ 40, H \+ 40\)/);
-    assert.match(wasm,/draw_frame_background\(width, height\)/);
-    assert.match(wasm,/fillStyle = '#0d0320'; batch\.context\.fillRect\(-20, -20, width \+ 40, height \+ 40\)/);
+    assert.match(wasm,/state\.direct\.drawFrameBackground\(context, width, height\)/);
+    assert.doesNotMatch(wasm,/wasm\.exports\.draw_frame_background|fill_frame_background/);
+    assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_frame_background|fill_frame_background/);
   });
   await test('Menu de pausa desenha no Canvas por chamadas diretas de Rust/WASM', () => {
     const html=read('index.html'),ui=read('js/exp-ui.js'),fx=read('js/exp-fx.js'),bridge=read('js/wasm-renderer.js'),rust=read('wasm-renderer-direct/src/lib.rs'),build=read('wasm-renderer/build.ps1'),worker=read('sw.js');
-    assert.match(ui,/drawPauseUiDirect\(g, W, H, hoverIndex\)/);
-    assert.match(bridge,/await import\(directJsUrl\.href\)/);assert.match(bridge,/state\.direct\.drawPauseUi\(context, width, height, hoverIndex\)/);
+    const bossPath=bridge.slice(bridge.indexOf('state.drawBossHealthBar ='),bridge.indexOf('state.drawInvasionArrow ='));
+    const arrowPath=bridge.slice(bridge.indexOf('state.drawInvasionArrow ='),bridge.indexOf('state.drawMaskArt ='));
+    const rainPath=bridge.slice(bridge.indexOf('state.drawRain ='),bridge.indexOf('state.drawWeatherMotes ='));
+    const motePath=bridge.slice(bridge.indexOf('state.drawWeatherMotes ='),bridge.indexOf('state.drawFog ='));
+    const fxPath=bridge.slice(bridge.indexOf('state.drawFxOverlays ='),bridge.indexOf('state.drawWorldLights ='));
+    const ringsPath=bridge.slice(bridge.indexOf('state.drawWorldRings ='),bridge.indexOf('state.drawInvasionZone ='));
+    const shotFxPath=bridge.slice(bridge.indexOf('state.drawFx ='),bridge.indexOf('state.drawPickups ='));
+    const darkOutlinePath=bridge.slice(bridge.indexOf('state.drawDarkOutlines ='),bridge.indexOf('state.drawDarkOverlay ='));
+    const shellPath=bridge.slice(bridge.indexOf('state.drawShells ='),bridge.indexOf('state.drawDarkOutlines ='));
+    const bulletPath=bridge.slice(bridge.indexOf('state.drawBullets ='),bridge.indexOf('state.drawLayer ='));
+    const pickupPath=bridge.slice(bridge.indexOf('state.drawPickups ='),bridge.indexOf('state.drawThrows ='));
+    const throwPath=bridge.slice(bridge.indexOf('state.drawThrows ='),bridge.indexOf('state.drawTransport ='));
+    assert.match(bossPath,/state\.direct\.drawBossHealthBar\(context[\s\S]*?return false/);
+    assert.doesNotMatch(bossPath,/wasm\.exports\.(draw_boss_health_bar|boss_health_input_ptr)/);
+    assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_boss_health_bar|boss_health_input_ptr|BOSS_HEALTH_INPUT/);
+    assert.match(read('js/exp-modes.js'),/if \(!barDrawn\) \{[\s\S]*?g\.strokeRect\(x, y, w, 14\)/);
+    assert.match(arrowPath,/state\.direct\.drawInvasionArrowInput\(context, centerX, centerY, Math\.cos\(angle\), Math\.sin\(angle\)\)[\s\S]*?return false/);
+    assert.doesNotMatch(arrowPath,/wasm\.exports\.(draw_invasion_arrow|invasion_arrow_input_ptr)|draw_invasion_arrow_batch/);
+    assert.match(bridge,/const rainDirectInputBuffer = new Float64Array\(256 \* 3\)/);assert.match(rainPath,/direct\.drawRain\(context, input, drops\.length, step\)[\s\S]*?return false/);assert.doesNotMatch(rainPath,/wasm\.exports\.(?:draw_rain|rain_input_ptr)|draw_rain_batch/);
+    assert.match(bridge,/const weatherMoteDirectInputBuffer = new Float64Array\(128 \* 4\)/);assert.match(motePath,/direct\.drawWeatherMotes\(context, input, motes\.length, nowMs\)[\s\S]*?return false/);assert.doesNotMatch(motePath,/wasm\.exports\.(?:draw_weather_motes|weather_mote_input_ptr)|draw_weather_motes_batch/);
+    assert.match(fxPath,/direct\.drawFxOverlays\(context, stage, width, height, nowMs, primary, secondary, enabled\)[\s\S]*?return false/);
+    assert.doesNotMatch(fxPath,/wasm\.exports\.(draw_fx_overlays|fx_overlay_input_ptr)/);
+    assert.doesNotMatch(bridge,/draw_fx_overlay_batch|currentFxOverlayBatch/);
+    assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_fx_overlay_batch|fx_overlay_input_ptr|draw_fx_overlays|FX_OVERLAY_INPUT|FX_OVERLAY_COMMANDS/);
+    assert.match(bridge,/const worldLightDirectInputBuffer = new Float64Array\(6 \* 5\)/);assert.match(bridge,/const worldRingDirectInputBuffer = new Float64Array\(14 \* 6\)/);
+    assert.match(ringsPath,/direct\.drawWorldRingInputs\(context, directValues\.subarray\(0, directValueCount\), colors\)[\s\S]*?return false/);
+    assert.doesNotMatch(ringsPath,/wasm\.exports\.(draw_world_rings|world_ring_input_ptr)/);
+    assert.match(bridge,/let fxDirectInputBuffer = new Float64Array\(96\)/);assert.match(shotFxPath,/direct\.drawFxInputs\(context, input\)[\s\S]*?return false/);assert.doesNotMatch(shotFxPath,/muzzleSpriteCanvas|createMuzzleSprite|wasm\.exports\.(draw_fx|fx_input_ptr|generate_muzzle_sprite)/);
+    assert.match(rust,/pub fn create_muzzle_sprite\(canvas: &HtmlCanvasElement\)[\s\S]*?write_rgba_canvas\(canvas, SIDE as u32, SIDE as u32, &pixels\)/);
+    assert.match(darkOutlinePath,/direct\.drawDarkOutlineInputs\(context, input, camX, camY, screenW, screenH, zoom\)/);assert.doesNotMatch(darkOutlinePath,/wasm\.exports\.(draw_dark_outlines|dark_outline_input_ptr)/);
+    assert.match(pickupPath,/direct\.drawPickups\(context, input, !!glow, FURNITURE_COLORS\)[\s\S]*?return false/);assert.doesNotMatch(pickupPath,/wasm\.exports\.(draw_pickups|pickup_input_ptr)/);
+    assert.match(throwPath,/direct\.drawThrows\(context, input, FURNITURE_COLORS\)[\s\S]*?return false/);assert.doesNotMatch(throwPath,/wasm\.exports\.(draw_throws|throw_input_ptr)/);
+    assert.match(rust,/pub fn draw_pickups\([\s\S]*?colors: &Array[\s\S]*?draw_weapon_icon_direct\(context, weapon, colors\)/);
+    assert.match(rust,/pub fn draw_throws\([\s\S]*?colors: &Array[\s\S]*?draw_weapon_icon_direct\(context, weapon, colors\)/);
+    assert.match(ui,/drawPauseUiDirect\(g, W, H, hoverIndex, pauseLabels\)/);assert.match(ui,/tx\('PAUSADO'\)/);
+    assert.match(bridge,/await import\(directJsUrl\.href\)/);assert.match(bridge,/state\.direct = Object\.assign\(\{\}, directModule\)/);assert.match(bridge,/state\.direct\.drawPauseUi\(context, width, height, hoverIndex, \.\.\.labels\)/);
     assert.match(rust,/pub fn draw_pause_ui\([\s\S]*?CanvasRenderingContext2d/);assert.match(rust,/context\.fill_rect/);assert.match(rust,/context\.fill_text/);
     assert.match(rust,/pub fn draw_fx_overlays\([\s\S]*?CanvasRenderingContext2d/);assert.match(bridge,/state\.direct\.drawFxOverlays\(context, stage, width, height, nowMs, primary, secondary, enabled\)/);
     assert.match(rust,/pub fn draw_rain\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array/);assert.match(bridge,/state\.direct\.drawRain\(context, input, drops\.length, step\)/);
     assert.match(rust,/pub fn draw_weather_motes\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array/);assert.match(bridge,/state\.direct\.drawWeatherMotes\(context, input, motes\.length, nowMs\)/);
+    assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_rain_batch|draw_weather_motes_batch|rain_input_ptr|weather_mote_input_ptr/);assert.doesNotMatch(bridge,/draw_rain_batch|draw_weather_motes_batch|wasm\.exports\.(?:draw_rain|draw_weather_motes)/);
     assert.match(rust,/pub fn draw_raw_hud_texts\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Array/);assert.match(bridge,/state\.direct\.drawRawHudTexts\(context, entries\)/);
     assert.match(fx,/drawCanvasImage\(g, weatherLabel, 32, H_ - 25\)/);assert.match(html,/function snapCanvas\(c\)[\s\S]*?renderer\.drawCanvasImage\(g, c, 0, 0\)/);assert.match(bridge,/state\.direct\.drawCanvasImage\(context, image, x, y\)/);assert.match(rust,/pub fn draw_canvas_image\([\s\S]*?CanvasRenderingContext2d[\s\S]*?HtmlCanvasElement[\s\S]*?draw_image_with_html_canvas_element/);
+    assert.match(html,/function drawHudTextBatch\(entries\)[\s\S]*?renderer\.drawCanvasImageBatch\(ctx, images, placements\)/);assert.match(bridge,/state\.direct\.drawCanvasImageBatch\(context, images, Float64Array\.from\(placements\)\)/);assert.match(rust,/pub fn draw_canvas_image_batch\([\s\S]*?Float64Array[\s\S]*?set_global_alpha\(values\[offset \+ 2\]\)[\s\S]*?draw_image_with_html_canvas_element/);
     assert.match(bridge,/state\.direct\.createCanvasImageData\(context, width, height\)/);assert.match(bridge,/state\.direct\.putCanvasImageData\(context, image, pixels, width, height\)/);assert.match(rust,/pub fn create_canvas_image_data\([\s\S]*?create_image_data_with_sw_and_sh/);assert.match(rust,/pub fn put_canvas_image_data\([\s\S]*?Uint8ClampedArray[\s\S]*?put_image_data/);
+    assert.match(bridge,/state\.direct\.createRadialSprite\(canvas, channels\[0\], channels\[1\], channels\[2\], radius, alpha\)/);assert.match(bridge,/state\.direct\.createFogSprite\(canvas, input\)/);assert.match(rust,/pub fn create_radial_sprite\([\s\S]*?write_rgba_canvas\(canvas, side, side, &pixels\)/);assert.match(rust,/pub fn create_fog_sprite\([\s\S]*?write_rgba_canvas\(canvas, WIDTH as u32, HEIGHT as u32, &pixels\)/);
+    assert.match(bridge,/direct\.createTransportGradient\(canvas, width, height, kind, offsetX, gradientWidth\)/);assert.match(bridge,/state\.direct\.createExitGradient\(exitGradientCanvas, rect\[2\], rect\[3\], !!cleared\)/);assert.match(rust,/pub fn create_transport_gradient\([\s\S]*?write_rgba_canvas\(canvas, width, height, &pixels\)/);assert.match(rust,/pub fn create_exit_gradient\([\s\S]*?write_rgba_canvas\(canvas, width, height, &pixels\)/);
     assert.match(html,/renderer\.clearCanvasRect\(flContext, 0, 0, fl\.width, fl\.height\)/);assert.match(bridge,/state\.direct\.clearCanvasRect\(context, x, y, width, height\)/);assert.match(rust,/pub fn clear_canvas_rect\([\s\S]*?context\.clear_rect/);
     assert.match(html,/drawLayer\(c, alpha = null\)[\s\S]*?renderer\.drawCanvasLayer\(ctx, c, vx0, vy0, w, h, vx0, vy0, w, h, alpha === null \? -1 : alpha\)/);assert.match(html,/drawLayer\(BL, \.55\)/);assert.match(bridge,/state\.direct\.drawCanvasLayer\(context, image, sx, sy, sw, sh, dx, dy, dw, dh, alpha\)/);assert.match(rust,/pub fn draw_canvas_layer\([\s\S]*?set_global_alpha\(alpha\)[\s\S]*?draw_image_with_html_canvas_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh/);
     assert.match(html,/function kill\(e, bx = 0, by = 0\)[\s\S]*?renderer\.drawBloodSplatter\(g, puddleColor, dropColor, blobs, streaks, droplets\)/);assert.match(html,/function drawBloodSplatterFallback\([\s\S]*?quadraticCurveTo/);assert.match(bridge,/state\.direct\.drawBloodSplatter\(context, puddleColor, dropColor,/);assert.match(rust,/pub fn draw_blood_splatter\([\s\S]*?quadratic_curve_to[\s\S]*?context\.stroke\(\)[\s\S]*?context\.arc\(/);
     assert.match(rust,/pub fn draw_dust\([\s\S]*?context\.save\(\)[\s\S]*?context\.set_global_alpha\(alpha\)[\s\S]*?context\.restore\(\)/);
-    assert.match(rust,/pub fn draw_enemy_shadows\([\s\S]*?context\.ellipse\([\s\S]*?context\.fill\(\)/);assert.match(bridge,/state\.direct\.drawEnemyShadows\(context, commands, offset, 1\)/);assert.match(bridge,/state\.drawEnemyShadowDirect && state\.drawEnemyShadowDirect\(context, shadows, offset\) === 1/);
+    assert.match(html,/wasmEnemyPass\.drawEnemies\(enemies, P, WASM_ENEMY_PAINTERS, ctx, ready\(ESHEET\) \? ESHEET : null, performance\.now\(\)\)/);
+    assert.match(bridge,/state\.direct\.drawEnemies\(context, Float64Array\.from\(rows\)/);
+    assert.match(rust,/pub fn draw_enemies_direct\([\s\S]*?set_global_alpha\(alpha\)[\s\S]*?ellipse\(x \+ 3\.0, y \+ 5\.0, 12\.0, 10\.0[\s\S]*?draw_image_at\(context, enemy_sheet[\s\S]*?text_images\.get\(placements\[offset\] as u32\)/);
+    assert.doesNotMatch(bridge,/drawEnemyShadowDirect|wasm\.exports\.(?:enemy_input_ptr|draw_visible_enemies)/);
     assert.match(fx,/const trace = new Float64Array\(9 \* 7\)[\s\S]*?glassTraceRenderer\.drawGlassBreakTrace\(f, gl\.x, gl\.y, gl\.w, gl\.h, trace\)/);assert.match(bridge,/state\.direct\.drawGlassBreakTrace\(context, x, y, width, height, commands\)/);assert.match(rust,/pub fn draw_glass_break_trace\([\s\S]*?context\.fill_rect\(x, y, width, height\)[\s\S]*?context\.line_to\([\s\S]*?context\.fill\(\)/);
     assert.match(read('js/exp-world.js'),/scorchRenderer\.drawExplosionScorch\(g, b\.x, b\.y\)/);assert.match(bridge,/state\.direct\.drawExplosionScorch\(context, x, y\)/);assert.match(rust,/pub fn draw_explosion_scorch\([\s\S]*?context\.arc\(x, y, 38\.0, 0\.0, core::f64::consts::TAU\)[\s\S]*?context\.arc\(x, y, 24\.0, 0\.0, core::f64::consts::TAU\)/);
     assert.match(read('js/exp-modes.js'),/if \(!toastsDrawn\) \{[\s\S]*?g\.globalAlpha = 1;[\s\S]*?\n      \}/);
     assert.match(read('js/exp-debug.js'),/renderer\.drawDebugHud\(g, W, H, D\.panel, lines, D\.errs, errorLines\)/);assert.match(bridge,/state\.direct\.drawDebugHud\(context, width, height, showPanel, lines, showErrors, errors\)/);assert.match(rust,/pub fn draw_debug_hud\([\s\S]*?set_fill_style_str\("#7dff9b"\)[\s\S]*?fill_text\(&text/);
     assert.match(read('js/exp-debug.js'),/renderer\.drawDebugWorld\(g, wallData, doorData, P\.x, P\.y, P\.r, D\.coll, enemyData, labels, D\.ai\)/);assert.match(bridge,/state\.direct\.drawDebugWorld\(context, walls, walls\.length \/ 4,[\s\S]*?enemies, labels, enemies\.length \/ 6, showAi\)/);assert.match(rust,/pub fn draw_debug_world\([\s\S]*?rgba\(0,255,120,\.8\)[\s\S]*?rgba\(255,46,147,\.7\)[\s\S]*?fill_text/);
-    assert.match(bridge,/state\.direct\.drawFog\(batch\.context, batch\.image, commands, count, alpha, smoke === 1\)/);assert.match(rust,/pub fn draw_fog\([\s\S]*?draw_image_at\(context, image/);
-    assert.match(bridge,/state\.direct\.drawWorldLights\(batch\.context, commands, images, batch\.flashImage \|\| null\)/);assert.match(rust,/pub fn draw_world_lights\([\s\S]*?set_global_composite_operation\("lighter"\)[\s\S]*?draw_image_at/);
-    assert.match(bridge,/state\.direct\.drawWorldRings\(batch\.context, commands\.subarray\(0, count \* 6\), batch\.colors\)/);assert.match(rust,/pub fn draw_world_rings\([\s\S]*?context\.arc\(/);
-    assert.match(bridge,/state\.direct\.drawInvasionZone\(batch\.context, commands\)/);assert.match(rust,/pub fn draw_invasion_zone\([\s\S]*?255,107,213/);
-    assert.match(bridge,/state\.direct\.drawDarkOverlay\(batch\.darkContext, batch\.screenContext,[\s\S]*?batch\.lamps\.flash, commands\)/);assert.match(rust,/pub fn draw_dark_overlay\([\s\S]*?destination-out[\s\S]*?draw_image_at\(screen_context, overlay/);
-    assert.match(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn draw_dark_overlay\(\)[\s\S]*?v\[4\] <= 0\.0 \|\| v\[5\] <= 0\.0 \|\| v\[6\] <= 0\.0[\s\S]*?v\[8\] == 0\.0 \|\| v\[8\] == 1\.0[\s\S]*?v\[9\] == 0\.0 \|\| v\[9\] == 1\.0/);
-    assert.match(bridge,/state\.direct\.drawFx\(batch\.context, commands, batch\.muzzleSprite \|\| null\)/);assert.match(rust,/pub fn draw_fx\([\s\S]*?set_global_composite_operation\("lighter"\)[\s\S]*?context\.arc\(/);
-    assert.match(bridge,/state\.direct\.drawShells\(batch\.context, commands, count\)/);assert.match(rust,/pub fn draw_shells\([\s\S]*?set_global_alpha\(0\.72\)[\s\S]*?context\.ellipse\(/);
-    assert.match(bridge,/state\.direct\.drawComboText\(batch\.context, commands, label\)/);assert.match(rust,/pub fn draw_combo_text\([\s\S]*?set_font\("bold 54px Impact, sans-serif"\)[\s\S]*?stroke_text\(label[\s\S]*?fill_text\(label/);
-    assert.match(bridge,/state\.direct\.drawAlarmText\(batch\.context, commands, label\)/);assert.match(rust,/pub fn draw_alarm_text\([\s\S]*?set_font\("bold 14px Orbitron, sans-serif"\)[\s\S]*?fill_text\(label/);
-    assert.match(bridge,/state\.direct\.drawHudImage\(batch\.context, image, commands\)/);assert.match(rust,/pub fn draw_hud_image\([\s\S]*?supported_image\(image\)[\s\S]*?draw_image_at\(context, image/);
-    assert.match(bridge,/state\.direct\.drawBullets\(batch\.context, commands, batch\.mine, batch\.foe\)/);assert.match(rust,/pub fn draw_bullets\([\s\S]*?supported_image\(mine\)[\s\S]*?draw_image_at\(context, image/);
-    assert.match(bridge,/state\.direct\.drawColorGrade\(context, width, height\)/);assert.match(rust,/pub fn draw_color_grade\([\s\S]*?set_global_composite_operation\("soft-light"\)[\s\S]*?set_global_composite_operation\("overlay"\)/);
-    assert.match(bridge,/state\.direct\.drawFinalOverlays\(context, width, height, fade, flash, flashEnabled\)/);assert.match(rust,/pub fn draw_final_overlays\([\s\S]*?rgba\(8,0,20,\{fade\}\)[\s\S]*?rgba\(255,46,147/);
+    assert.doesNotMatch(bridge,/wasm\.exports\.(?:draw_fog|fog_input_ptr)/);assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/fog_input_ptr|fog_command_count|draw_fog_batch/);
+    assert.match(bridge,/direct\.drawFogInputs\(context, image, nowMs, smoke, perfTier\)/);assert.match(rust,/pub fn draw_fog_inputs\([\s\S]*?let x = \(now_ms \/ \(60\.0 \+ index as f64 \* 25\.0\) \+ index as f64 \* 330\.0\)[\s\S]*?draw_image_at\(context, image/);
+    assert.match(bridge,/state\.direct\.drawWorldLightInputs\(context, directValues, directImages, metadata, flashImage \|\| null\)/);assert.match(rust,/pub fn draw_world_light_inputs\([\s\S]*?js_sys::Math::sin\(now_ms \/ 520\.0 \+ light\[3\]\)[\s\S]*?draw_image_at/);
+    assert.match(bridge,/state\.direct\.drawWorldRingInputs\(context, directValues\.subarray\(0, directValueCount\), colors\)/);assert.match(rust,/pub fn draw_world_ring_inputs\([\s\S]*?let progress = 1\.0 - ring\[3\] \/ ring\[4\]/);
+    assert.doesNotMatch(bridge,/draw_world_light_batch|draw_world_ring_batch|wasm\.exports\.(?:draw_world_lights|draw_world_rings|world_light_input_ptr|world_ring_input_ptr)/);
+    assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_world_light_batch|draw_world_ring_batch|world_light_input_ptr|world_ring_input_ptr|draw_world_lights|draw_world_rings/);
+    assert.doesNotMatch(rust,/js_name = drawWorldLights|js_name = drawWorldRings/);
+    assert.doesNotMatch(bridge,/draw_invasion_zone_batch/);assert.match(rust,/pub fn draw_invasion_zone\([\s\S]*?255,107,213/);
+    assert.match(bridge,/state\.direct\.drawInvasionZoneInput\(context, x, y, nowMs\)/);assert.match(rust,/pub fn draw_invasion_zone_input\([\s\S]*?invasion_zone_sine\(now_ms \/ 260\.0\)[\s\S]*?draw_invasion_zone\(context, &commands\)/);
+    assert.match(rust,/pub fn draw_dark_overlay\([\s\S]*?destination-out[\s\S]*?draw_image_at\(screen_context, overlay/);
+    assert.match(bridge,/state\.direct\.drawDarkOverlayInputs\(darkContext, screenContext, overlay, lamps\.core, lamps\.far, lamps\.flash,[\s\S]*?playerX, playerY, camX, camY, screenW, screenH, zoom, angle/);assert.match(rust,/pub fn draw_dark_overlay_inputs\([\s\S]*?let screen_x = \(player_x - camera_x - screen_w \/ 2\.0\) \* zoom \+ screen_w \/ 2\.0[\s\S]*?draw_dark_overlay\(\s*dark_context,\s*screen_context,\s*overlay,\s*core,\s*far,\s*flash,\s*&commands,\s*\)/);
+    assert.match(bridge,/state\.direct\.drawFxInputs\(context, input\)/);assert.doesNotMatch(bridge,/legacyInput\.set\(input\)/);assert.match(rust,/pub fn draw_fx_inputs\([\s\S]*?draw_fx_commands\(context, inputs\)/);assert.match(rust,/fn draw_fx_commands\([\s\S]*?set_global_composite_operation\("lighter"\)[\s\S]*?create_radial_gradient\(x, y, 0\.0, x, y, radius\)[\s\S]*?context\.arc\(/);
+    assert.match(shellPath,/state\.direct\.drawShellInputs\(context, input, cameraX, cameraY\)/);assert.doesNotMatch(shellPath,/wasm\.exports\.(draw_shells|shell_input_ptr)|legacyInput/);assert.match(rust,/pub fn draw_shell_inputs\([\s\S]*?radius \* 1\.6,\s*radius,\s*0\.5[\s\S]*?context\.ellipse\(/);assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn draw_shells/);assert.match(read('tests/wasm-shell-input-parity.cjs'),/directInputCalls < 1[\s\S]*?differentChannels !== 0/);
+    assert.match(bridge,/state\.direct\.drawComboTextStage\(context, combo, nowMs\)/);assert.doesNotMatch(bridge,/wasm\.exports\.(draw_combo_text|combo_text_input_ptr)|draw_combo_text_batch/);assert.match(rust,/pub fn draw_combo_text_stage\([\s\S]*?set_font\("bold 54px Impact, sans-serif"\)[\s\S]*?stroke_text\(&label[\s\S]*?fill_text\(&label/);
+    assert.match(bridge,/state\.direct\.drawAlarmTextStage\(context, seconds, width\)/);assert.doesNotMatch(bridge,/wasm\.exports\.(draw_alarm_text|alarm_text_input_ptr)|draw_alarm_text_batch/);assert.match(rust,/pub fn draw_alarm_text_stage\([\s\S]*?set_font\("bold 14px Orbitron, sans-serif"\)[\s\S]*?fill_text\(&label/);
+    assert.match(bridge,/state\.direct\.drawHudImageStage\(context, stage, width, height,[\s\S]*?images\)/);assert.doesNotMatch(bridge,/wasm\.exports\.(draw_hud_image|hud_image_input_ptr)|draw_hud_image_batch/);assert.match(rust,/pub fn draw_hud_image_stage\([\s\S]*?supported_image\(&image\)[\s\S]*?draw_image_at\(context, &image/);
+    assert.match(bulletPath,/state\.direct\.drawBulletInputs\(context, input, mine, foe\)/);assert.doesNotMatch(bulletPath,/wasm\.exports\.(draw_bullets|bullet_input_ptr)|legacyInput/);assert.match(rust,/pub fn draw_bullet_inputs\([\s\S]*?owner >= 0\.5[\s\S]*?x - 22\.0, y - 14\.0/);assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn draw_bullets/);assert.match(read('tests/wasm-bullet-input-parity.cjs'),/directInputCalls < 1[\s\S]*?differentChannels !== 0/);
+    assert.match(bridge,/state\.drawColorGrade = \(context, width, height\) => !!\(state\.drawColorGradeDirect/);assert.doesNotMatch(bridge,/wasm\.exports\.(draw_color_grade|color_grade_input_ptr)|draw_color_grade_batch/);assert.match(bridge,/state\.direct\.drawColorGrade\(context, width, height\)/);assert.match(rust,/pub fn draw_color_grade\([\s\S]*?set_global_composite_operation\("soft-light"\)[\s\S]*?set_global_composite_operation\("overlay"\)/);
+    assert.match(bridge,/state\.drawFinalOverlays = \(context, width, height, fade, flash, flashEnabled\) => !!\(state\.drawFinalOverlaysDirect/);assert.doesNotMatch(bridge,/wasm\.exports\.(draw_final_overlays|final_overlay_input_ptr)|draw_final_overlay_batch/);assert.match(bridge,/state\.direct\.drawFinalOverlays\(context, width, height, fade, flash, flashEnabled\)/);assert.match(rust,/pub fn draw_final_overlays\([\s\S]*?rgba\(8,0,20,\{fade\}\)[\s\S]*?rgba\(255,46,147/);
+    assert.match(rust,/pub fn draw_transport_commands\([\s\S]*?commands\.length\(\) % 8[\s\S]*?set_shadow_color\("transparent"\)[\s\S]*?draw_image_at\(context, image/);
+    assert.doesNotMatch(bridge,/draw_exit_batch|draw_exit_gradient_batch|wasm\.exports\.(draw_exit|generate_exit_gradient|exit_input_ptr)/);assert.match(rust,/pub fn draw_exit_commands\([\s\S]*?commands\.length\(\) % 6[\s\S]*?context\.clip\(\)[\s\S]*?draw_image_at\(context, gradient/);
+    assert.match(bridge,/direct\.drawTransportDirect\(context, transport\.x,[\s\S]*?gradients\.doorRight/);assert.match(rust,/pub fn draw_transport_direct\([\s\S]*?push\(9\.0,[\s\S]*?draw_transport_commands\(context, &commands/);
+    assert.match(bridge,/state\.direct\.drawExitDirect\(context, rect\[0\],[\s\S]*?exitGradientCanvas/);assert.match(rust,/pub fn draw_exit_direct\([\s\S]*?commands\.len\(\) \/ 6 < 28[\s\S]*?draw_exit_commands\(context, &commands/);
+    assert.match(bridge,/state\.direct\.drawPickups\(context, input, !!glow, FURNITURE_COLORS\)/);assert.doesNotMatch(bridge,/legacyInput\.set\(input\)|draw_pickup_batch/);assert.match(rust,/pub fn draw_pickups\([\s\S]*?context\.arc\(18\.0, 0\.0, 18\.0[\s\S]*?draw_weapon_icon_direct\(context, weapon, colors\)/);
+    assert.match(bridge,/state\.direct\.drawThrows\(context, input, FURNITURE_COLORS\)/);assert.doesNotMatch(bridge,/legacyInput\.set\(input\)|draw_throw_batch/);assert.match(rust,/pub fn draw_throws\([\s\S]*?context\.rotate\(angle\)[\s\S]*?draw_weapon_icon_direct\(context, weapon, colors\)/);assert.match(read('tests/wasm-pickup-throw-input-parity.cjs'),/directInputCalls < 1[\s\S]*?differentChannels !== 0/);
+    assert.match(bridge,/state\.direct\.drawWeaponIcon\(context, weaponId, FURNITURE_COLORS\)/);assert.match(bridge,/state\.directWeaponIconCalls\+\+/);
+    assert.doesNotMatch(bridge,/currentWeaponBatch|wasm\.exports\.draw_weapon/);assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_weapon_icon\(|pub extern "C" fn draw_weapon\(/);assert.match(read('tests/wasm-direct-draw-parity.cjs'),/weaponIconParity[\s\S]*?differentChannels !== 0/);
+    assert.match(rust,/pub fn draw_weapon_icon_direct\([\s\S]*?match id[\s\S]*?finish_weapon_icon\(context, colors, id\)/);
+    assert.match(bridge,/state\.direct\.drawDoors\(context, input, doorImage \|\| null, FURNITURE_COLORS\)/);assert.match(bridge,/state\.directDoorCalls \+= drawn/);
+    assert.match(rust,/pub fn draw_doors_direct\([\s\S]*?doors\.length\(\) % STRIDE[\s\S]*?context\.stroke_rect\(local_x \+ 0\.5/);
+    assert.doesNotMatch(bridge,/draw_hud_shape_batch|currentHudShapeBatch|wasm\.exports\.(draw_hud_shape|hud_shape_input_ptr)/);
+    assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_hud_shape_batch|draw_hud_shape\(|hud_shape_input_ptr|HUD_SHAPE_INPUT/);
+    assert.match(rust,/pub fn draw_hud_shape\([\s\S]*?context\.fill_rect\([\s\S]*?context\.stroke_rect\(/);
+    assert.match(bridge,/state\.direct\.drawInvasionArrowInput\(context, centerX, centerY, Math\.cos\(angle\), Math\.sin\(angle\)\)/);assert.doesNotMatch(bridge,/draw_invasion_arrow_batch/);assert.match(rust,/pub fn draw_invasion_arrow_input\([\s\S]*?context\.line_to\(vertices\[2\]\.0, vertices\[2\]\.1\)/);
     assert.match(html,/wasmRenderer\.setCanvasImageSmoothing\(g, false\)/);assert.match(bridge,/state\.direct\.setCanvasImageSmoothing\(context, enabled\)/);assert.match(rust,/pub fn set_canvas_image_smoothing\([\s\S]*?set_image_smoothing_enabled\(enabled\)/);
     assert.match(fx,/renderer\.createTextImage\(k, s, font, col, false\)/);assert.match(html,/renderer\.createTextImage\(k, s, font, c, true\)/);assert.match(bridge,/state\.direct\.createTextImage\(canvas, text, font, color, outlined\)/);assert.match(rust,/pub fn create_text_image\([\s\S]*?measure_text\(text\)[\s\S]*?fill_text\(text, 2\.0, 17\.0\)/);assert.match(rust,/stroke_text\(text, 6\.0, baseline\)/);
-    assert.match(rust,/pub fn draw_batch_commands\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array[\s\S]*?JsValue/);assert.match(bridge,/state\.direct\.drawBatchCommands\(batch\.context, commands, FURNITURE_COLORS, ACTOR_COLORS, batch\)/);
-    assert.match(rust,/pub fn draw_map_commands\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array[\s\S]*?Array/);assert.match(bridge,/state\.direct\.drawMapCommands\(batch\.context, commands, batch\.mapColors \|\| \[\]\)/);assert.match(bridge,/batch\.commands\.push\(opcode, color, x1, y1, x2, y2, lineWidth, alpha\)/);
-    assert.match(rust,/batch_array\(batch, "enemyTextImages"\)/);assert.match(rust,/draw_image_at\(context, &image, &\[x, y\]\)/);assert.match(bridge,/painters\.textImage\(enemy, commands\[offset \+ 1\] \| 0, commands\[offset \+ 2\], commands\[offset \+ 3\]\)/);
-    assert.match(rust,/pub fn draw_dust\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array/);assert.match(rust,/pub fn draw_sparks\([\s\S]*?set_global_composite_operation\("lighter"\)/);assert.match(bridge,/state\.direct\.drawDust\(batch\.context, commands, alpha\)/);assert.match(bridge,/state\.direct\.drawSparks\(batch\.context, commands, batch\.colors\)/);
-    assert.match(rust,/pub fn draw_live_blood\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array/);assert.match(rust,/pub fn draw_static_blood\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array/);assert.match(bridge,/state\.direct\.drawLiveBlood\(batch\.context, commands, batch\.color\)/);assert.match(bridge,/state\.direct\.drawStaticBlood\(batch\.context, commands, batch\.color\)/);
+    assert.match(bridge,/state\.drawEnemies = \(enemies, player, painters, context, enemySheet = null, nowMs = 0\)/);
+    assert.doesNotMatch(bridge,/painters\.textImage\(enemy, commands\[offset \+ 1\]/);
+    assert.match(rust,/pub fn draw_map_commands\([\s\S]*?CanvasRenderingContext2d[\s\S]*?Float64Array[\s\S]*?Array/);assert.doesNotMatch(bridge,/draw_map_command|currentMapBatch|drawMapCommandsDirect|flushDirectMapCommands/);
+    assert.match(rust,/draw_image_at\(context, &image, &\[placements\[offset \+ 1\], placements\[offset \+ 2\]\]\)/);
+    assert.match(bridge,/state\.direct\.drawDust\(context, input, alpha\)/);assert.match(bridge,/state\.direct\.drawSparkInputs\(context, input, colors\)/);assert.match(rust,/pub fn draw_spark_inputs\([\s\S]*?ceil\(\)[\s\S]*?draw_sparks\(context, &commands, colors\)/);assert.match(read('tests/wasm-particle-input-parity.cjs'),/differentChannels !== 0/);
+    assert.match(bridge,/state\.direct\.drawLiveBlood\(context, input, color\)/);assert.match(bridge,/state\.direct\.drawStaticBlood\(context, input, color\)/);assert.match(bridge,/state\.direct\.drawCorpseInputs\(context, input, colors\)/);assert.match(rust,/pub fn draw_corpse_inputs\([\s\S]*?15\.0, 11\.0, 0\.35, 3\.0[\s\S]*?13\.0, 8\.0, 0\.55[\s\S]*?draw_corpses_mode\(context, &commands, colors, true\)/);assert.match(read('tests/wasm-particle-input-parity.cjs'),/staticBlood:[\s\S]*?corpses:/);
     assert.match(build,/wasm-bindgen \$directTargetWasm --target web/);
     assert.match(worker,/wasm-renderer\/pkg\/direct\/direct_renderer_bg\.wasm/);
+  });
+  await test('Resumo da pausa usa painter Rust direto com fallback Canvas e paridade de pixels', () => {
+    const modes=read('js/exp-modes.js'),rust=read('wasm-renderer-direct/src/lib.rs'),parity=read('tests/wasm-direct-draw-parity.cjs');
+    assert.match(modes,/if \(st === 'paused' && r\)[\s\S]*?drawHudShape\(g, 4, W, H\)[\s\S]*?g\.fillRect\(W \/ 2 - 230, H \/ 2 \+ 80, 460, 120\)/);
+    assert.match(rust,/pub fn draw_hud_shape\([\s\S]*?if stage > 4[\s\S]*?4 => \{[\s\S]*?rgba\(5,0,18,\.55\)[\s\S]*?fill_rect\(width \/ 2\.0 - 230\.0, height \/ 2\.0 \+ 80\.0, 460\.0, 120\.0\)/);
+    assert.match(parity,/compareHudStages=\(\)=>\[0,1,2,3,4\]/);
   });
   await test('Spawn procedural não deixa a primeira sala vazia nem conclui sem inimigos', () => {
     const html=read('index.html'), spawnFn=declaration(html,'function spawnFloor('), clearFn=declaration(html,'function allClear(');
@@ -511,21 +597,23 @@ async function run() {
     assert.match(fx,/if \(stormFlash > 0 && !CFG\.noflash\)/);assert.match(fx,/if \(FX\.flick > 0 && !CFG\.noflash\)/);
     assert.match(fx,/darkRenderer\.drawDarkOverlay\(dg, g, dk, LAMP, P\.x, P\.y, cam\.x, cam\.y, W_, H_, zoom, P\.a, EXP\.world\.blackout > 0, P\.fireFlash > 0\)/);
     assert.match(fx,/if \(!darkBatchDrawn\) \{/);
-    assert.match(read('js/wasm-renderer.js'),/draw_dark_overlay\(\)/);
     assert.match(read('index.html'),/comboTextRenderer\.drawComboText\(ctx, combo, comboNow\)/);
-    assert.match(read('js/wasm-renderer.js'),/draw_combo_text\(\)/);
+    assert.match(read('index.html'),/if \(!\(comboTextRenderer[^\n]+\)\) \{\s*const pulse = 1 \+ Math\.max\(0, Math\.sin\(comboNow \/ 90\)\) \* \.06/);
+    assert.doesNotMatch(read('js/wasm-renderer.js'),/draw_combo_text\(\)/);
     assert.match(read('index.html'),/drawHudImage\(ctx, 0, W, H, CFG\.crt, true/);
     assert.match(read('index.html'),/drawHudImage\(ctx, 2, W, H, false, true/);
     assert.match(read('js/exp-fx.js'),/weatherRenderer\.drawHudImage\(g, 3, W_, H_, false, true/);
-    assert.match(read('js/wasm-renderer.js'),/draw_hud_image\(\)/);
+    assert.doesNotMatch(read('js/wasm-renderer.js'),/draw_hud_image\(\)/);
     assert.match(fx,/alarmTextRenderer\.drawAlarmText\(g, EXP\.world\.alarmT, W_\)/);
-    assert.match(read('js/wasm-renderer.js'),/draw_alarm_text/);
+    assert.match(fx,/if \(!\(alarmTextRenderer[^\n]+\)\) \{\s*g\.fillStyle = 'rgba\(255,60,90,\.9\)'/);
+    assert.doesNotMatch(read('js/wasm-renderer.js'),/draw_alarm_text/);
   });
   await test('Anéis de mundo da expansão usam batch Rust com fallback Canvas', () => {
     const world=read('js/exp-world.js'),renderer=read('js/wasm-renderer.js');
     assert.match(world,/ringRenderer\.drawWorldRings\(g, WLD\.rings\)/);
     assert.match(world,/if \(!\(ringRenderer && ringRenderer\.drawWorldRings/);
-    assert.match(renderer,/wasm\.exports\.draw_world_rings\(count, colors\.length\)/);
+    assert.match(renderer,/direct\.drawWorldRingInputs\(context, directValues\.subarray\(0, directValueCount\), colors\)/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.draw_world_rings/);
     assert.match(renderer,/worldRingCommands/);
   });
   await test('Passe de luz vazio não altera o Canvas e preserva o fallback com efeitos ativos', () => {
@@ -539,44 +627,58 @@ async function run() {
     const modes=read('js/exp-modes.js'),renderer=read('js/wasm-renderer.js');
     assert.match(modes,/zoneRenderer\.drawInvasionZone\(g, z\.x, z\.y, now\)/);
     assert.match(modes,/if \(!\(zoneRenderer && zoneRenderer\.drawInvasionZone/);
-    assert.match(renderer,/wasm\.exports\.draw_invasion_zone\(\)/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.(draw_invasion_zone|invasion_zone_input_ptr)/);
   });
-  await test('Barris da expansão usam batch Rust com fallback Canvas e preservam o limite', () => {
-    const world=read('js/exp-world.js'),renderer=read('js/wasm-renderer.js');
+  await test('Barris usam painter Rust direto e removem o batch legado', () => {
+    const world=read('js/exp-world.js'),renderer=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs');
     assert.match(world,/barrelRenderer\.drawWorldBarrels\(g, WLD\.barrels, now\)/);
     assert.match(world,/if \(!\(barrelRenderer && barrelRenderer\.drawWorldBarrels/);
-    assert.match(renderer,/wasm\.exports\.draw_world_barrels\(barrels\.length, nowMs\)/);
+    assert.match(renderer,/state\.direct\.drawWorldBarrels\(context, directInput, nowMs, FURNITURE_COLORS\)/);
+    assert.match(direct,/pub fn draw_world_barrels_direct/);
     assert.match(renderer,/barrels\.length > 16/);
+    assert.match(renderer,/worldBarrelDirectInputBuffer\.subarray\(0, barrels\.length \* 4\)/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.(?:draw_world_barrels|world_barrel_input_ptr)/);
+    assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_world_barrels|world_barrel_input_ptr|WORLD_BARREL_INPUT/);
   });
-  await test('Câmeras da expansão enviam cone e corpo em batch Rust com fallback Canvas', () => {
-    const world=read('js/exp-world.js'),renderer=read('js/wasm-renderer.js');
+  await test('Câmeras usam painter Rust direto e removem o batch legado', () => {
+    const world=read('js/exp-world.js'),renderer=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs');
     assert.match(world,/cameraRenderer\.drawWorldCameras\(g, WLD\.cams, WLD\.alarmT > 0\)/);
     assert.match(world,/if \(!\(cameraRenderer && cameraRenderer\.drawWorldCameras/);
-    assert.match(renderer,/wasm\.exports\.draw_world_cameras\(cameras\.length\)/);
+    assert.match(renderer,/state\.direct\.drawWorldCameras\(context, directInput, FURNITURE_COLORS\)/);
+    assert.match(direct,/pub fn draw_world_cameras_direct/);
     assert.match(renderer,/cameras\.length > 8/);
     assert.match(renderer,/camera\.poly\.length < 26/);
+    assert.match(renderer,/worldCameraDirectInputBuffer\.subarray\(0, cameras\.length \* 30\)/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.(?:draw_world_cameras|world_camera_input_ptr)/);
+    assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_world_cameras|world_camera_input_ptr|WORLD_CAMERA_INPUT/);
   });
   await test('Realces visuais de inimigos da expansão geram linhas, barras e vetores no Rust', () => {
-    const world=read('js/exp-world.js'),renderer=read('js/wasm-renderer.js');
+    const world=read('js/exp-world.js'),renderer=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs');
     assert.match(world,/enemyAccentRenderer\.drawWorldEnemyAccents\(g, enemies, now, P\.x, P\.y, g\.globalAlpha\)/);
     assert.match(world,/if \(!\(P && enemyAccentRenderer/);
-    assert.match(renderer,/wasm\.exports\.draw_world_enemy_accents\(count, nowMs\)/);
+    assert.match(renderer,/state\.direct\.drawWorldEnemyAccents\(context, input, count, nowMs, worldEnemyColors\)/);
+    assert.match(direct,/pub fn draw_world_enemy_accents_direct/);
     assert.match(renderer,/enemy\.cls === 'blindado' \? 1 : enemy\.cls === 'lider' \? 2 : boss \? 3 : 0/);
     assert.match(renderer,/enemies\.length > 256/);
+    assert.match(renderer,/const directValues = worldEnemyDirectInputBuffer/);assert.match(renderer,/directValues\.subarray\(0, count \* 13\)/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.(?:draw_world_enemy_accents|world_enemy_input_ptr)/);
+    assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_world_enemy_accents|world_enemy_input_ptr|WORLD_ENEMY_INPUT/);
   });
-  await test('Tremores de quadro combinam screen shake, kick e camera shake no batch Rust', () => {
-    const html=read('index.html'),renderer=read('js/wasm-renderer.js');
+  await test('Tremores de quadro usam transforms Rust diretos e preservam fallback Canvas', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),direct=read('wasm-renderer-direct/src/lib.rs');
     assert.match(html,/frameTransformRenderer\.drawFrameTransforms\(ctx, 0, screenShakeNow, screenShakePower, screenRx, screenRy/);
     assert.match(html,/frameTransformRenderer\.drawFrameTransforms\(ctx, 1, 0, 0, \.5, \.5, kickX, kickY/);
     assert.match(html,/if \(!screenTransformDrawn\) \{\s*ctx\.save\(\);/);
     assert.match(html,/if \(!cameraTransformDrawn\) \{/);
     assert.match(html,/drawFrameTransforms\(ctx, 2, 0, 0, \.5, \.5, 0, 0, 0, 0, \.5, \.5, W, H, CFG\.zoom, cam\.x, cam\.y\)/);
-    assert.match(renderer,/else if \(op === 39\) g\.scale\(a, b\)/);
-    assert.match(renderer,/wasm\.exports\.draw_frame_transforms\(stage\)/);
-    assert.match(renderer,/frameTransformCommands/);
+    assert.match(renderer,/state\.direct\.drawFrameTransforms\(context, stage, frameTransformInput\)/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.draw_frame_transforms|frame_transform_input_ptr/);
+    assert.match(direct,/js_name = drawFrameTransforms/);
+    assert.match(direct,/context\.scale\(zoom, zoom\)/);
+    assert.doesNotMatch(rust,/FRAME_TRANSFORM_INPUT|draw_frame_transforms|frame_transform_input_ptr/);
   });
-  await test('Escopos de transformação do quadro abrem e fecham no batch Rust com fallback', () => {
-    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+  await test('Escopos de transformação do quadro abrem e fecham em Rust direto com fallback Canvas', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),direct=read('wasm-renderer-direct/src/lib.rs');
     assert.match(html,/drawFrameTransforms\(ctx, 0, screenShakeNow/);
     assert.match(html,/drawFrameTransforms\(ctx, 1, 0, 0, \.5, \.5, kickX/);
     assert.match(html,/drawFrameTransforms\(ctx, 3, 0, 0, \.5, \.5/);
@@ -585,47 +687,50 @@ async function run() {
     assert.match(html,/if \(!worldTransformRestored\) ctx\.restore\(\);/);
     assert.match(html,/if \(!frameTransformRestored\) ctx\.restore\(\);/);
     assert.match(renderer,/stage !== 0 && stage !== 1 && stage !== 2 && stage !== 3 && stage !== 4/);
-    assert.match(rust,/furniture_command\(16, 0, 0\.0, 0\.0, 0\.0, 0\.0, 0\.0, 0\.0\)/);
-    assert.match(rust,/if stage == 3 \|\| stage == 4 \{/);
+    assert.match(direct,/context\.save\(\);[\s\S]*?context\.translate\(kick_x \* scale, kick_y \* scale\)/);
+    assert.match(direct,/if stage == 3 \|\| stage == 4 \{/);
   });
-  await test('Renderer não reescreve alpha padrão após batch de ghosts', () => {
-    const html=read('index.html');
-    assert.match(html,/const ghostRenderer = window\.HM_WASM_RENDERER;[\s\S]*?if \(!\(ghostRenderer && ghostRenderer\.drawGhosts/);
-    assert.match(html,/if \(ctx\.globalAlpha !== 1\) ctx\.globalAlpha = 1;/);
+  await test('Fantasmas usam painter Rust direto e removem o batch legado', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),legacy=read('wasm-renderer/src/lib.rs'),direct=read('wasm-renderer-direct/src/lib.rs');
+    assert.match(html,/const ghostRenderer = window\.HM_WASM_RENDERER;[\s\S]*?ghostRenderer\.drawGhosts\(ghosts, ctx, cw\)/);
+    assert.match(html,/function drawGhostsFallback\(ghosts, weapon, context = ctx\)/);
+    assert.match(renderer,/state\.drawGhosts = \(ghosts, context, weaponName\) =>[\s\S]*?state\.direct\.drawGhosts\(context, directItems, weapon/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.draw_ghosts|ghost_input_ptr/);
+    assert.doesNotMatch(legacy,/draw_ghosts|ghost_input_ptr|GHOST_INPUT/);
+    assert.match(direct,/pub fn draw_ghosts_direct\(/);
   });
-  await test('Rótulo de transporte usa batch HUD Rust com fallback de texto', () => {
+  await test('Rótulo de transporte usa painter Rust de texto cacheado e fallback Canvas', () => {
     const html=read('index.html'),renderer=read('js/wasm-renderer.js');
     const match=html.match(/if \(transportWasm && transportWasm\.drawTransport && transportWasm\.drawTransport\(ctx, t, andar\)\) \{([\s\S]*?)\n  \}/);
     assert.ok(match,'WASM transport branch should stay isolated');
     assert.match(match[1],/drawHudTextBatch\(\[\{ text: t\.tipo\.toUpperCase\(\)/);
     assert.doesNotMatch(match[1],/tx\(/,'the WASM branch must not draw the label through the generic Canvas dispatcher');
     assert.match(html,/tx\(t\.tipo\.toUpperCase\(\) \+ \(up \? ' ▲' : ' ▼'\), cx, y - 8/,'the Canvas transport fallback keeps its original label');
-    assert.match(renderer,/state\.drawHudTexts =/);
+    assert.doesNotMatch(renderer,/state\.drawHudTexts =|drawHudTextEntries/);
+    assert.match(renderer,/state\.drawRawHudTexts = \(entries, context\)/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.draw_hud_text|currentHudTextBatch/);assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_hud_text|HUD_TEXT_INPUT/);
   });
-  await test('Gradientes de escada/elevador usam RGBA Rust cacheado e preservam o gradiente inteiro das portas', () => {
-    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
-    assert.match(html,/createLinearGradient\(x, y, x \+ w, y\)/);
-    assert.match(renderer,/const transportGradientCache = new WeakMap\(\)/);
-    assert.match(renderer,/generate_transport_gradient\(width, height, kind, offsetX, gradientWidth\)/);
-    assert.match(renderer,/const doorRight = getGradient\('doorRight', doorWidth, doorHeight, 2, transport\.w \/ 2 \+ 1, transport\.w\)/);
-    assert.match(rust,/let door_t = \(offset_x \+ x as f64 \+ 0\.5\) \/ gradient_width/);
-    assert.match(rust,/pub extern "C" fn generate_transport_gradient\(width: u32, height: u32, kind: u32, offset_x: f64, gradient_width: f64\)/);
-    const transportBatch=renderer.slice(renderer.indexOf('draw_transport_batch(pointer, count)'),renderer.indexOf('draw_transport_gradient_batch(pointer, width, height)'));
-    assert.match(transportBatch,/drawImage\(variant \? batch\.gradients\.doorRight : batch\.gradients\.doorLeft/);
-    assert.match(transportBatch,/drawImage\(batch\.gradients\.(stair|elevator)/);
-    assert.doesNotMatch(transportBatch,/createLinearGradient|addColorStop/);
+  await test('Transportes usam painter direto Rust e não retêm batch legado', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),directRust=read('wasm-renderer-direct/src/lib.rs');
+    const transportBridge=renderer.slice(renderer.indexOf('state.drawTransport ='),renderer.indexOf('state.drawExit ='));
+    assert.match(html,/if \(transportWasm && transportWasm\.drawTransport && transportWasm\.drawTransport\(ctx, t, andar\)\)/);
+    assert.match(transportBridge,/direct\.createTransportGradient/);assert.match(transportBridge,/direct\.drawTransportDirect/);
+    assert.doesNotMatch(transportBridge,/wasm\.exports\.(?:draw_transports|generate_transport_gradient)/);
+    assert.doesNotMatch(rust,/transport_input_ptr|draw_transports|generate_transport_gradient|draw_transport_batch|draw_transport_gradient_batch/);
+    assert.match(directRust,/pub fn draw_transport_direct\([\s\S]*?draw_transport_commands\(context, &commands/);
   });
   await test('Créditos do overlay usam texto HUD Rust bruto com painter de fallback idêntico', () => {
-    const shop=read('js/exp-shop.js'),renderer=read('js/wasm-renderer.js');
+    const shop=read('js/exp-shop.js'),renderer=read('js/wasm-renderer.js'),directRust=read('wasm-renderer-direct/src/lib.rs');
     assert.match(shop,/const creditHudEntry = \[\{ text: ''/);
     assert.match(shop,/drawRawHudTexts\(creditHudEntry, g\)/);
     assert.match(shop,/g\.textAlign = 'left'; g\.font = 'bold 18px Impact, sans-serif'; g\.fillStyle = '#ffd23f';\s*g\.fillText\(creditHudEntry\[0\]\.text, 34, 156\); g\.restore\(\);/);
     assert.match(renderer,/state\.drawRawHudTexts = \(entries, context\)/);
-    assert.match(renderer,/context\.fillText\(entry\.text, commands\[i \+ 1\], commands\[i \+ 2\]\)/);
-    assert.match(renderer,/raw \? \(entry\.absoluteAlpha \? alpha : baseAlpha \* alpha\) : alpha/);
+    assert.match(renderer,/state\.direct\.drawRawHudTexts\(context, entries\)/);
+    assert.match(directRust,/context\.set_global_alpha\(if absolute \{ alpha \} else \{ saved_alpha \* alpha \}\)/);
+    assert.match(directRust,/context\.fill_text\(&text, x, y\)/);
   });
   await test('Textos do dealer, cards, reroll e balão passam pelo batch HUD e preservam o wrap em cache', () => {
-    const shop=read('js/exp-shop.js'),renderer=read('js/wasm-renderer.js');
+    const shop=read('js/exp-shop.js'),directRust=read('wasm-renderer-direct/src/lib.rs');
     const extract=(start,end)=>shop.slice(shop.indexOf(start),shop.indexOf(end,shop.indexOf(start)+start.length));
     for(const [name,end] of [['function drawBubble(','function drawCard('],['function drawCard(','function drawReroll('],['function drawReroll(','// Madame Piranha:']]) {
       const body=extract(name,end); assert.ok(body.length>0,`${name} should exist`); assert.doesNotMatch(body,/\.fillText\(/,`${name} should submit raw text through the batch`);
@@ -633,7 +738,15 @@ async function run() {
     assert.match(shop,/function flushDealerText\(g\)[\s\S]*?drawRawHudTexts\(dealerTextBatch, g\)/);
     assert.match(shop,/entry\.absoluteAlpha = absoluteAlpha/);
     assert.match(shop,/if \(txt === bubbleCacheText && fontKey === bubbleCacheFont && maxW === bubbleCacheWidth\) return bubbleCacheLines/);
-    assert.match(renderer,/entry\.absoluteAlpha \? alpha : baseAlpha \* alpha/);
+    assert.match(directRust,/context\.set_global_alpha\(if absolute \{ alpha \} else \{ saved_alpha \* alpha \}\)/);
+  });
+  await test('HUD normal usa batch Rust de imagens e não mantém o painter JavaScript intermediário', () => {
+    const modes=read('js/exp-modes.js'),renderer=read('js/wasm-renderer.js'),html=read('index.html');
+    assert.match(modes,/drawModeHudText = \(g, entry\) => \{[\s\S]*?drawHudTextBatch\(\[entry\]\)/);
+    assert.match(modes,/drawHudTextBatch\(toastEntries\)/);
+    assert.match(html,/function drawHudTextBatch\(entries\)[\s\S]*?renderer\.drawCanvasImageBatch\(ctx, images, placements\)/);
+    assert.doesNotMatch(modes,/drawHudTexts\(/);
+    assert.doesNotMatch(renderer,/state\.drawHudTexts|drawHudTextEntries|context\.globalAlpha = entry\.alpha/);
   });
   await test('Geometria da Madame Piranha e painéis da loja são gerados em Rust com fallback Canvas', () => {
     const shop=read('js/exp-shop.js'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
@@ -642,47 +755,73 @@ async function run() {
     assert.match(shop,/renderer\.drawShopPanel\(g, \[0, x, by, w, h, 22, 0\]\)/);
     assert.match(shop,/renderer\.drawShopPanel\(g, \[1, cx, cy, w, h, 24, flick \? 1 : 0\], c\.slot\.cor\)/);
     assert.match(shop,/renderer\.drawShopPanel\(g, \[2, cx, cy, w, h, 18, 0\]\)/);
-    assert.match(renderer,/state\.drawShopDealer = \(context, inputValues\)/);
-    assert.match(renderer,/state\.drawShopPanel = \(context, inputValues, outlineColor\)/);
-    assert.match(renderer,/op === 2[\s\S]*?context\.ellipse\(x, y, width, height/);
-    assert.match(rust,/pub extern "C" fn draw_shop_dealer\(\)/);
-    assert.match(rust,/pub extern "C" fn draw_shop_panel\(\)/);
-    assert.match(rust,/hud_shape_command\(5, gx, gy \+ 6\.0, 30\.0, timer_ratio\.clamp/);
+    const dealer=renderer.slice(renderer.indexOf('state.drawShopDealer ='),renderer.indexOf('state.drawShopPanel ='));
+    const panel=renderer.slice(renderer.indexOf('state.drawShopPanel ='),renderer.indexOf('state.createRadialSprite ='));
+    assert.match(dealer,/directReady[\s\S]*?direct\.drawShopDealerStage[\s\S]*?return false/);
+    assert.doesNotMatch(dealer,/wasm\.exports\.(draw_shop_dealer|shop_dealer_input_ptr)/);
+    assert.match(panel,/direct\.drawShopPanelStage[\s\S]*?return false/);assert.doesNotMatch(panel,/wasm\.exports\.(draw_shop_panel|shop_panel_input_ptr)/);
+    assert.doesNotMatch(rust,/draw_shop_panel|shop_panel_input_ptr|SHOP_PANEL_INPUT|draw_shop_dealer|shop_dealer_input_ptr|SHOP_DEALER_INPUT/);
+    assert.match(shop,/if \(!dealerDrawn\) \{[\s\S]*?g\.ellipse\(gx, gy \+ 10/);assert.match(shop,/if \(!panelDrawn\) \{[\s\S]*?g\.fillRect\(cx - w \/ 2, cy - h \/ 2, w, h\)/);
   });
   await test('Sprites de luz radial são rasterizados em RGBA pelo Rust com fallback Canvas', () => {
     const fx=read('js/exp-fx.js'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),build=read('wasm-renderer/build.ps1');
     assert.match(fx,/radialRenderer\.createRadialSprite\(c, rgb, r, a0\)/);
     assert.match(renderer,/state\.createRadialSprite = \(canvas, rgb, radius, alpha\)/);
-    assert.match(renderer,/draw_radial_sprite_batch\(pointer, width, height\)/);
-    assert.match(rust,/pub extern "C" fn generate_radial_sprite\(\)/);
-    assert.match(rust,/RADIAL_SPRITE_PIXELS/);
+    assert.doesNotMatch(renderer,/draw_radial_sprite_batch\(pointer, width, height\)/);
+    assert.doesNotMatch(rust,/pub extern "C" fn generate_radial_sprite\(\)/);
+    assert.doesNotMatch(rust,/RADIAL_SPRITE_PIXELS|RADIAL_MAX_SIDE/);
     assert.match(build,/if \(\$LASTEXITCODE -ne 0\)/);
   });
   await test('Clarões de disparo usam sprite RGBA Rust e preservam o fallback Canvas', () => {
-    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),directRust=read('wasm-renderer-direct/src/lib.rs');
     assert.match(html,/fxWasm\.drawFx && fxWasm\.drawFx\(ctx, fx\)/);
     assert.match(html,/createRadialGradient\(f\.x, f\.y, 0, f\.x, f\.y, f\.R\)/);
-    assert.match(rust,/pub extern "C" fn generate_muzzle_sprite\(\)/);
-    assert.match(renderer,/draw_muzzle_sprite_batch\(pointer, width, height\)/);
-    assert.match(renderer,/context\.drawImage\(batch\.muzzleSprite, x - radius, y - radius, radius \* 2, radius \* 2\)/);
-    const fxBatch=renderer.slice(renderer.indexOf('draw_fx_batch(pointer, count)'),renderer.indexOf('draw_pickup_batch(pointer, count)'));
-    assert.doesNotMatch(fxBatch,/createRadialGradient|addColorStop/);
+    assert.match(directRust,/pub fn draw_fx_inputs\([\s\S]*?draw_fx_commands\(context, inputs\)/);
+    assert.match(directRust,/create_radial_gradient\(x, y, 0\.0, x, y, radius\)[\s\S]*?add_color_stop\(0\.35, "#ffd23f"\)/);
+    assert.match(renderer,/direct\.drawFxInputs\(context, input\)/);
+    assert.doesNotMatch(renderer,/createMuzzleSprite|muzzleSpriteCanvas/);
+    assert.doesNotMatch(renderer,/draw_muzzle_sprite_batch|generate_muzzle_sprite|draw_fx_batch/);
+    assert.doesNotMatch(rust,/pub extern "C" fn (generate_muzzle_sprite|draw_fx|draw_pickups|draw_throws)\(/);
   });
-  await test('Gradiente da saída é pré-rasterizado pelo Rust e mantém o painter Canvas de fallback', () => {
-    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+  await test('Saída de fase usa Rust direto e mantém o painter Canvas do jogo como fallback', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),direct=read('wasm-renderer-direct/src/lib.rs');
     assert.match(html,/exitWasm\.drawExit && exitWasm\.drawExit\(ctx, exitR, pulse, cleared, CFG\.bloom !== false\)/);
     assert.match(html,/createLinearGradient\(ex, ey, ex \+ ew, ey \+ eh\)/);
-    assert.match(rust,/pub extern "C" fn generate_exit_gradient\(width: u32, height: u32, cleared: u32\)/);
-    const exitBatch=renderer.slice(renderer.indexOf('draw_exit_batch(pointer, count)'),renderer.indexOf('draw_color_grade_batch(pointer, count)'));
-    assert.match(exitBatch,/drawImage\(batch\.gradientCanvas/);
-    assert.doesNotMatch(exitBatch,/createLinearGradient|addColorStop/);
+    assert.match(renderer,/state\.direct\.createExitGradient\(exitGradientCanvas, rect\[2\], rect\[3\], !!cleared\)/);
+    assert.match(renderer,/state\.direct\.drawExitDirect\(context, rect\[0\],[\s\S]*?exitGradientCanvas/);
+    assert.match(direct,/pub fn create_exit_gradient\([\s\S]*?write_rgba_canvas\(canvas, width, height, &pixels\)/);
+    assert.doesNotMatch(renderer,/draw_exit_batch|draw_exit_gradient_batch|wasm\.exports\.(draw_exit|generate_exit_gradient|exit_input_ptr)/);
+    assert.doesNotMatch(rust,/draw_exit_batch|draw_exit_gradient_batch|pub extern "C" fn (draw_exit|generate_exit_gradient|exit_input_ptr)/);
+    assert.match(renderer,/if \(!generatedDirect\) return false/);
   });
   await test('Vidros intactos e estilhaços de expansão usam batch Rust com fallback', () => {
-    const fx=read('js/exp-fx.js'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+    const fx=read('js/exp-fx.js'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),direct=read('wasm-renderer-direct/src/lib.rs');
     assert.match(fx,/drawGlass\(g, EXP\.glass\.list, SH, now, g\.globalAlpha\)/);
-    assert.match(renderer,/wasm\.exports\.draw_glass\(panels\.length, shardCount, nowMs, baseAlpha\)/);
-    assert.match(rust,/pub extern "C" fn draw_glass\(panel_count: u32, shard_count: u32, now_ms: f64, base_alpha: f64\)/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.(?:draw_glass|glass_panel_input_ptr|glass_shard_input_ptr)/);
+    assert.doesNotMatch(rust,/pub extern "C" fn draw_glass|GLASS_PANEL_INPUT|GLASS_SHARD_INPUT/);
+    assert.match(renderer,/if \(!state\.directReady \|\| !state\.direct \|\| !state\.direct\.drawGlass\) return false/);
+    assert.match(renderer,/state\.direct\.drawGlass\(context, directPanels, directShards, nowMs, baseAlpha, FURNITURE_COLORS\)/);
+    assert.match(direct,/pub fn draw_glass_direct/);
     assert.match(fx,/for \(const gl of EXP\.glass\.list\)/);
+  });
+  await test('Contornos e rota de fuga da máscara Coruja são pintados por Rust com fallback', () => {
+    const modes=read('js/exp-modes.js'),renderer=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs');
+    assert.match(modes,/addItem\(0, p\.x, p\.y, 12, 12\)/);
+    assert.match(modes,/addItem\(1, b\.x, b\.y, b\.r \+ 4, 0\)/);
+    assert.match(modes,/addItem\(2, c\.x, c\.y, 10, 8\)/);
+    assert.match(modes,/renderer\.drawOwlOverlay\(g, owlItemsInput, itemCount, owlPathInput, pathCount, now, pulse\)/);
+    assert.match(modes,/if \(renderer && renderer\.drawOwlOverlay[\s\S]*?return;/);
+    assert.match(renderer,/state\.direct\.drawOwlOverlay\(context, items, itemCount, path, pathCount, nowMs, pulse\)/);
+    assert.match(direct,/pub fn draw_owl_overlay\(/);
+    assert.match(direct,/context\.set_line_dash\(dash\.as_ref\(\)\)/);
+  });
+  await test('Seta da Invasão é calculada e pintada diretamente por Rust com fallback Canvas', () => {
+    const modes=read('js/exp-modes.js'),renderer=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs');
+    assert.match(modes,/arrowRenderer\.drawInvasionArrow\(g, arrowX, arrowY, a\)/);
+    assert.match(renderer,/state\.direct\.drawInvasionArrowInput\(context, centerX, centerY, Math\.cos\(angle\), Math\.sin\(angle\)\)/);
+    assert.match(renderer,/state\.directInvasionArrowCalls/);
+    assert.match(direct,/pub fn draw_invasion_arrow_input\(/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.(draw_invasion_arrow|invasion_arrow_input_ptr)/);
   });
   await test('Jogar Solo desliga multiplayer persistido e evita criar P2', () => {
     const html=read('index.html'),ui=read('js/exp-ui.js');
@@ -698,72 +837,77 @@ async function run() {
     assert.match(html,/const rawDt = Math\.max/);assert.match(html,/perfSamples\.push\(rawDt\)/);assert.match(html,/window\.EXP\.perfTier = 1/);
     assert.match(html,/tier >= 1 \? \.55/);assert.match(fx,/EXP\.perfTier >= 1 \? 2 : 1/);assert.match(fx,/EXP\.perfTier < 2/);
   });
-  await test('BuildFloor envia granulado, sombras e rejunte ao Rust com fallback JS', () => {
-    const html=read('index.html'),renderer=read('js/wasm-renderer.js');
+  await test('BuildFloor envia o piso ao Rust direto sem rota antiga no WASM', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),direct=read('wasm-renderer-direct/src/lib.rs'),abi=read('tests/wasm-renderer.cjs');
     assert.match(html,/renderer\.paintFloorGrain\(fg, WW, WH, R2\)/);
     assert.match(html,/renderer\.paintFloorFinish\(fg, sol, WW, WH\)/);
+    assert.match(html,/renderer\.paintFloorTiles\(fg, rooms, tIdx, FTILES\)/);
     assert.match(html,/if \(!grainRendered\) for \(let k = 0; k < Math\.round\(WW \* WH \/ 160\)/);
     assert.match(html,/if \(!finishRendered\) \{/);
-    assert.match(renderer,/paint_floor_grain_rgba\(width, height, random\.getState\(\)\)/);
-    assert.match(renderer,/draw_floor_rgba_batch\(pointer, width, height\)/);
-    assert.match(renderer,/floorGrainImageCache = new WeakMap\(\)/);
-    assert.match(renderer,/batch\.context\.putImageData\(batch\.image, 0, 0\)/);
-    assert.match(read('wasm-renderer/src/lib.rs'),/const FLOOR_GRAIN_MAX_WIDTH: usize = 1440;[\s\S]*const FLOOR_GRAIN_MAX_HEIGHT: usize = 900/);
-    assert.match(renderer,/floorGrainRasterReady\.has\(context\)/);
-    assert.match(renderer,/const useCanvasFallback = \(\) => \{ if \(context\) floorGrainRasterReady\.delete\(context\); return false; \}/);
-    assert.match(renderer,/paint_floor_finish_rgba\(solids\.length, width, height\)/);
-    assert.match(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn paint_floor_finish_rgba\(solid_count: u32, width: f64, height: f64\)/);
-    assert.match(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn paint_floor_finish\(solid_count: u32, width: f64, height: f64\)/,'legacy Canvas command route is retained for fallback compatibility');
+    assert.match(html,/if \(!floorTilesRendered\) \{/);
+    assert.match(renderer,/state\.direct\.drawFloorGrainRgba\(cached\.image\.data, width, height, seed\)/);
+    assert.match(renderer,/state\.direct\.drawFloorTilesCanvas\(context, tileImage, directRooms/);
+    assert.match(renderer,/state\.direct\.paintFloorFinishCanvas\(context/);
+    assert.match(direct,/js_name = drawFloorGrainRgba/);assert.match(direct,/js_name = drawFloorTilesCanvas/);assert.match(direct,/js_name = paintFloorFinishCanvas/);
+    assert.doesNotMatch(rust,/paint_floor_(?:grain|finish|tiles)|floor_tile_pixels_ptr|floor_rects|draw_floor_(?:rgba_)?batch/);
+    assert.doesNotMatch(direct,/drawFloorCommands|draw_floor_commands/);
+    assert.match(abi,/legacy floor route \$\{name\} was removed/);
+    assert.match(read('tests/wasm-floor-pixel-parity.cjs'),/const floorParity=await evalJS/);
   });
-  await test('BuildFloor envia texturas de sólidos e aberturas ao Rust preservando fallback', () => {
+  await test('BuildFloor pinta texturas de mapa em Rust direto e preserva fallback Canvas', () => {
     const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),pixelTest=read('tests/wasm-floor-pixel-parity.cjs');
     assert.match(html,/renderer\.paintMapTextures\(tc, sol, keep, mapTextures, T\)/);
     assert.match(html,/wallSheet: ready\(WALLT\) \? WALLT : null/);
     assert.match(html,/furnitureSheet: ready\(FURNT\) \? FURNT : null/);
     assert.match(html,/doorSheet: ready\(DOORT\) \? DOORT : null/);
     assert.match(html,/if \(!texturesRendered\) \{/);
-    assert.match(renderer,/paint_map_textures\(solids\.length, openings\.length/);
-    assert.match(renderer,/map_texture_pixels_ptr/);assert.match(renderer,/paint_map_textures_rgba\(/);
-    assert.match(rust,/pub extern "C" fn paint_map_textures_rgba/);
-    assert.match(rust,/pub extern "C" fn map_texture_sheet_pixels_ptr/);
-    assert.match(rust,/pub extern "C" fn copy_map_texture_sprite/);
-    assert.match(renderer,/copy_map_texture_sprite\(slot, pixels\.width, pixels\.height, sourceX, sourceY\)/);
+    assert.match(renderer,/const texturePixels = new Uint8Array\(8 \* 24 \* 24 \* 4\)/);
+    assert.match(renderer,/pixels\.data\.subarray\(start, start \+ 24 \* 4\)/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.(?:paint_map_textures|map_texture_pixels_ptr|map_texture_sheet_pixels_ptr|copy_map_texture_sprite)/);
+    assert.doesNotMatch(renderer,/currentMapTextureBatch|legacyTexturePixels|legacySolidInput|legacyOpeningInput/);
+    assert.match(renderer,/data = state\.readCanvasSourcePixels\(source, sourceContext, width, height\)/);
+    assert.match(read('wasm-renderer-direct/src/lib.rs'),/pub fn read_canvas_source_pixels\(/);
+    assert.match(renderer,/state\.direct\.drawMapTexturesRgba\(context, layer\.image/);
+    assert.match(renderer,/const solidInput = new Float64Array\(solids\.length \* 4\)/);
+    assert.match(renderer,/const openingInput = new Float64Array\(openings\.length \* 5\)/);
+    assert.match(renderer,/return paintMapTexturesRgba\(context, solids, openings, mapTextures, across\) === true/);
+    assert.match(read('wasm-renderer-direct/src/lib.rs'),/pub fn draw_map_textures_rgba\(/);
     assert.match(pixelTest,/mapTextureParity\.maxDifference>80/);assert.match(pixelTest,/mapTextureParity\.meanDifference>0\.0025/);
     assert.match(pixelTest,/wallSheet:ready\(WALLT\)\?WALLT:null/);
     assert.match(pixelTest,/furnitureSheet:ready\(FURNT\)\?FURNT:null/);
     assert.match(pixelTest,/doorSheet:ready\(DOORT\)\?DOORT:null/);
-    assert.match(renderer,/else if \(op === 31\)/);assert.match(renderer,/else if \(op === 32\)/);
+    assert.doesNotMatch(renderer,/op === 31|op === 32|op === 33/);
   });
   await test('Névoa e fumaça geram sprite RGBA por Rust e mantêm fallback Canvas', () => {
     const fx=read('js/exp-fx.js'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),pixels=read('tests/wasm-floor-pixel-parity.cjs');
     assert.match(fx,/const fogRings = Array\.from\(\{ length: 9 \}/);assert.match(fx,/renderer\.createFogSprite\(canvas, fogRings\)/);
-    assert.match(fx,/createRadialGradient/);assert.match(renderer,/wasm\.exports\.generate_fog_sprite\(\)/);
-    assert.match(rust,/pub extern "C" fn generate_fog_sprite/);assert.match(pixels,/fogSpriteParity/);assert.match(pixels,/maxAlphaDifference>1/);
+    assert.match(fx,/createRadialGradient/);assert.match(renderer,/state\.direct\.createFogSprite\(canvas, input\)/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.generate_fog_sprite\(\)/);
+    assert.doesNotMatch(rust,/pub extern "C" fn generate_fog_sprite/);assert.match(pixels,/fogSpriteParity/);assert.match(pixels,/maxAlphaDifference>1/);
   });
-  await test('BuildFloor envia FTILES ao Rust e preserva fallback do corredor', () => {
-    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+  await test('BuildFloor envia FTILES ao Rust direto e preserva o painter Canvas original', () => {
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),direct=read('wasm-renderer-direct/src/lib.rs');
     assert.match(html,/renderer\.paintFloorTiles\(fg, rooms, tIdx, FTILES\)/);
     assert.match(html,/if \(!floorTilesRendered\) \{/);
     const block=renderer.match(/state\.paintFloorTiles = \(context, rooms, tileIndex, tileImage\) => \{[\s\S]*?\n      state\.paintFloorFinish/mi)?.[0];assert.ok(block);
-    assert.match(block,/floorGrainRasterReady\.has\(context\)/);
-    assert.match(block,/sourceContext\.getImageData\(0, 0, 72, 24\)\.data/);
-    assert.match(block,/floor_tile_pixels_ptr\(\)/);
-    assert.match(block,/paint_floor_tiles_rgba\(rooms\.length, hallIndex, tileIndex, grain\.width, grain\.height\)/);
-    assert.match(block,/drawnRooms === -1 \|\| drawnRooms === 0xffffffff/);
-    assert.match(renderer,/else if \(op === 33\)/,'legacy command renderer remains available for fallback');
-    assert.match(rust,/pub extern "C" fn paint_floor_tiles_rgba\(room_count: u32, hall_index: i32, tile_index: i32, width: f64, height: f64\)/);
-    assert.match(rust,/let source_x = \(x \+ tile_index as usize \* 24\) % 72/);
-    assert.match(rust,/pub extern "C" fn paint_floor_tiles\(room_count: u32, hall_index: i32, tile_index: i32\)/);
+    assert.match(block,/state\.direct\.drawFloorTilesCanvas\(context, tileImage/);
+    assert.match(block,/return false;/);
+    assert.doesNotMatch(block,/wasm\.exports\.paint_floor|floor_tile_pixels_ptr/);
+    assert.match(direct,/pub fn draw_floor_tiles_canvas_direct/);
+    assert.doesNotMatch(rust,/paint_floor_(?:grain|finish|tiles)|floor_tile_pixels_ptr|draw_floor_(?:rgba_)?batch/);
   });
   await test('Portas Neon enviam sprite e transformação ao Rust com fallback JS', () => {
-    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs');
+    const html=read('index.html'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),directRust=read('wasm-renderer-direct/src/lib.rs');
     const block=html.match(/function drawDoors\(\) \{[\s\S]*?\n\}/)?.[0];assert.ok(block);
     assert.match(block,/renderer\.drawNeonDoors\(ctx, neonBatch\)/);
     assert.match(block,/if \(!rendered\) for \(const door of neonBatch\) neonDrawDoor\(door\.fallback\)/);
     assert.match(renderer,/drawNeonDoors = \(context, doors\)/);
-    assert.match(renderer,/draw_neon_doors\(doors\.length\)/);
-    assert.match(renderer,/else if \(op === 34\)/);
-    assert.match(rust,/pub extern "C" fn draw_neon_doors\(count: u32\)/);
+    assert.match(renderer,/state\.direct\.drawNeonDoors\(context, input, spriteImages\)/);
+    assert.match(renderer,/state\.directNeonDoorCalls \+= drawn/);
+    assert.match(renderer,/if \(!state\.directReady \|\| !state\.direct \|\| !state\.direct\.drawNeonDoors\) return false/);
+    assert.doesNotMatch(renderer,/wasm\.exports\.(?:draw_neon_doors|neon_doors_ptr)|else if \(op === 34\)/);
+    assert.doesNotMatch(rust,/pub extern "C" fn draw_neon_doors|NEON_DOORS/);
+    assert.match(directRust,/pub fn draw_neon_doors_direct\([\s\S]*?sprite_images\.length\(\)[\s\S]*?context\.rotate\(angle\)[\s\S]*?draw_image_at\(context, &image, &\[-ox, -oy\]\)/);
   });
   await test('Janelas quebráveis, perímetro Neon e armas têm integração própria', () => {
     const html=read('index.html');
@@ -803,7 +947,8 @@ async function run() {
     assert.match(fixed,/doors = \[\]/);
   });
   await test('Campanha mantém a primeira fase, bloqueia avanço duplicado e remove reinício por R', () => {
-    const html=read('index.html'), modes=read('js/exp-modes.js'), world=read('js/exp-world.js'), ui=read('js/exp-ui.js'), debug=read('js/exp-debug.js');
+    const html=read('index.html'), modes=read('js/exp-modes.js'), world=read('js/exp-world.js'), ui=read('js/exp-ui.js'), debug=read('js/exp-debug.js'),rust=read('wasm-renderer-direct/src/lib.rs');
+    const bridge=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs');
     assert.match(modes,/m\.tiles\) \{ mapSel = 'tiles'; EXP\.tileIdx = 0; lvl = 1; \}/);
     assert.match(modes,/r\.currentTile = 0; r\.pending = false/);
     assert.match(modes,/r\.currentTile !== EXP\.tileIdx/);
@@ -812,6 +957,12 @@ async function run() {
     assert.doesNotMatch(html,/R · RECOMEÇAR|ou aperte R/);
     assert.doesNotMatch(ui,/R · RECOMEÇAR|id: 'rest'/);
     assert.doesNotMatch(debug,/F8 reiniciar|e\.key === 'F8'/);
+    assert.match(world,/renderer\.paintTileWalls\(tc, walls, th\.wall, th\.trim\)/);
+    assert.match(bridge,/state\.direct\.drawTileWalls\(context,[\s\S]*?wallColor, trimColor\)/);
+    assert.match(direct,/pub fn draw_tile_walls_direct\([\s\S]*?context\.set_global_alpha\(0\.9\)[\s\S]*?context\.fill_rect\(x, y \+ height - 3\.0, width, 3\.0\)/);
+    assert.match(rust,/const MAP_TEXTURE_BUFFER_LEN: usize = 1600 \* 1200 \* 4/);
+    assert.match(rust,/pub fn draw_floor_grain_rgba_direct\([\s\S]*?height > 1200/);
+    assert.match(rust,/pub fn draw_floor_tiles_canvas_direct\([\s\S]*?width > 1600[\s\S]*?height > 1200/);
   });
   await test('Allowlist de mapas, títulos limpos e progressão narrativa sem referências excluídas', () => {
     const c=mapConfiguration(),html=c.html;
@@ -884,12 +1035,146 @@ async function run() {
   await test('Save de versão futura expõe modo protegido na interface', () => {
     const core=read('js/exp-core.js');assert.match(core,/saveReadOnly: \(\) => unsupportedSave/);assert.match(core,/saveReadonlyNotice/);assert.match(core,/modo protegido/);
   });
+  await test('Arte das 16 máscaras novas rasteriza em Rust com fallback e atualização tardia', () => {
+    const exp=read('js/exp-content.js'),renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer-direct/src/lib.rs');
+    assert.equal((exp.match(/art:\s*\{/g)||[]).length,16);
+    assert.match(exp,/window\.HM_WASM_RENDERER\.drawMaskArt\(g, sp\)/);
+    assert.match(exp,/hm-wasm-renderer-ready/);assert.match(exp,/renderExpansionMaskArtWithRust/);
+    assert.match(renderer,/state\.direct\.drawMaskArt\(context, palette, params\)/);
+    assert.match(rust,/js_name = drawMaskArt/);
+  });
+  await test('Ícones das armas da expansão têm painter Rust e teste de paridade Chrome', () => {
+    const source=read('wasm-renderer-direct/src/lib.rs'),renderer=read('js/wasm-renderer.js'),test=read('tests/wasm-exp-weapon-icon-parity.cjs');
+    assert.match(source,/js_name = drawWeaponIcon/);assert.match(renderer,/state\.direct\.drawWeaponIcon\(context, weaponId, FURNITURE_COLORS\)/);
+    assert.match(test,/differentChannels !== 0/);assert.match(test,/stateRestored/);assert.equal((test.match(/'pistola_aut'|'magnum'|'pump'|'dupla'|'carabina'|'sniper'|'lmg'|'katana'|'machado'|'garrafa'|'extintor'|'lanca'/g)||[]).length,12);
+  });
+  await test('Setup do Canvas e fundo do quadro tentam o painter Rust antes do fallback legado', () => {
+    const direct=read('wasm-renderer-direct/src/lib.rs'),renderer=read('js/wasm-renderer.js'),browser=read('tests/wasm-direct-draw-parity.cjs');
+    assert.match(direct,/js_name = setupCanvas[\s\S]*?context\.set_transform\(scale, 0\.0, 0\.0, scale, 0\.0, 0\.0\)[\s\S]*?set_image_smoothing_enabled\(smoothing\)/);
+    const setup=renderer.match(/state\.setupCanvas = \(context, scale, smoothing, quality, force = false\) => \{[\s\S]*?\n      \};/)?.[0];
+    assert.ok(setup);assert.match(setup,/state\.direct\.setupCanvas\(context, scale, !!smoothing, qualityId\)/);assert.match(setup,/return false;[\r\n]+      \};$/);assert.doesNotMatch(setup,/wasm\.exports\.draw_canvas_setup/);
+    const background=renderer.match(/state\.drawFrameBackground = \(context, width, height\) => \{[\s\S]*?\n      \};/)?.[0];
+    assert.ok(background);assert.match(background,/state\.direct\.drawFrameBackground\(context, width, height\)/);assert.match(background,/return false;[\r\n]+      \};$/);assert.doesNotMatch(background,/wasm\.exports\.draw_frame_background/);
+    assert.match(browser,/setupCanvasParity[\s\S]*?setup\.directCalls !== 1[\s\S]*?setup\.parity/);
+  });
+  await test('Painter Rust da pausa não depende do wrapper legado', () => {
+    const renderer=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs'),browser=read('tests/wasm-direct-draw-parity.cjs');
+    assert.doesNotMatch(renderer,/state\.drawPauseUi =/);assert.match(renderer,/state\.drawPauseUiDirect = [\s\S]*?state\.direct\.drawPauseUi\(context, width, height, hoverIndex, \.\.\.labels\)/);assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/draw_pause_ui|pause_ui_input_ptr|PAUSE_UI_INPUT/);assert.match(read('js/exp-ui.js'),/drawPauseUiDirect\(g, W, H, hoverIndex, pauseLabels\)[\s\S]*?O painter Canvas original continua disponível[\s\S]*?g\.strokeRect\(bx\.x, bx\.y, bx\.w, bx\.h\)/);
+    assert.match(direct,/js_name = drawPauseUi/);assert.match(direct,/resume_label: &str[\s\S]*?lobby_label: &str/);assert.match(browser,/pauseUiParity[\s\S]*?differentChannels !== 0/);
+  });
+  await test('Seleção de frames de jogadores e inimigos passa a ser calculada no Rust direto', () => {
+    const renderer=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs'),browser=read('tests/wasm-direct-draw-parity.cjs');
+    assert.match(direct,/js_name = selectPlayerSprite[\s\S]*?pub fn select_player_sprite[\s\S]*?js_name = selectEnemySprite[\s\S]*?pub fn select_enemy_sprite/);
+    const player=renderer.match(/state\.selectPlayerSprite = \(drawState, animation, attackRemaining\) => \{[\s\S]*?\n      \};/)?.[0];
+    const enemy=renderer.match(/state\.selectEnemySprite = \(moving, nowMs\) => \{[\s\S]*?\n      \};/)?.[0];
+    assert.ok(player);assert.ok(enemy);assert.match(player,/state\.direct\.selectPlayerSprite[\s\S]*?return null;/);
+    assert.match(enemy,/state\.direct\.selectEnemySprite[\s\S]*?return null;/);
+    assert.doesNotMatch(player,/wasm\.exports/);assert.doesNotMatch(enemy,/wasm\.exports/);
+    const legacy=read('wasm-renderer/src/lib.rs');assert.doesNotMatch(legacy,/player_sheet_frame|enemy_sheet_frame|draw_player_frame|PLAYER_PIXELS|PLAYER_PALETTE/);
+    assert.match(browser,/spriteSelectionParity[\s\S]*?playerResults\.some[\s\S]*?enemyResults\.some/);
+  });
+  await test('Desenho direto de mapa e partículas remove os batches redundantes do WASM antigo', () => {
+    const renderer=read('js/wasm-renderer.js');
+    const layer=renderer.match(/state\.drawLayer = \([\s\S]*?\n      \};/)?.[0];assert.ok(layer);assert.match(layer,/state\.drawCanvasLayer\(context, image, vx0, vy0, width, height, vx0, vy0, width, height, -1\)/);assert.doesNotMatch(layer,/wasm\.exports\.draw_layer/);
+    const mapDecor=renderer.match(/state\.paintMapDecor = \([\s\S]*?\n      \};/)?.[0];assert.ok(mapDecor);assert.match(mapDecor,/state\.direct\.drawMapDecor\(context, mapDecorInputBuffer\.subarray\(0, decor\.length \* 6\), colors\)/);assert.doesNotMatch(mapDecor,/wasm\.exports\.(paint_map_decor|furniture_ptr)/);assert.match(mapDecor,/return false;[\r\n]+      \};/);
+    const breakables=renderer.match(/state\.drawBreakables = \([\s\S]*?\n      \};/)?.[0];assert.ok(breakables);assert.match(breakables,/state\.direct\.drawMapBreakables\(context, mapBreakableInputBuffer\.subarray\(0, count \* 5\), intact\.length, shards\.length\)/);assert.doesNotMatch(breakables,/wasm\.exports\.(draw_breakables|breakable_data_ptr)/);assert.match(breakables,/return false;[\r\n]+      \};/);
+    for (const [name,method] of [['drawDust','drawDust'],['drawSparks','drawSparkInputs'],['drawLiveBlood','drawLiveBlood'],['drawStaticBlood','drawStaticBlood'],['drawCorpses','drawCorpseInputs'],['drawDarkOutlines','drawDarkOutlineInputs'],['drawDarkOverlay','drawDarkOverlayInputs']]) {
+      const item=renderer.match(new RegExp(`state\\.${name} = \\([\\s\\S]*?\\n      \\};`))?.[0];assert.ok(item,`${name} bridge exists`);assert.ok(item.includes(`state.direct.${method}`),`${name} uses direct Rust`);assert.doesNotMatch(item,/wasm\.exports\.(draw_dust|dust_input_ptr|draw_sparks|spark_input_ptr|draw_live_blood|draw_static_blood|blood_input_ptr|draw_corpses|corpse_input_ptr|draw_dark_outlines|dark_outline_input_ptr|draw_dark_overlay|dark_overlay_input_ptr)/);assert.match(item,/return false;[\r\n]+      \};$/);
+    }
+    const legacy=read('wasm-renderer/src/lib.rs');assert.doesNotMatch(legacy,/pub extern "C" fn (draw_dust|draw_sparks|draw_live_blood|draw_static_blood|draw_corpses|dust_input_ptr|spark_input_ptr|blood_input_ptr|corpse_input_ptr|draw_layer|dark_outline_input_ptr|draw_dark_outlines|dark_overlay_input_ptr|draw_dark_overlay)/);assert.doesNotMatch(legacy,/fn draw_(dust|spark|live_blood|static_blood|corpse|layer|dark_outline|dark_overlay)_batch|fn draw_layer_command/);
+  });
+  await test('Piso usa somente Rust direto e mantém fallback original do jogo', () => {
+    const renderer=read('js/wasm-renderer.js'),rust=read('wasm-renderer/src/lib.rs'),game=read('index.html');
+    for (const [name,method] of [['paintFloorGrain','drawFloorGrainRgba'],['paintFloorTiles','drawFloorTilesCanvas'],['paintFloorFinish','paintFloorFinishCanvas']]) {
+      const painter=renderer.match(new RegExp('state\\.'+name+' = \\([\\s\\S]*?\\n      \\};'))?.[0];
+      assert.ok(painter,name+' bridge exists');assert.ok(painter.includes('state.direct.'+method),name+' calls direct Rust');
+      assert.doesNotMatch(painter,/wasm\.exports\.paint_floor|draw_floor_(?:rgba_)?batch/);
+    }
+    assert.doesNotMatch(rust,/paint_floor_(?:grain|finish|tiles)|floor_tile_pixels_ptr|floor_rects|draw_floor_(?:rgba_)?batch/);
+    assert.match(game,/if \(!grainRendered\) for \(let k = 0; k < Math\.round\(WW \* WH \/ 160\)/);
+    assert.match(game,/if \(!floorTilesRendered\) \{/);assert.match(game,/if \(!finishRendered\) \{/);
+  });
+  await test('Barra do chefe pinta direto no Rust e mantém fallback validado no Chrome', () => {
+    const source=read('wasm-renderer-direct/src/lib.rs'),renderer=read('js/wasm-renderer.js'),test=read('tests/wasm-boss-hud-parity.cjs');
+    assert.match(source,/js_name = drawBossHealthBar/);assert.match(renderer,/state\.direct\.drawBossHealthBar\(context, width, height, fraction, boss\.boss\.col, phaseValues\)/);
+    assert.match(test,/differentChannels !== 0/);assert.match(test,/transformRestored/);
+  });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v176.0-screen-compositing');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v289.0-campaign-tile-walls-rust');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
-    assert.ok(list.includes('wasm-renderer/pkg/renderer.wasm'));
+    assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));
+  });
+  await test('Texto cacheado encaminha drawImage ao Rust com fallback Canvas', () => {
+    const html=read('index.html');
+    assert.match(html,/function txPlacement\(s, x, y, c, font, al = 'left'\)[\s\S]*?return \{ image: e\.k, x: Math\.round\(x - ox\), y: Math\.round\(y - e\.by\) \}/);
+    assert.match(html,/renderer\.drawCanvasImage\(ctx, placement\.image, placement\.x, placement\.y\)/);
+    assert.match(html,/\)\) ctx\.drawImage\(placement\.image, placement\.x, placement\.y\)/);
+  });
+  await test('Base e overlay do mapa tentam desenho direto em Rust antes do gerador legado', () => {
+    const bridge=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs');
+    assert.match(bridge,/state\.direct\.paintMapBase\(context, !!fixedMap, width, height\)/);
+    assert.match(bridge,/state\.direct\.paintMapOverlay\(context, width, height\)/);
+    assert.match(direct,/pub fn paint_map_base_direct\([\s\S]*?context\.fill_rect\(0\.0, 0\.0, width, height\)/);
+    assert.match(direct,/pub fn paint_map_overlay_direct\([\s\S]*?rgba\(255,240,230,\.08\)[\s\S]*?context\.fill_rect\(0\.0, 0\.0, width, height\)/);
+    assert.doesNotMatch(bridge,/wasm\.exports\.paint_map_(base|overlay)/);
+    assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/paint_map_(base|overlay)/);
+    assert.match(read('index.html'),/paintMapBase\(g, true, WW, WH\)\)\) \{ g\.fillStyle = '#07010f'/);
+    assert.match(read('index.html'),/paintMapOverlay\(g, WW, WH\)\)\) \{ g\.fillStyle = 'rgba\(255,240,230,\.08\)'/);
+  });
+  await test('Decoração de mapa gera e pinta direta em Rust mantendo fallback', () => {
+    const bridge=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs'),legacy=read('wasm-renderer/src/lib.rs');
+    assert.match(bridge,/state\.direct\.drawMapDecor\(context, mapDecorInputBuffer\.subarray\(0, decor\.length \* 6\), colors\)/);
+    assert.doesNotMatch(bridge,/wasm\.exports\.paint_map_decor/);assert.doesNotMatch(legacy,/pub extern "C" fn paint_map_decor/);assert.match(read('index.html'),/if \(!\(wasmRenderer && wasmRenderer\.active && wasmRenderer\.paintMapDecor && wasmRenderer\.paintMapDecor\(g, decor\)\)\) \{\s*for \(const d of decor\)/);
+    assert.match(direct,/pub fn draw_map_decor_direct\([\s\S]*?context\.fill_rect\(x, y, width, height\)[\s\S]*?context\.stroke_rect\(x \+ 1\.0, y \+ 1\.0, width - 2\.0, height - 2\.0\)[\s\S]*?context\.stroke_rect\(x \+ 8\.0, y \+ 8\.0, width - 16\.0, height - 16\.0\)/);
+  });
+  await test('Detalhes do mapa usam Rust direto e cedem ao fallback Canvas', () => {
+    const bridge=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs'),legacy=read('wasm-renderer/src/lib.rs');
+    assert.match(bridge,/state\.direct\.drawMapDetails\(context, directRooms, width, height, random\.getState\(\)\)/);
+    assert.match(bridge,/random\.setState\(nextSeed\)/);
+    assert.doesNotMatch(bridge,/wasm\.exports\.paint_map_details/);assert.doesNotMatch(legacy,/pub extern "C" fn paint_map_details/);
+    assert.match(bridge,/state\.paintMapDetails = \(context, rooms, width, height, random\) => \{[\s\S]*?return false;[\s\S]*?\n      \};/);
+    assert.match(read('index.html'),/if \(!wasmRenderer \|\| !wasmRenderer\.paintMapDetails \|\| !wasmRenderer\.paintMapDetails\(g, rooms, WW, WH, R\)\) \{[\s\S]*?g\.strokeRect\(rx \+ 9/);
+    const detailSource=direct.match(/pub fn draw_map_details_direct\([\s\S]*?\n\}/)?.[0];
+    assert.ok(detailSource);assert.match(detailSource,/map_detail_random\(/);assert.match(detailSource,/set_global_alpha\(0\.22\)/);assert.match(detailSource,/rgba\(255,255,255,\.035\)/);
+  });
+  await test('Sombras de paredes e móveis são desenhadas diretamente em Rust com fallback', () => {
+    const bridge=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs');
+    assert.match(bridge,/state\.direct\.drawMapShadows\(context, mapShadowInputBuffer\.subarray\(0, count \* 5\)\)/);
+    assert.doesNotMatch(bridge,/wasm\.exports\.paint_map_shadows/);assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn paint_map_shadows/);
+    assert.match(bridge,/state\.paintMapShadows = \(context, walls, furniture\) => \{[\s\S]*?return false;[\s\S]*?\n      \};/);
+    assert.match(read('index.html'),/if \(!wasmRenderer \|\| !wasmRenderer\.paintMapShadows \|\| !wasmRenderer\.paintMapShadows\(t, walls, furn\)\) \{[\s\S]*?t\.fillStyle = 'rgba\(0, 0, 0, 0\.4\)'/);
+    assert.match(direct,/pub fn draw_map_shadows_direct\([\s\S]*?let dx = if furniture \{ 4\.0 \} else \{ 6\.0 \};[\s\S]*?let dy = if furniture \{ 6\.0 \} else \{ 8\.0 \};[\s\S]*?rgba\(0, 0, 0, 0\.4\)/);
+  });
+  await test('Faces estruturais de paredes e detalhes de postes são gerados em Rust com fallback', () => {
+    const bridge=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs');
+    assert.match(bridge,/state\.direct\.drawMapStructure\(context, mapStructureInputBuffer\.subarray\(0, count \* 5\)\)/);
+    assert.doesNotMatch(bridge,/wasm\.exports\.paint_map_structure/);assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn paint_map_structure/);
+    assert.match(bridge,/state\.paintMapStructure = \(context, walls, posts\) => \{[\s\S]*?return false;[\s\S]*?\n      \};/);
+    assert.match(read('index.html'),/if \(!wasmRenderer \|\| !wasmRenderer\.paintMapStructure \|\| !wasmRenderer\.paintMapStructure\(t, walls, posts\)\) \{[\s\S]*?t\.fillStyle = '#c8c8d8'/);
+    const structureSource=direct.match(/pub fn draw_map_structure_direct\([\s\S]*?\n\}/)?.[0];
+    assert.ok(structureSource);assert.match(structureSource,/structure_fill\(context, "#c8c8d8"/);assert.match(structureSource,/structure_stroke\(context, "#5d5d73"/);assert.match(structureSource,/structure_fill\(context, "rgba\(25,240,230,\.18\)"/);assert.match(structureSource,/structure_stroke\(context, "#383849"/);
+  });
+  await test('Vidros intactos e fragmentos são gerados e desenhados em Rust com fallback', () => {
+    const bridge=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs');
+    assert.match(bridge,/state\.direct\.drawMapBreakables\(context, mapBreakableInputBuffer\.subarray\(0, count \* 5\), intact\.length, shards\.length\)/);
+    assert.doesNotMatch(bridge,/wasm\.exports\.draw_breakables/);assert.doesNotMatch(read('wasm-renderer/src/lib.rs'),/pub extern "C" fn draw_breakables/);
+    assert.match(direct,/pub fn draw_map_breakables_direct\([\s\S]*?rgba\(110,225,255,\.22\)[\s\S]*?rgba\(210,255,255,\.85\)[\s\S]*?rgba\(210,250,255,\.75\)/);
+  });
+  await test('Acabamento do piso usa painter Canvas Rust/WebSys sem rota legada', () => {
+    const bridge=read('js/wasm-renderer.js'),direct=read('wasm-renderer-direct/src/lib.rs'),legacy=read('wasm-renderer/src/lib.rs');
+    assert.match(bridge,/state\.direct\.paintFloorFinishCanvas\(context/);
+    assert.doesNotMatch(bridge,/wasm\.exports\.paint_floor_finish_rgba/);
+    assert.match(direct,/pub fn paint_floor_finish_canvas_direct\([\s\S]*?context\.fill_rect\(solids\.get_index\(offset\) \+ 5\.0/);
+    assert.doesNotMatch(legacy,/paint_floor_finish/);
+  });
+  await test('Contornos noturnos de atores tentam o painter direto Rust antes do fallback Canvas', () => {
+    const source=read('js/wasm-renderer.js'),game=read('index.html');
+    assert.match(source,/state\.direct\.drawDarkOutlineInputs\(context, input, camX, camY, screenW, screenH, zoom\)/);
+    assert.match(read('wasm-renderer-direct/src/lib.rs'),/pub fn draw_dark_outline_inputs\([\s\S]*?14\.0 \* zoom[\s\S]*?draw_dark_outlines\(context, &commands\)/);
+    assert.match(game,/outlineWasm\.drawDarkOutlines\(ctx, enemies, cam\.x, cam\.y, W, H, CFG\.zoom\)/);
+    assert.match(game,/if \(!\(outlineWasm && outlineWasm\.drawDarkOutlines[\s\S]*?ctx\.arc\(sx, sy, 14 \* z, 0, 6\.28\)/);
   });
   await test('Ativação não apaga cache de outros apps nem outras instalações', async () => {
     const w=worker();let pending;w.handlers.activate({waitUntil:p=>pending=p});await pending;

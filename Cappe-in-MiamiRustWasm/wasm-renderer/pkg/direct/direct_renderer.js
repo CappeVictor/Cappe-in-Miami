@@ -31,6 +31,67 @@ export function createCanvasImageData(context, width, height) {
 }
 
 /**
+ * Generates the cached exit glow fill directly in Rust/WebSys.
+ * @param {HTMLCanvasElement} canvas
+ * @param {number} width
+ * @param {number} height
+ * @param {boolean} cleared
+ * @returns {boolean}
+ */
+export function createExitGradient(canvas, width, height, cleared) {
+    const ret = wasm.createExitGradient(canvas, width, height, cleared);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Rasterizes the nine radial fog/smoke rings directly in Rust/WebSys.
+ * @param {HTMLCanvasElement} canvas
+ * @param {Float64Array} rings
+ * @returns {boolean}
+ */
+export function createFogSprite(canvas, rings) {
+    const ret = wasm.createFogSprite(canvas, rings);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Generates the cached muzzle-flash sprite directly in Rust/WebSys.
+ * @param {HTMLCanvasElement} canvas
+ * @returns {boolean}
+ */
+export function createMuzzleSprite(canvas) {
+    const ret = wasm.createMuzzleSprite(canvas);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Generates the cached radial light sprite directly in Rust/WebSys.
+ * @param {HTMLCanvasElement} canvas
+ * @param {number} red
+ * @param {number} green
+ * @param {number} blue
+ * @param {number} radius
+ * @param {number} alpha
+ * @returns {boolean}
+ */
+export function createRadialSprite(canvas, red, green, blue, radius, alpha) {
+    const ret = wasm.createRadialSprite(canvas, red, green, blue, radius, alpha);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
  * @param {HTMLCanvasElement} canvas
  * @param {string} text
  * @param {string} font
@@ -53,6 +114,24 @@ export function createTextImage(canvas, text, font, color, outlined) {
 }
 
 /**
+ * Generates the cached stair/elevator/door gradient directly in Rust/WebSys.
+ * @param {HTMLCanvasElement} canvas
+ * @param {number} width
+ * @param {number} height
+ * @param {number} kind
+ * @param {number} offset_x
+ * @param {number} gradient_width
+ * @returns {boolean}
+ */
+export function createTransportGradient(canvas, width, height, kind, offset_x, gradient_width) {
+    const ret = wasm.createTransportGradient(canvas, width, height, kind, offset_x, gradient_width);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
  * Draws the existing alarm status label using the browser's Canvas text rasterizer.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} commands
@@ -63,6 +142,21 @@ export function drawAlarmText(context, commands, label) {
     const ptr0 = passStringToWasm0(label, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.drawAlarmText(context, commands, ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Formats and paints the centered alarm timer entirely in Rust/WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} seconds
+ * @param {number} screen_width
+ * @returns {boolean}
+ */
+export function drawAlarmTextStage(context, seconds, screen_width) {
+    const ret = wasm.drawAlarmTextStage(context, seconds, screen_width);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -110,6 +204,42 @@ export function drawBloodSplatter(context, puddle_color, drop_color, blobs, stre
 }
 
 /**
+ * Paints the expansion boss health bar and phase markers directly in Rust.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} width
+ * @param {number} height
+ * @param {number} fraction
+ * @param {string} boss_color
+ * @param {Float64Array} phases
+ * @returns {boolean}
+ */
+export function drawBossHealthBar(context, width, height, fraction, boss_color, phases) {
+    const ptr0 = passStringToWasm0(boss_color, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.drawBossHealthBar(context, width, height, fraction, ptr0, len0, phases);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Draws world-simulation projectile inputs directly, preserving owner sprite and centered offset.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} inputs
+ * @param {any} mine
+ * @param {any} foe
+ * @returns {number}
+ */
+export function drawBulletInputs(context, inputs, mine, foe) {
+    const ret = wasm.drawBulletInputs(context, inputs, mine, foe);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
  * Draws cached projectile sprites at positions emitted by the legacy Rust pass.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} commands
@@ -139,6 +269,22 @@ export function drawCanvasImage(context, image, x, y) {
         throw takeFromExternrefTable0(ret[1]);
     }
     return ret[0] !== 0;
+}
+
+/**
+ * Draws a batch of cached text images with per-entry alpha in one direct Rust call.
+ * Placements contain x, y and alpha triples; Canvas state is restored after each image.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Array<any>} images
+ * @param {Float64Array} placements
+ * @returns {number}
+ */
+export function drawCanvasImageBatch(context, images, placements) {
+    const ret = wasm.drawCanvasImageBatch(context, images, placements);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
 }
 
 /**
@@ -198,7 +344,36 @@ export function drawComboText(context, commands, label) {
 }
 
 /**
- * Rasterizes ordered corpse ellipses with their original transforms and palette.
+ * Computes the combo pulse and paints its outlined multiplier directly in Rust/WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} combo
+ * @param {number} now_ms
+ * @returns {boolean}
+ */
+export function drawComboTextStage(context, combo, now_ms) {
+    const ret = wasm.drawComboTextStage(context, combo, now_ms);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Derives the original shadow/body ellipses from corpse state and paints them without the legacy batch.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} input
+ * @param {Array<any>} colors
+ * @returns {number}
+ */
+export function drawCorpseInputs(context, input, colors) {
+    const ret = wasm.drawCorpseInputs(context, input, colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} commands
  * @param {Array<any>} colors
@@ -206,6 +381,39 @@ export function drawComboText(context, commands, label) {
  */
 export function drawCorpses(context, commands, colors) {
     const ret = wasm.drawCorpses(context, commands, colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Projects living enemies and derives their dark-scene outlines from simulation state directly.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} input
+ * @param {number} camera_x
+ * @param {number} camera_y
+ * @param {number} screen_width
+ * @param {number} screen_height
+ * @param {number} zoom
+ * @returns {number}
+ */
+export function drawDarkOutlineInputs(context, input, camera_x, camera_y, screen_width, screen_height, zoom) {
+    const ret = wasm.drawDarkOutlineInputs(context, input, camera_x, camera_y, screen_width, screen_height, zoom);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Draws projected actor outlines for dark scenes, preserving the existing stroke styles.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} commands
+ * @returns {number}
+ */
+export function drawDarkOutlines(context, commands) {
+    const ret = wasm.drawDarkOutlines(context, commands);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -225,6 +433,34 @@ export function drawCorpses(context, commands, colors) {
  */
 export function drawDarkOverlay(dark_context, screen_context, overlay, core, far, flash, commands) {
     const ret = wasm.drawDarkOverlay(dark_context, screen_context, overlay, core, far, flash, commands);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Projects player/world coordinates and paints the blackout mask without legacy command generation.
+ * @param {CanvasRenderingContext2D} dark_context
+ * @param {CanvasRenderingContext2D} screen_context
+ * @param {any} overlay
+ * @param {any} core
+ * @param {any} far
+ * @param {any} flash
+ * @param {number} player_x
+ * @param {number} player_y
+ * @param {number} camera_x
+ * @param {number} camera_y
+ * @param {number} screen_w
+ * @param {number} screen_h
+ * @param {number} zoom
+ * @param {number} angle
+ * @param {boolean} blackout
+ * @param {boolean} fire_flash
+ * @returns {boolean}
+ */
+export function drawDarkOverlayInputs(dark_context, screen_context, overlay, core, far, flash, player_x, player_y, camera_x, camera_y, screen_w, screen_h, zoom, angle, blackout, fire_flash) {
+    const ret = wasm.drawDarkOverlayInputs(dark_context, screen_context, overlay, core, far, flash, player_x, player_y, camera_x, camera_y, screen_w, screen_h, zoom, angle, blackout, fire_flash);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -276,6 +512,22 @@ export function drawDebugWorld(context, walls, wall_count, doors, door_count, pl
 }
 
 /**
+ * Draws standard room doors directly, without generating a legacy WASM command batch.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} doors
+ * @param {any} door_image
+ * @param {Array<any>} furniture_colors
+ * @returns {number}
+ */
+export function drawDoors(context, doors, door_image, furniture_colors) {
+    const ret = wasm.drawDoors(context, doors, door_image, furniture_colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
  * Rasterizes the Rust-generated dust circles in one direct Canvas batch.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} commands
@@ -284,6 +536,28 @@ export function drawDebugWorld(context, walls, wall_count, doors, door_count, pl
  */
 export function drawDust(context, commands, alpha) {
     const ret = wasm.drawDust(context, commands, alpha);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Filters and composes visible enemy shadows, bodies, stun marks, and cached labels directly.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} items
+ * @param {number} player_x
+ * @param {number} player_y
+ * @param {any} enemy_sheet
+ * @param {number} now_ms
+ * @param {Array<any>} actor_colors
+ * @param {Array<any>} text_images
+ * @param {Float64Array} text_placements
+ * @param {Uint32Array} text_offsets
+ * @returns {number}
+ */
+export function drawEnemies(context, items, player_x, player_y, enemy_sheet, now_ms, actor_colors, text_images, text_placements, text_offsets) {
+    const ret = wasm.drawEnemies(context, items, player_x, player_y, enemy_sheet, now_ms, actor_colors, text_images, text_placements, text_offsets);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -304,6 +578,45 @@ export function drawEnemyShadows(context, commands, offset, count) {
         throw takeFromExternrefTable0(ret[1]);
     }
     return ret[0];
+}
+
+/**
+ * Rasterizes the existing exit glow, gradient, hatches, and borders directly in Rust/WASM.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} commands
+ * @param {any} gradient
+ * @param {number} pulse
+ * @param {boolean} cleared
+ * @param {boolean} bloom
+ * @returns {number}
+ */
+export function drawExitCommands(context, commands, gradient, pulse, cleared, bloom) {
+    const ret = wasm.drawExitCommands(context, commands, gradient, pulse, cleared, bloom);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Builds and paints a phase exit directly, without asking the legacy renderer for commands.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} pulse
+ * @param {boolean} cleared
+ * @param {boolean} bloom
+ * @param {any} gradient
+ * @returns {boolean}
+ */
+export function drawExitDirect(context, x, y, width, height, pulse, cleared, bloom, gradient) {
+    const ret = wasm.drawExitDirect(context, x, y, width, height, pulse, cleared, bloom, gradient);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
 }
 
 /**
@@ -340,6 +653,38 @@ export function drawFinalOverlays(context, width, height, fade, flash, flash_ena
 }
 
 /**
+ * Generates deterministic floor-grain pixels directly into ImageData and returns the advanced RNG state.
+ * @param {Uint8ClampedArray} data
+ * @param {number} width
+ * @param {number} height
+ * @param {number} seed
+ * @returns {number}
+ */
+export function drawFloorGrainRgba(data, width, height, seed) {
+    const ret = wasm.drawFloorGrainRgba(data, width, height, seed);
+    return ret;
+}
+
+/**
+ * Paints repeating floor tiles with the Canvas clipping/compositing rules, called directly from Rust.
+ * @param {CanvasRenderingContext2D} context
+ * @param {HTMLImageElement} tile_image
+ * @param {Float64Array} rooms
+ * @param {number} hall_index
+ * @param {number} tile_index
+ * @param {number} width
+ * @param {number} height
+ * @returns {number}
+ */
+export function drawFloorTilesCanvas(context, tile_image, rooms, hall_index, tile_index, width, height) {
+    const ret = wasm.drawFloorTilesCanvas(context, tile_image, rooms, hall_index, tile_index, width, height);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
  * Rasterizes the already-positioned fog sprites without routing drawImage through host JS.
  * @param {CanvasRenderingContext2D} context
  * @param {any} image
@@ -358,14 +703,93 @@ export function drawFog(context, image, commands, count, alpha, smoke) {
 }
 
 /**
- * Draws muzzle sprites and short impact arcs from commands calculated by the legacy Rust pass.
+ * Computes the three drifting fog/smoke sprites and paints them directly from simulation time.
  * @param {CanvasRenderingContext2D} context
- * @param {Float64Array} commands
- * @param {any} muzzle_sprite
+ * @param {any} image
+ * @param {number} now_ms
+ * @param {boolean} smoke
+ * @param {number} perf_tier
  * @returns {number}
  */
-export function drawFx(context, commands, muzzle_sprite) {
-    const ret = wasm.drawFx(context, commands, muzzle_sprite);
+export function drawFogInputs(context, image, now_ms, smoke, perf_tier) {
+    const ret = wasm.drawFogInputs(context, image, now_ms, smoke, perf_tier);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Fills the frame background with the game's shake-safe margins.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} width
+ * @param {number} height
+ * @returns {boolean}
+ */
+export function drawFrameBackground(context, width, height) {
+    const ret = wasm.drawFrameBackground(context, width, height);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Applies one of the game's nested screen shake, kick, or camera transforms.
+ * Stages 0 and 1 open save scopes, stage 2 applies the camera transform, and
+ * stages 3 and 4 close the matching scopes.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} stage
+ * @param {Float64Array} input
+ * @returns {boolean}
+ */
+export function drawFrameTransforms(context, stage, input) {
+    const ptr0 = passArrayF64ToWasm0(input, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.drawFrameTransforms(context, stage, ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Paints static furniture directly from compact records, bypassing the legacy command generator.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} items
+ * @param {Array<any>} colors
+ * @returns {number}
+ */
+export function drawFurniture(context, items, colors) {
+    const ret = wasm.drawFurniture(context, items, colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Draws muzzle flashes and short impact arcs from prepared effect commands.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} commands
+ * @returns {number}
+ */
+export function drawFx(context, commands) {
+    const ret = wasm.drawFx(context, commands);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Draws effect inputs directly, without a command-generation pass in the legacy WASM module.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} inputs
+ * @returns {number}
+ */
+export function drawFxInputs(context, inputs) {
+    const ret = wasm.drawFxInputs(context, inputs);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -387,6 +811,41 @@ export function drawFx(context, commands, muzzle_sprite) {
  */
 export function drawFxOverlays(context, stage, width, height, now_ms, primary, secondary, enabled) {
     const ret = wasm.drawFxOverlays(context, stage, width, height, now_ms, primary, secondary, enabled);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Composes player afterimages directly from host-owned motion samples.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} items
+ * @param {number} weapon
+ * @param {Array<any>} furniture_colors
+ * @param {Array<any>} actor_colors
+ * @returns {number}
+ */
+export function drawGhosts(context, items, weapon, furniture_colors, actor_colors) {
+    const ret = wasm.drawGhosts(context, items, weapon, furniture_colors, actor_colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Paints intact glass and active shards directly from the host-maintained simulation records.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} panels
+ * @param {Float64Array} shards
+ * @param {number} now_ms
+ * @param {number} base_alpha
+ * @param {Array<any>} colors
+ * @returns {number}
+ */
+export function drawGlass(context, panels, shards, now_ms, base_alpha, colors) {
+    const ret = wasm.drawGlass(context, panels, shards, now_ms, base_alpha, colors);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -427,6 +886,89 @@ export function drawHudImage(context, image, commands) {
 }
 
 /**
+ * Selects and paints the existing vignette or mask image without the legacy HUD generator.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} stage
+ * @param {number} width
+ * @param {number} height
+ * @param {boolean} crt
+ * @param {boolean} has_player
+ * @param {boolean} has_mask
+ * @param {Array<any>} images
+ * @returns {boolean}
+ */
+export function drawHudImageStage(context, stage, width, height, crt, has_player, has_mask, images) {
+    const ret = wasm.drawHudImageStage(context, stage, width, height, crt, has_player, has_mask, images);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Draws the game's fixed HUD shapes directly from Rust without the legacy command bridge.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} stage
+ * @param {number} width
+ * @param {number} height
+ * @param {number} value
+ * @returns {boolean}
+ */
+export function drawHudShape(context, stage, width, height, value) {
+    const ret = wasm.drawHudShape(context, stage, width, height, value);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Rasterizes the legacy HUD geometry batch while Rust keeps its exact opcode and palette.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} commands
+ * @param {Array<any>} colors
+ * @returns {number}
+ */
+export function drawHudShapeCommands(context, commands, colors) {
+    const ret = wasm.drawHudShapeCommands(context, commands, colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Rasterizes the invasion direction triangle from its three Rust-generated vertices.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} vertices
+ * @returns {boolean}
+ */
+export function drawInvasionArrow(context, vertices) {
+    const ret = wasm.drawInvasionArrow(context, vertices);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Computes and paints the Invasion direction arrow without the legacy command buffer.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} center_x
+ * @param {number} center_y
+ * @param {number} cosine
+ * @param {number} sine
+ * @returns {boolean}
+ */
+export function drawInvasionArrowInput(context, center_x, center_y, cosine, sine) {
+    const ret = wasm.drawInvasionArrowInput(context, center_x, center_y, cosine, sine);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
  * Draws the pulsing invasion-zone ring and fill from its six computed command values.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} commands
@@ -434,6 +976,22 @@ export function drawHudImage(context, image, commands) {
  */
 export function drawInvasionZone(context, commands) {
     const ret = wasm.drawInvasionZone(context, commands);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Computes and paints the pulsing Invasion marker without the legacy geometry batch.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} x
+ * @param {number} y
+ * @param {number} now_ms
+ * @returns {boolean}
+ */
+export function drawInvasionZoneInput(context, x, y, now_ms) {
+    const ret = wasm.drawInvasionZoneInput(context, x, y, now_ms);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -458,6 +1016,19 @@ export function drawLiveBlood(context, commands, color) {
 }
 
 /**
+ * Generates and paints intact breakable panes and transient glass fragments directly.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} items
+ * @param {number} panel_count
+ * @param {number} shard_count
+ * @returns {number}
+ */
+export function drawMapBreakables(context, items, panel_count, shard_count) {
+    const ret = wasm.drawMapBreakables(context, items, panel_count, shard_count);
+    return ret;
+}
+
+/**
  * Draws Rust-generated static map command batches directly through Canvas.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} commands
@@ -473,20 +1044,228 @@ export function drawMapCommands(context, commands, colors) {
 }
 
 /**
+ * Generates and paints static room decor directly, preserving rug details and input order.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} decor
+ * @param {Array<any>} colors
+ * @returns {number}
+ */
+export function drawMapDecor(context, decor, colors) {
+    const ret = wasm.drawMapDecor(context, decor, colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Generates and paints static room inlays and floor specks, returning the advanced RNG state.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} rooms
+ * @param {number} width
+ * @param {number} height
+ * @param {number} seed
+ * @returns {number}
+ */
+export function drawMapDetails(context, rooms, width, height, seed) {
+    const ret = wasm.drawMapDetails(context, rooms, width, height, seed);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Draws map shadows directly, with separate offsets for walls and furniture.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} rectangles
+ * @returns {number}
+ */
+export function drawMapShadows(context, rectangles) {
+    const ret = wasm.drawMapShadows(context, rectangles);
+    return ret;
+}
+
+/**
+ * Generates and paints wall faces and decorative posts directly in Rust/WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} geometry
+ * @returns {number}
+ */
+export function drawMapStructure(context, geometry) {
+    const ret = wasm.drawMapStructure(context, geometry);
+    return ret;
+}
+
+/**
+ * Rasterizes wall/furniture patterns and open-door decals without the legacy renderer callback.
+ * @param {CanvasRenderingContext2D} context
+ * @param {ImageData} image
+ * @param {Float64Array} solids
+ * @param {Float64Array} openings
+ * @param {Uint8Array} texture_input
+ * @param {boolean} wall_ready
+ * @param {boolean} furniture_ready
+ * @param {boolean} door_ready
+ * @param {number} across
+ * @param {number} width
+ * @param {number} height
+ * @returns {number}
+ */
+export function drawMapTexturesRgba(context, image, solids, openings, texture_input, wall_ready, furniture_ready, door_ready, across, width, height) {
+    const ret = wasm.drawMapTexturesRgba(context, image, solids, openings, texture_input, wall_ready, furniture_ready, door_ready, across, width, height);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Rasterizes an expansion mask sprite using Rust-owned Canvas calls.
+ * Colors: [base, outline, eyes, dark, nose]. Params: [ears, eyes, marks, mouth, width, height, eye_y].
+ * @param {CanvasRenderingContext2D} context
+ * @param {Array<any>} colors
+ * @param {Float64Array} params
+ * @returns {boolean}
+ */
+export function drawMaskArt(context, colors, params) {
+    const ret = wasm.drawMaskArt(context, colors, params);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Draws animated Neon door sprites and transforms without a legacy WASM batch.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} doors
+ * @param {Array<any>} sprite_images
+ * @returns {number}
+ */
+export function drawNeonDoors(context, doors, sprite_images) {
+    const ret = wasm.drawNeonDoors(context, doors, sprite_images);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Paints the hidden-object outline and escape route for the Owl character.
+ * Items are rows of [kind, x, y, radius_or_half_width, half_height].
+ * Kinds: 0 pickup rectangle, 1 circular object, 2 camera rectangle.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} items
+ * @param {number} item_count
+ * @param {Float64Array} path
+ * @param {number} path_count
+ * @param {number} now_ms
+ * @param {number} pulse
+ * @returns {number}
+ */
+export function drawOwlOverlay(context, items, item_count, path, path_count, now_ms, pulse) {
+    const ret = wasm.drawOwlOverlay(context, items, item_count, path, path_count, now_ms, pulse);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
  * Draws the complete pause overlay through Canvas APIs called from Rust/WASM.
  * JavaScript still owns pause state and pointer hit-testing.
  * @param {CanvasRenderingContext2D} context
  * @param {number} width
  * @param {number} height
  * @param {number} hover_index
+ * @param {string} title
+ * @param {string} resume_label
+ * @param {string} lobby_label
  * @returns {boolean}
  */
-export function drawPauseUi(context, width, height, hover_index) {
-    const ret = wasm.drawPauseUi(context, width, height, hover_index);
+export function drawPauseUi(context, width, height, hover_index, title, resume_label, lobby_label) {
+    const ptr0 = passStringToWasm0(title, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(resume_label, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passStringToWasm0(lobby_label, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ret = wasm.drawPauseUi(context, width, height, hover_index, ptr0, len0, ptr1, len1, ptr2, len2);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
     return ret[0] !== 0;
+}
+
+/**
+ * Draws pickup transforms, their pulsing glow, and weapon icons in direct Rust/WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} commands
+ * @param {boolean} glow
+ * @param {Array<any>} colors
+ * @returns {number}
+ */
+export function drawPickups(context, commands, glow, colors) {
+    const ret = wasm.drawPickups(context, commands, glow, colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Draws the player's shadow and optional local color glow.
+ * @param {CanvasRenderingContext2D} context
+ * @param {boolean} is_p2
+ * @param {boolean} shadows
+ * @param {boolean} glow
+ * @returns {boolean}
+ */
+export function drawPlayerAura(context, is_p2, shadows, glow) {
+    const ret = wasm.drawPlayerAura(context, is_p2, shadows, glow);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Builds the game's procedural 24x24 player frame in the supplied ImageData bytes.
+ * Gameplay timing and the host-computed animation sine remain owned by JavaScript.
+ * @param {Uint8ClampedArray} output
+ * @param {Uint32Array} palette_input
+ * @param {number} state
+ * @param {number} _phase
+ * @param {number} attack_frame
+ * @param {number} sine
+ * @returns {boolean}
+ */
+export function drawPlayerFrameRgba(output, palette_input, state, _phase, attack_frame, sine) {
+    const ret = wasm.drawPlayerFrameRgba(output, palette_input, state, _phase, attack_frame, sine);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Composes live players directly, preserving host-owned state and sprite assets.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} items
+ * @param {any} player_sheet
+ * @param {Array<any>} player_frames
+ * @param {Array<any>} skin_colors
+ * @param {Array<any>} furniture_colors
+ * @param {Array<any>} actor_colors
+ * @returns {number}
+ */
+export function drawPlayers(context, items, player_sheet, player_frames, skin_colors, furniture_colors, actor_colors) {
+    const ret = wasm.drawPlayers(context, items, player_sheet, player_frames, skin_colors, furniture_colors, actor_colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
 }
 
 /**
@@ -521,6 +1300,22 @@ export function drawRawHudTexts(context, entries) {
 }
 
 /**
+ * Projects world-space shell inputs and paints them without the legacy WASM command batch.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} inputs
+ * @param {number} camera_x
+ * @param {number} camera_y
+ * @returns {number}
+ */
+export function drawShellInputs(context, inputs, camera_x, camera_y) {
+    const ret = wasm.drawShellInputs(context, inputs, camera_x, camera_y);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
  * Draws projected shell casings from commands emitted by the legacy Rust pass.
  * Each row contains screen x/y, horizontal/vertical radii, and rotation.
  * @param {CanvasRenderingContext2D} context
@@ -530,6 +1325,52 @@ export function drawRawHudTexts(context, entries) {
  */
 export function drawShells(context, commands, count) {
     const ret = wasm.drawShells(context, commands, count);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Computes and paints the shop dealer's ordered geometry directly in Rust/WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} values
+ * @returns {number}
+ */
+export function drawShopDealerStage(context, values) {
+    const ret = wasm.drawShopDealerStage(context, values);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Computes and paints the shop speech bubble, card, or reroll panel directly in Rust/WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} values
+ * @param {string} outline_color
+ * @returns {boolean}
+ */
+export function drawShopPanelStage(context, values, outline_color) {
+    const ptr0 = passStringToWasm0(outline_color, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.drawShopPanelStage(context, values, ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Derives spark rectangles from simulation particle fields and paints them without the legacy WASM batch.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} input
+ * @param {Array<any>} colors
+ * @returns {number}
+ */
+export function drawSparkInputs(context, input, colors) {
+    const ret = wasm.drawSparkInputs(context, input, colors);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -569,6 +1410,94 @@ export function drawStaticBlood(context, commands, color) {
 }
 
 /**
+ * Draws thrown weapon transforms and icons entirely in direct Rust/WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} commands
+ * @param {Array<any>} colors
+ * @returns {number}
+ */
+export function drawThrows(context, commands, colors) {
+    const ret = wasm.drawThrows(context, commands, colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Applies the campaign tile map's themed wall faces and trims directly through Rust/WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} walls
+ * @param {string} wall_color
+ * @param {string} trim_color
+ * @returns {number}
+ */
+export function drawTileWalls(context, walls, wall_color, trim_color) {
+    const ptr0 = passStringToWasm0(wall_color, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(trim_color, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.drawTileWalls(context, walls, ptr0, len0, ptr1, len1);
+    return ret;
+}
+
+/**
+ * Rasterizes the existing stair/elevator command batch directly through WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} commands
+ * @param {any} stair
+ * @param {any} elevator
+ * @param {any} door_left
+ * @param {any} door_right
+ * @returns {number}
+ */
+export function drawTransportCommands(context, commands, stair, elevator, door_left, door_right) {
+    const ret = wasm.drawTransportCommands(context, commands, stair, elevator, door_left, door_right);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Builds and paints one stair/elevator directly, without asking the legacy renderer for commands.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} kind
+ * @param {boolean} up
+ * @param {any} stair
+ * @param {any} elevator
+ * @param {any} door_left
+ * @param {any} door_right
+ * @returns {boolean}
+ */
+export function drawTransportDirect(context, x, y, width, height, kind, up, stair, elevator, door_left, door_right) {
+    const ret = wasm.drawTransportDirect(context, x, y, width, height, kind, up, stair, elevator, door_left, door_right);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * Builds and rasterizes an existing weapon icon entirely in the direct Rust renderer.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} id
+ * @param {Array<any>} colors
+ * @returns {boolean}
+ */
+export function drawWeaponIcon(context, id, colors) {
+    const ret = wasm.drawWeaponIcon(context, id, colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
  * Draws ambient motes directly while JS retains all position updates.
  * @param {CanvasRenderingContext2D} context
  * @param {Float64Array} input
@@ -585,15 +1514,15 @@ export function drawWeatherMotes(context, input, count, now_ms) {
 }
 
 /**
- * Draws glow sprites and rain reflections from Rust-generated world-light commands.
+ * Paints world barrels directly from live simulation records, without legacy command generation.
  * @param {CanvasRenderingContext2D} context
- * @param {Float64Array} commands
- * @param {Array<any>} images
- * @param {any} flash_image
+ * @param {Float64Array} barrels
+ * @param {number} now_ms
+ * @param {Array<any>} colors
  * @returns {number}
  */
-export function drawWorldLights(context, commands, images, flash_image) {
-    const ret = wasm.drawWorldLights(context, commands, images, flash_image);
+export function drawWorldBarrels(context, barrels, now_ms, colors) {
+    const ret = wasm.drawWorldBarrels(context, barrels, now_ms, colors);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -601,18 +1530,127 @@ export function drawWorldLights(context, commands, images, flash_image) {
 }
 
 /**
- * Rasterizes animated world rings emitted by the legacy Rust geometry pass.
+ * Paints camera cones, housings, and lenses directly from simulation records.
  * @param {CanvasRenderingContext2D} context
- * @param {Float64Array} commands
+ * @param {Float64Array} cameras
  * @param {Array<any>} colors
  * @returns {number}
  */
-export function drawWorldRings(context, commands, colors) {
-    const ret = wasm.drawWorldRings(context, commands, colors);
+export function drawWorldCameras(context, cameras, colors) {
+    const ret = wasm.drawWorldCameras(context, cameras, colors);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
     return ret[0];
+}
+
+/**
+ * Draws enemy class accents and telegraphs directly from the host-selected enemy records.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} input
+ * @param {number} count
+ * @param {number} now_ms
+ * @param {Array<any>} colors
+ * @returns {number}
+ */
+export function drawWorldEnemyAccents(context, input, count, now_ms, colors) {
+    const ret = wasm.drawWorldEnemyAccents(context, input, count, now_ms, colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Computes pulse/flicker light commands and paints them directly, preserving JS-owned light state.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} input
+ * @param {Array<any>} images
+ * @param {Float64Array} metadata
+ * @param {any} flash_image
+ * @returns {number}
+ */
+export function drawWorldLightInputs(context, input, images, metadata, flash_image) {
+    const ret = wasm.drawWorldLightInputs(context, input, images, metadata, flash_image);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Computes each active ring's pulse and paints it without legacy command generation.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} input
+ * @param {Array<any>} colors
+ * @returns {number}
+ */
+export function drawWorldRingInputs(context, input, colors) {
+    const ret = wasm.drawWorldRingInputs(context, input, colors);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0];
+}
+
+/**
+ * Generates and paints a static carpet/tile/brick floor directly in Rust/WebSys.
+ * Returns [next RNG state, emitted rectangle count] to preserve host RNG progression.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} kind
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} spacing
+ * @param {number} seed
+ * @param {Array<any>} color_input
+ * @returns {Float64Array}
+ */
+export function paintFloor(context, kind, x, y, width, height, spacing, seed, color_input) {
+    const ret = wasm.paintFloor(context, kind, x, y, width, height, spacing, seed, color_input);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Paints static floor shadows and grout on Canvas directly from Rust/WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {Float64Array} solids
+ * @param {number} width
+ * @param {number} height
+ * @returns {number}
+ */
+export function paintFloorFinishCanvas(context, solids, width, height) {
+    const ret = wasm.paintFloorFinishCanvas(context, solids, width, height);
+    return ret;
+}
+
+/**
+ * Paints the optional fixed-map backing directly in Rust/WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {boolean} fixed_map
+ * @param {number} width
+ * @param {number} height
+ * @returns {boolean}
+ */
+export function paintMapBase(context, fixed_map, width, height) {
+    const ret = wasm.paintMapBase(context, fixed_map, width, height);
+    return ret !== 0;
+}
+
+/**
+ * Paints the translucent map light layer directly in Rust/WebSys.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} width
+ * @param {number} height
+ * @returns {boolean}
+ */
+export function paintMapOverlay(context, width, height) {
+    const ret = wasm.paintMapOverlay(context, width, height);
+    return ret !== 0;
 }
 
 /**
@@ -632,6 +1670,46 @@ export function putCanvasImageData(context, image, pixels, width, height) {
 }
 
 /**
+ * Reads a small texture source into ImageData through Rust's Web APIs.
+ * Canvas sources are read directly; image sources are rasterized into the supplied scratch canvas.
+ * @param {any} source
+ * @param {CanvasRenderingContext2D} scratch
+ * @param {number} width
+ * @param {number} height
+ * @returns {any}
+ */
+export function readCanvasSourcePixels(source, scratch, width, height) {
+    const ret = wasm.readCanvasSourcePixels(source, scratch, width, height);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Selects the enemy sprite sheet cell at the legacy 110 ms animation cadence.
+ * @param {boolean} moving
+ * @param {number} now_ms
+ * @returns {number}
+ */
+export function selectEnemySprite(moving, now_ms) {
+    const ret = wasm.selectEnemySprite(moving, now_ms);
+    return ret >>> 0;
+}
+
+/**
+ * Selects the player's existing sprite sheet cell with the legacy animation math.
+ * @param {number} state
+ * @param {number} animation
+ * @param {number} attack_remaining
+ * @returns {number}
+ */
+export function selectPlayerSprite(state, animation, attack_remaining) {
+    const ret = wasm.selectPlayerSprite(state, animation, attack_remaining);
+    return ret >>> 0;
+}
+
+/**
  * @param {CanvasRenderingContext2D} context
  * @param {boolean} enabled
  * @returns {boolean}
@@ -639,6 +1717,22 @@ export function putCanvasImageData(context, image, pixels, width, height) {
 export function setCanvasImageSmoothing(context, enabled) {
     const ret = wasm.setCanvasImageSmoothing(context, enabled);
     return ret !== 0;
+}
+
+/**
+ * Applies the renderer's root Canvas transform and smoothing settings directly.
+ * @param {CanvasRenderingContext2D} context
+ * @param {number} scale
+ * @param {boolean} smoothing
+ * @param {number} quality
+ * @returns {boolean}
+ */
+export function setupCanvas(context, scale, smoothing, quality) {
+    const ret = wasm.setupCanvas(context, scale, smoothing, quality);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
 }
 function __wbg_get_imports() {
     const import0 = {
@@ -673,11 +1767,18 @@ function __wbg_get_imports() {
         __wbg___wbindgen_throw_41e9ee4f547fc59a: function(arg0, arg1) {
             throw new Error(getStringFromWasm0(arg0, arg1));
         },
+        __wbg_addColorStop_2fe19c9df420d0a6: function() { return handleError(function (arg0, arg1, arg2, arg3) {
+            arg0.addColorStop(arg1, getStringFromWasm0(arg2, arg3));
+        }, arguments); },
         __wbg_arc_03f7717b2e38682a: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5) {
             arg0.arc(arg1, arg2, arg3, arg4, arg5);
         }, arguments); },
         __wbg_beginPath_8598d895c13f1c86: function(arg0) {
             arg0.beginPath();
+        },
+        __wbg_canvas_2b619d4767b78c03: function(arg0) {
+            const ret = arg0.canvas;
+            return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
         },
         __wbg_clearRect_a5e36505218c247a: function(arg0, arg1, arg2, arg3, arg4) {
             arg0.clearRect(arg1, arg2, arg3, arg4);
@@ -688,10 +1789,22 @@ function __wbg_get_imports() {
         __wbg_closePath_355eb6da179dd9c2: function(arg0) {
             arg0.closePath();
         },
+        __wbg_complete_e501182ac1c4e1e3: function(arg0) {
+            const ret = arg0.complete;
+            return ret;
+        },
+        __wbg_cos_640f0df62a857f39: function(arg0) {
+            const ret = Math.cos(arg0);
+            return ret;
+        },
         __wbg_createImageData_eba92f20690e49b9: function() { return handleError(function (arg0, arg1, arg2) {
             const ret = arg0.createImageData(arg1, arg2);
             return ret;
         }, arguments); },
+        __wbg_createLinearGradient_d67a7d18d11c0b62: function(arg0, arg1, arg2, arg3, arg4) {
+            const ret = arg0.createLinearGradient(arg1, arg2, arg3, arg4);
+            return ret;
+        },
         __wbg_createPattern_6afa84d0d2ffe63e: function() { return handleError(function (arg0, arg1, arg2, arg3) {
             const ret = arg0.createPattern(arg1, getStringFromWasm0(arg2, arg3));
             return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
@@ -699,6 +1812,10 @@ function __wbg_get_imports() {
         __wbg_createPattern_94e5692cc458e195: function() { return handleError(function (arg0, arg1, arg2, arg3) {
             const ret = arg0.createPattern(arg1, getStringFromWasm0(arg2, arg3));
             return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
+        }, arguments); },
+        __wbg_createRadialGradient_e54676bfd0a6ae40: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5, arg6) {
+            const ret = arg0.createRadialGradient(arg1, arg2, arg3, arg4, arg5, arg6);
+            return ret;
         }, arguments); },
         __wbg_drawImage_3fed5f1f3393a907: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) {
             arg0.drawImage(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
@@ -734,11 +1851,19 @@ function __wbg_get_imports() {
             const ret = arg0.getContext(getStringFromWasm0(arg1, arg2));
             return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
         }, arguments); },
+        __wbg_getImageData_a8175cf7f34afc20: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+            const ret = arg0.getImageData(arg1, arg2, arg3, arg4);
+            return ret;
+        }, arguments); },
         __wbg_get_31af05bd4842a84f: function() { return handleError(function (arg0, arg1) {
             const ret = Reflect.get(arg0, arg1);
             return ret;
         }, arguments); },
         __wbg_get_6c896e0571ddae51: function(arg0, arg1) {
+            const ret = arg0[arg1 >>> 0];
+            return ret;
+        },
+        __wbg_get_index_c78b0af767cc90df: function(arg0, arg1) {
             const ret = arg0[arg1 >>> 0];
             return ret;
         },
@@ -808,6 +1933,14 @@ function __wbg_get_imports() {
             const ret = result;
             return ret;
         },
+        __wbg_length_511b1f84719d3462: function(arg0) {
+            const ret = arg0.length;
+            return ret;
+        },
+        __wbg_length_7f3c00c40364105e: function(arg0) {
+            const ret = arg0.length;
+            return ret;
+        },
         __wbg_length_b5d0ffc9b832763b: function(arg0) {
             const ret = arg0.length;
             return ret;
@@ -830,9 +1963,38 @@ function __wbg_get_imports() {
         __wbg_moveTo_037e3deefec91ae1: function(arg0, arg1, arg2) {
             arg0.moveTo(arg1, arg2);
         },
+        __wbg_naturalHeight_df41ba6a4a6b0d33: function(arg0) {
+            const ret = arg0.naturalHeight;
+            return ret;
+        },
+        __wbg_naturalWidth_c4c567dc88a9ee9a: function(arg0) {
+            const ret = arg0.naturalWidth;
+            return ret;
+        },
         __wbg_new_ee2291f50781bf1d: function() {
             const ret = new Array();
             return ret;
+        },
+        __wbg_new_from_slice_f545fd22ddc142b8: function(arg0, arg1) {
+            const ret = new Float64Array(getArrayF64FromWasm0(arg0, arg1));
+            return ret;
+        },
+        __wbg_new_with_length_3827645dc5adb679: function(arg0) {
+            const ret = new Float64Array(arg0 >>> 0);
+            return ret;
+        },
+        __wbg_of_20798cb14708764f: function(arg0, arg1) {
+            const ret = Array.of(arg0, arg1);
+            return ret;
+        },
+        __wbg_prototypesetcall_06eb15da165dee8f: function(arg0, arg1, arg2) {
+            Uint32Array.prototype.set.call(getArrayU32FromWasm0(arg0, arg1), arg2);
+        },
+        __wbg_prototypesetcall_bc27214492979395: function(arg0, arg1, arg2) {
+            Uint8Array.prototype.set.call(getArrayU8FromWasm0(arg0, arg1), arg2);
+        },
+        __wbg_prototypesetcall_d49a4fab5ca427bc: function(arg0, arg1, arg2) {
+            Float64Array.prototype.set.call(getArrayF64FromWasm0(arg0, arg1), arg2);
         },
         __wbg_push_2baf45db356cf468: function(arg0, arg1) {
             const ret = arg0.push(arg1);
@@ -862,10 +2024,23 @@ function __wbg_get_imports() {
         __wbg_setLineDash_9fc0f9169c542b64: function() { return handleError(function (arg0, arg1) {
             arg0.setLineDash(arg1);
         }, arguments); },
+        __wbg_setTransform_fa787a8f0adc1ade: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5, arg6) {
+            arg0.setTransform(arg1, arg2, arg3, arg4, arg5, arg6);
+        }, arguments); },
+        __wbg_set_145a351398b48c65: function() { return handleError(function (arg0, arg1, arg2) {
+            const ret = Reflect.set(arg0, arg1, arg2);
+            return ret;
+        }, arguments); },
         __wbg_set_61a601c6843275e7: function(arg0, arg1, arg2) {
             arg0.set(arg1, arg2 >>> 0);
         },
+        __wbg_set_c2baa06365903d3b: function(arg0, arg1, arg2) {
+            arg0.set(getArrayU8FromWasm0(arg1, arg2));
+        },
         __wbg_set_fillStyle_00dcacffc57cf944: function(arg0, arg1) {
+            arg0.fillStyle = arg1;
+        },
+        __wbg_set_fillStyle_1a796925e818ac7c: function(arg0, arg1) {
             arg0.fillStyle = arg1;
         },
         __wbg_set_fillStyle_a2961b4d44e572af: function(arg0, arg1, arg2) {
@@ -886,8 +2061,14 @@ function __wbg_get_imports() {
         __wbg_set_imageSmoothingEnabled_eb22252b69819404: function(arg0, arg1) {
             arg0.imageSmoothingEnabled = arg1 !== 0;
         },
+        __wbg_set_index_897c678888c01797: function(arg0, arg1, arg2) {
+            arg0[arg1 >>> 0] = arg2;
+        },
         __wbg_set_lineCap_c9b7bdd3b7f5ce74: function(arg0, arg1, arg2) {
             arg0.lineCap = getStringFromWasm0(arg1, arg2);
+        },
+        __wbg_set_lineDashOffset_18a92ebe34cd9fa3: function(arg0, arg1) {
+            arg0.lineDashOffset = arg1;
         },
         __wbg_set_lineJoin_c1780f2096e6f970: function(arg0, arg1, arg2) {
             arg0.lineJoin = getStringFromWasm0(arg1, arg2);
@@ -953,6 +2134,11 @@ function __wbg_get_imports() {
             return ret;
         },
         __wbindgen_generic_0000000000000002: function(arg0, arg1) {
+            // Cast intrinsic for `Ref(Slice(U8)) -> NamedExternref("Uint8ClampedArray")`.
+            const ret = getArrayU8FromWasm0(arg0, arg1);
+            return ret;
+        },
+        __wbindgen_generic_0000000000000003: function(arg0, arg1) {
             // Cast intrinsic for `Ref(String) -> Externref`.
             const ret = getStringFromWasm0(arg0, arg1);
             return ret;
@@ -979,6 +2165,21 @@ function addToExternrefTable0(obj) {
     return idx;
 }
 
+function getArrayF64FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getFloat64ArrayMemory0().subarray(ptr / 8, ptr / 8 + len);
+}
+
+function getArrayU32FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
+}
+
+function getArrayU8FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
+}
+
 let cachedDataViewMemory0 = null;
 function getDataViewMemory0() {
     if (cachedDataViewMemory0 === null || cachedDataViewMemory0.buffer.detached === true || (cachedDataViewMemory0.buffer.detached === undefined && cachedDataViewMemory0.buffer !== wasm.memory.buffer)) {
@@ -987,8 +2188,24 @@ function getDataViewMemory0() {
     return cachedDataViewMemory0;
 }
 
+let cachedFloat64ArrayMemory0 = null;
+function getFloat64ArrayMemory0() {
+    if (cachedFloat64ArrayMemory0 === null || cachedFloat64ArrayMemory0.byteLength === 0) {
+        cachedFloat64ArrayMemory0 = new Float64Array(wasm.memory.buffer);
+    }
+    return cachedFloat64ArrayMemory0;
+}
+
 function getStringFromWasm0(ptr, len) {
     return decodeText(ptr >>> 0, len);
+}
+
+let cachedUint32ArrayMemory0 = null;
+function getUint32ArrayMemory0() {
+    if (cachedUint32ArrayMemory0 === null || cachedUint32ArrayMemory0.byteLength === 0) {
+        cachedUint32ArrayMemory0 = new Uint32Array(wasm.memory.buffer);
+    }
+    return cachedUint32ArrayMemory0;
 }
 
 let cachedUint8ArrayMemory0 = null;
@@ -1010,6 +2227,13 @@ function handleError(f, args) {
 
 function isLikeNone(x) {
     return x === undefined || x === null;
+}
+
+function passArrayF64ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 8, 8) >>> 0;
+    getFloat64ArrayMemory0().set(arg, ptr / 8);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
 }
 
 function passStringToWasm0(arg, malloc, realloc) {
@@ -1090,6 +2314,8 @@ function __wbg_finalize_init(instance, module) {
     wasm = instance.exports;
     wasmModule = module;
     cachedDataViewMemory0 = null;
+    cachedFloat64ArrayMemory0 = null;
+    cachedUint32ArrayMemory0 = null;
     cachedUint8ArrayMemory0 = null;
     wasm.__wbindgen_start();
     return wasm;

@@ -1,4 +1,82 @@
+## D163 — v276.0 — usar painter direto de fantasmas
+Após a paridade independente no Chrome com a arma Taco, remover o batch de fantasmas do WASM legado; usar Rust/WebSys direto e manter o fallback Canvas do jogo.
+
+## D162 — v275.0 — usar painter direto de jogadores
+Os batches P1/P2 do WASM legado foram removidos após a paridade Chrome do painter direto. A lógica e poses seguem no JavaScript, e o chamador preserva fallback Canvas.
+
+## D161 — v274.0 — Usar pintores diretos para as formas fixas do HUD
+Barra de combo, contorno de máscara, véu de pausa e recarga já tinham painter Rust/WebSys direto e paridade independente em Chrome. O batch genérico do WASM antigo deixou de ter produtores após a remoção do dealer. Retirar input, export e callback genéricos; preservar os painters Canvas originais nos chamadores como fallback.
+
+## D160 — v273.0 — Remover dealer do batch legado após paridade Canvas independente
+O painter Rust/WebSys direto do dealer agora é a única rota no bridge. Reproduzir a referência original do `exp-shop.js` (incluindo transformações do rosto e temporizador) mostrou zero diferenças RGBA em estado normal e de queda no Chrome. `exp-shop.js` mantém o Canvas original como fallback, mas o batch do WASM antigo e sua entrada foram removidos.
+
+## D159 — v272.0 — Migrar painéis de loja sem remover o dealer legado
+Rust/WebSys desenha balão, card e rerolar; `exp-shop.js` conserva Canvas como fallback. Remover as entradas do painel e manter dealer no batch antigo até uma referência Canvas independente validar pixels e estado.
+
+## D158 — v271.0 — Remover os comandos antigos de base/overlay de mapa
+Usar os painters Rust/WebSys já validados para a base de mapa fixo e overlay. `index.html` conserva os dois `fillRect` Canvas como fallback. Remover somente os dois exports legados, mantendo os comandos de mapa usados por outras rotinas.
+
+## D157 — v270.0 — Migrar o menu de pausa integralmente para Rust direto
+Rust/WebSys desenha overlay, título, botões, textos e estado de hover em uma chamada direta; `exp-ui.js` mantém o painter Canvas integral como fallback. Depois de validar pixels e rótulos localizados, remover o batch e a entrada do menu do módulo legado, mantendo o batch genérico para as outras camadas HUD.
+
+## D156 — v269.0 — Migrar a barra do chefe sem manter export legado
+O painter Rust/WebSys direto desenha fundo, vida, marcadores de fase e contorno. `exp-modes.js` mantém o Canvas original se o painter direto falhar; assim a lógica do chefe e o fallback permanecem no host. Retirar o buffer e os exports legados após paridade RGBA e restauração do estado Canvas no Chrome.
+
+## D137 — v204.0 — Calcular e pintar seta da Invasão no Rust direto
+O host passa centro e o vetor de rotação; Rust calcula vértices e pinta o triângulo, removendo o lote legado do caminho normal. Manter o batch antigo como fallback e comparar ângulos/posições, alpha, composição e transformação.
+
+## D136 — v203.0 — Desenhar contornos e rota da máscara Coruja em Rust
+JavaScript continua aplicando LOS, alcance e navegação; envia só os tipos/posições visíveis e os pontos da rota em buffers reutilizáveis. Rust mantém strokeStyle, largura, padrão tracejado e offset. Fallback Canvas permanece para indisponibilidade/erro; comparar pixels e restauração de alpha/composição/transformação.
+
+## D135 — v202.0 — Enviar entradas de projéteis ao painter Rust
+O host mantém origem, dono e sprites cacheados. Rust aplica o offset de desenho e blita cada sprite diretamente; conservar o lote anterior como fallback e comparar os dois donos e linhas inválidas.
+
+## D134 — v201.0 — Projetar cápsulas de munição no painter Rust direto
+O host passa partículas de mundo e posição da câmera em um buffer reutilizável. Rust projeta as cápsulas na tela e desenha elipses em um único path, conservando o lote antigo como fallback. Comparar entradas inválidas, alpha e composição.
+
+## D133 — v200.0 — Enviar pickups e arremessos diretamente aos painters Rust
+O host envia posição, rotação, arma e brilho ao painter existente. Rust mantém transformações e composição; o batch antigo fica como fallback. Validar brilho ligado/desligado, ícones e restauração do estado Canvas em Chrome.
+
+## D132 — v199.0 — Enviar efeitos diretamente ao painter Rust
+O host mantém a lista e as propriedades dos efeitos. Envia os valores diretamente ao módulo Rust/WebSys e conserva o batch antigo como fallback. Comparar clarões e arcos de impacto em Chrome antes de considerar a rota validada.
+
+## D131 — v198.0 — Projetar a máscara de blackout no Rust direto
+Passar posição, câmera, tamanho, zoom e flags ao módulo direto. Rust calcula a posição de tela e os três raios e chama o painter existente; manter a geração de comandos legada como fallback e comparar máscara/overlay em Chrome.
+
+## D130 — v197.0 — Calcular e rasterizar sprites de neblina/fumaça no Rust direto
+O host conserva o relógio, a escolha entre neblina e fumaça e o limite de desempenho. Rust calcula as três posições e aplica alpha/composição, desenhando os sprites diretamente. O batch anterior permanece fallback e referência para comparação.
+
+## D129 — v196.0 — Calcular e rasterizar a zona da Invasão no Rust direto
+Enviar coordenadas e relógio do jogo ao módulo direto. Rust mantém a aproximação senoide do renderer atual e desenha contorno e preenchimento. Conservar o batch anterior como fallback e confirmar paridade de pixels e restauração do Canvas em Chrome.
+
+## D128 — v195.0 — Calcular e rasterizar luzes de mundo no Rust direto
+JavaScript preserva o estado dos emissores, sprites e stride de qualidade. Rust calcula pulso e flicker, desenha as luzes/clarão em composição aditiva e o reflexo de chuva com a composição original. Manter o gerador de comandos anterior como fallback e validar alpha, Neon, clarão e stride em Chrome.
+
+## D127 — v194.0 — Calcular e rasterizar anéis de mundo no Rust direto
+O host filtra os anéis expirados e prepara centro, raio-base, tempo e paleta. Rust/WebSys calcula raio, espessura e transparência e desenha cada anel. Manter o gerador legado como fallback; validar fases do pulso, cores, alpha e composição em Chrome.
+
+## D126 — v193.0 — Rasterizar vidro e estilhaços no Rust direto
+Manter física, lista de vidros e ativação dos estilhaços no host. Enviar somente retângulos de painéis e estados dos cacos; Rust/WebSys desenha brilho, contornos e polígonos. Fallback anterior permanece disponível. Confirmar animação, paleta, alpha e composição em Chrome.
+
+## D125 — v192.0 — Rasterizar realces e telegraphs de inimigos no Rust direto
+O host conserva filtragem, seleção de classes e payloads de estado; Rust/WebSys desenha anéis, barras, mira e carga do chefe. O gerador do WASM legado segue fallback. Preservar seno aproximado, paleta, dash, alpha e ordem dos callbacks; comparar pixels em Chrome.
+
+## D124 — v191.0 — Pintar barris e câmeras no Rust direto
+Passar os registros de estado já calculados pelo jogo em arrays compactos ao painter WebSys. Rust rasteriza o halo/corpo dos barris e o cone/carcaça/lente das câmeras; manter a geração do renderer anterior como fallback. Confirmar paridade RGBA em Chrome para timers, alarme, ângulos e polígonos.
+
+## D123 — v190.0 — Rasterizar portas Neon no módulo direto
+Passar os transforms compostos e os handles deduplicados ao painter direto; manter o gerador antigo como fallback. Confirmar ordem de sprites, rotação e offsets em paridade Chrome.
+
+## D122 — v189.0 — Desenhar portas de sala no módulo Rust direto
+Enviar ao módulo direto os seis campos geométricos de cada porta e o asset de painel opcional. O painter aplica a mesma transformação, preenchimento/asset e dois contornos da rota anterior. Manter o buffer antigo como fallback. Testar ambas as orientações e portas com/sem asset antes de empacotar.
+
 ## D103 — v169.0 — Rasterizar dark overlay no painter Rust direto
+## D121 — v188.0 — Desenhar ícones de arma no módulo Rust direto
+A geração geométrica dos ícones sai do WASM legado e passa ao painter WebSys direto. Manter o renderer antigo como fallback por compatibilidade. Testar todos os 24 IDs contra a rota atual antes de empacotar; igualdade exata observada.
+
+## D120 — v187.0 — Passar geometria do mapa em buffers JavaScript
+Enviar arrays JS de sólidos e aberturas ao painter direto. Na falha, copiar os mesmos dados para as tabelas legadas e manter o compositor anterior. Isso desacopla a rota direta da memória de geometria do WASM antigo sem mudar mapa, ordem ou dados de colisão. O host ainda monta os arrays e mantém seletores/assets. Build, regressões 85/85 e paridades Chrome passaram; sem benchmark.
+
 O módulo recebe os comandos e imagens já preparados, limpa o layer half-resolution, aplica `destination-out` ao brilho central e ao cone, desenha o flash e compõe na tela. O fallback antigo permanece. A auditoria revelou que o WASM legado rejeitava flags booleanas false e ângulo zero; a validação foi corrigida sem alterar a fórmula de câmera. Chrome 156 teve igualdade RGBA e callback integrado confirmado; regressões passaram.
 
 ## D102 — v168.0 — Enviar batches atmosféricos e de mundo ao Rust direto
@@ -331,4 +409,96 @@ Manter projeção e escolha do sprite no WASM legado, passar o lote e as imagens
 
 ## D110 — v176.0 — Rasterizar composição final pelo painter Rust direto
 Preservar os passes Canvas existentes de gradação soft-light/overlay e fade/flash, movendo as chamadas de composição e fillRect para Rust/WebSys. JS continua entregando parâmetros; fallback legado continua disponível. Paridade RGBA exata em Chrome 156 e estado Canvas restaurado nos cenários sintéticos; sem benchmark.
+
+## D111 — v177.0 — Rasterizar lote de escadas/elevadores no painter Rust
+Manter no WASM legado a seleção, ordenação e geração do lote; enviar comandos e gradientes cacheados ao WebSys/Rust para as operações Canvas finais. O import antigo continua fallback. Escada e elevador tiveram paridade RGBA exata em Chrome 156 e estado Canvas preservado; sem benchmark.
+
+## D112 — v178.0 — Rasterizar painter da saída em Rust direto
+Preservar o lote de geometria e a imagem de gradiente produzidos pelo WASM legado, transferindo drawImage, clip, strokes, hachuras e glow para o painter WebSys. Validar paridade no estado concluído e não concluído e manter fallback Canvas. Sem benchmark.
+
+## D113 — v179.0 — Rasterizar pickups/arremessos sob transform Rust
+Passar transformações e halos para WebSys/Rust e invocar o callback já existente do ícone dentro do estado transformado. Copiar e validar os comandos antes da chamada reentrante para preservar memória; fallback completo fica disponível. Chrome 156 mostrou RGBA idêntica nos casos testados; sem benchmark.
+
+## D114 — v180.0 — Rasterizar formas HUD e seta da Invasão no painter direto
+Preservar no WASM legado a geração/ordenação dos comandos e cores, enviando-os ao painter Rust para preencher/strokar formas do HUD; mover a seta triangular para WebSys direto usando os vértices já calculados. Manter fallback e lógica de jogo. Paridade sintética exata; sem benchmark.
+
+## D115 — v182.0 — Rasterizar retângulos legados de piso em Rust direto
+Manter WASM legado como produtor dos comandos e paleta; passar o lote `fillRect` validado ao painter WebSys/Rust. Preservar o callback Canvas como fallback e o estado final de `fillStyle`. O smoke confirmou chamadas no jogo e paridade sintética exata; sem benchmark.
+
+## D116 — v183.0 — Desenhar contornos de atores em cenas escuras pelo Rust
+Preservar no WASM legado a filtragem, projeção e classificação KO/alerta; passar somente o lote de arcos ao módulo direto. Manter o painter Canvas original como fallback e validar restauração de estado do contexto.
+
+## D117 — v184.0 — Ler fontes de textura pequenas no módulo direto
+Usar WebSys para ler `HTMLCanvasElement` e rasterizar `HTMLImageElement` no contexto temporário já criado pelo host, limitando a rota a spritesheets de 24–144 × 24. Retornar `ImageData` para preservar os bytes que o compositor já consome. Manter o fallback Canvas para tipos/dimensões incompatíveis e erros de leitura.
+
+## D118 — v185.0 — Rasterizar texturas do mapa no módulo direto
+Manter no bridge a seleção/cache de assets e os dados de geometria; portar o compositor RGBA e a chamada `putImageData` ao módulo WebSys/Rust. Validar saída exata contra o compositor Rust existente e conservar essa implementação como fallback. A referência Canvas mantém os limites de diferença previamente documentados.
+
+## D119 — v186.0 — Retirar do caminho normal a tabela do WASM legado
+Montar os oito crops em buffer JS a partir dos dados de pixel que já foram lidos pelo Rust e passar o buffer ao novo compositor. Copiar para a tabela antiga somente ao usar fallback; manter a rota antiga até cobrir e validar falhas do painter direto.
+
+## D138 — v205.0 — Rasterizar arte procedural das máscaras em Rust
+- As 16 máscaras novas usam o painter direto Rust/WebSys quando disponível. A especificação visual permanece em JavaScript; Canvas original serve de fallback e a lógica da coleção não muda. A grade é reconstruída após a inicialização do renderer.
+
+## D139 — v206.0 — Paridade dos ícones das armas da expansão
+- Manter o painter Rust como caminho ativo e alinhar exatamente cinco sprites que diferiam no fallback JS. Teste Chrome dedicado cobre as 12 armas, pixels e estado do Canvas; o fallback e a lógica de jogo permanecem.
+
+## D140 — v207.0 — Pintar a barra do chefe diretamente no Rust
+- Rust/WebSys rasteriza fundo, vida, marcas de fase e contorno no contexto original. O batch antigo permanece como fallback; valores de gameplay são apenas lidos, sem mudar chefe ou progressão.
+
+## D138 — v252.0 — Retirar FX e itens de arma do bridge gráfico legado
+Os painters WebSys diretos já cobriam os casos de gameplay; paridade Chrome comparava glow, ícones, arremessos e efeitos. Removidos seus buffers, exports e callbacks do WASM antigo. No clarão, substituído o sprite pré-rasterizado por gradiente radial criado em Rust, o que iguala o painter original Canvas pixel a pixel. Se a chamada direta falhar, o bridge devolve `false` e `index.html` executa o desenho Canvas. O módulo antigo segue obrigatório para inicialização e outras camadas.
+
+## D140 — v253.0 — Retirar color grade e overlays finais do bridge legado
+Como as rotas de color grade e fade/flash Rust/WebSys direto já existem, o bridge legado deixa de montar comandos e encaminhar essas camadas por callbacks JS. Em falha ou inatividade, o wrapper declina o desenho para que `index.html` execute o painter Canvas original. Não altera simulação. ABI e testes de bridge validam a remoção; paridade direta ampla exercita as camadas em Chrome. O binário caiu 1.209 bytes; isso não prova ganho de FPS.
+## D141 — v254.0 — Remover combo e alarme do bridge gráfico legado
+Combo e alarme já tinham painters WebSys diretos equivalentes. Os wrappers deixam de emitir batches pelo módulo antigo e, se o direto estiver inativo/indisponível, retornam `false` para a rotina original de Canvas no jogo. Isso elimina dois callbacks e seus buffers sem mudar a simulação/timer. A saída direta foi comparada com os painters Canvas originais no Chrome sem diferenças RGBA nos casos exercitados. Redução de tamanho do módulo não comprova ganho em FPS.
+## D142 — v255.0 — Remover o batch legado de imagens do HUD
+As cinco rotas existentes para vinhetas, retrato da máscara e imagem auxiliar do HUD passam pelo método direto Rust/WebSys, que recebe as imagens reais e calcula as posições. Se recusar os dados ou o renderer não estiver pronto, o chamador usa o Canvas original. Remove-se o batch duplicado do WASM antigo sem mudar seleção de estado do jogo. Paridade de cinco estágios contra o Canvas original teve zero diferenças RGBA; redução do binário não implica ganho de FPS.
+## D143 — v256.0 — Remover a seta de Invasão do bridge legado
+A seta já tinha uma entrada direta Rust/WebSys que calcula e pinta a geometria. O wrapper agora retorna `false` se o módulo direto não desenhar e `exp-modes.js` mantém a rotina Canvas. Isso remove o callback legado, os vértices estáticos e os exports de cálculo sem mudar as coordenadas de gameplay. Cinco estados comparados no Chrome tiveram saída RGBA idêntica e estado Canvas restaurado. Tamanho/imports/exports menores não provam ganho de desempenho.
+## D144 — v257.0 — Remover a zona pulsante de Invasão do batch legado
+A zona tem painter Rust/WebSys direto que recebe posição e tempo e preserva o pulso. O wrapper deixa de gerar/encaminhar comandos pelo módulo antigo; caso o painter direto falhe, `exp-modes.js` desenha o círculo Canvas original. Simulação e fase seguem no JavaScript. O teste Chrome comparou desenho e estado Canvas com zero diferenças RGBA. O binário menor não demonstra ganho de FPS.
+
+## D145 — v258.0 — Remover o transporte do WASM legado
+Os gradientes, a geometria e o desenho de escadas/elevadores ficam no painter direto Rust/WebSys. Remover buffers e callbacks duplicados do WASM antigo; manter o Canvas do jogo como fallback e validar a paridade dos dois tipos de transporte.
+
+## D146 — v259.0 — Remover névoa/fumaça do WASM legado
+Rust/WebSys aplica as posições e sprites ambientais. A simulação e o estado dos efeitos seguem no JavaScript; remover apenas buffers e batch do renderer legado, preservando o painter Canvas de fallback.
+## D147 — v260.0 — retirar chuva e poeira do WASM legado
+O jogo usa os painters Rust/WebSys diretos para chuva e poeira. Movimento, respawn e aleatoriedade continuam no JS, que mantém o painter Canvas como fallback. Removemos do WASM legado buffers, exports e callbacks duplicados. A paridade de pixels no Chrome foi exata para os casos exercitados; isso não mede desempenho real.
+
+## D148 — v261.0 — Remover batches de efeitos do mundo
+Barris, câmeras e acentos de inimigos são pintados pelo módulo Rust/WebSys direto. Manter os painters Canvas dos chamadores como fallback e remover os buffers/exports duplicados do renderer legado apenas após paridade RGBA exata no Chrome.
+
+## D149 — v262.0 — Remover batches legados de luzes e anéis
+Calcular e pintar luzes do mundo e anéis de efeito no módulo Rust/WebSys direto usando os dados do host. Preservar fallback Canvas nos chamadores; remover arrays e callbacks do WASM legado depois de paridade RGBA exata no Chrome.
+
+## D150 — v263.0 — Remover batch legado de overlays FX
+Os overlays de tela são pintados pelo módulo Rust/WebSys direto com estado de jogo fornecido pelo host. Preservar Canvas como fallback e remover buffers/exports antigos após paridade RGBA no Chrome.
+
+## D151 — v264.0 — Remover batches legados da saída de fase
+O painter Rust/WebSys direto já gera o gradiente e desenha a saída. Se ele não estiver disponível, retornar controle ao fallback Canvas original em index.html em vez de reativar o WASM legado.
+
+## D152 — v265.0 — Remover a rota legada dos padrões de piso
+
+Os padrões de carpete, ladrilho e tijolo passam ao painter direto Rust/WebSys, preservando os dados de largura do ladrilho e a sequência RNG. O chamador segue com o fallback Canvas original.
+
+## D153 — v266.0 — Remover setup e fundo do quadro do caminho legado
+
+O Canvas raiz e o fundo de quadro já têm painters Rust diretos. Remover callbacks e exports legados evita manter duas implementações WASM do mesmo trabalho; os chamadores do jogo continuam oferecendo o fallback Canvas original. Verificações de paridade cobrem o estado do Canvas e os pixels do fundo.
+
+## D154 — v267.0 — Migrar transforms do quadro para chamadas Rust diretas
+
+Screen shake, recoil, tremor e transformação da câmera passam pelo módulo Rust/WebSys direto. A sequência de transformação é conferida contra Canvas, incluindo a abertura/fechamento dos dois escopos salvos; inválidos são rejeitados sem alterar o contexto.
+
+## D155 — v268.0 — Pintar sombra e aura do jogador diretamente
+
+O efeito independente de sombra/brilho passa pelo módulo Rust direto e preserva as elipses, cores P1/P2 e restore do contexto. O Canvas fallback fica no chamador; o export legado foi removido após comparar pixels no Chrome.
+Usar o painter Rust/WebSys direto para os três tipos de piso e preservar o RNG do host. Se a entrada for recusada, devolver o desenho ao fallback de carpete/ladrilho/tijolo em index.html.
+## D164 — v287.0 — aposentar o transporte trampoline
+O trampoline só encaminhava chamadas Canvas ao host e não desenhava. Como as camadas Rust/WebSys já chamam Canvas via wasm-bindgen direto, manter o trampoline como binário carregado/buildado/cacheado era redundante. Retiramos seu fluxo de build/HTTP/offline e deixamos a interceptação Canvas exclusivamente como ferramenta diagnóstica opt-in. Os painters JS restantes continuam como fallback até cada camada ter implementação e paridade próprias. Não alegamos conclusão da migração nem melhoria FPS sem medição.
+
+## D165 — v288.0 — usar stage Rust para resumo da pausa
+A auditoria `wasmDiagnostics=1` localizou uma única chamada Canvas host na tela de pausa: o painel escuro de resumo em `js/exp-modes.js`. O painter existente `drawHudShape` foi estendido com stage 4 em vez de criar uma API separada. Isso mantém a superfície do bridge pequena; fallback Canvas fica no chamador. Chrome confirmou zero diferenças RGBA para o retângulo exercitado.
 

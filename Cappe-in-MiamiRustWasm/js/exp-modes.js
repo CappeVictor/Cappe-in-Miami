@@ -301,15 +301,28 @@
 
   // Rasmus (Coruja): contornos roxos em objetos escondidos e no caminho de fuga (desenho no canvas)
   let escT = 0, escPath = null;
+  let owlItemsInput = new Float64Array(128 * 5), owlPathInput = new Float64Array(256 * 2);
+  const growOwlInput = (buffer, needed) => {
+    if (buffer.length >= needed) return buffer;
+    let capacity = Math.max(32, buffer.length);
+    while (capacity < needed) capacity *= 2;
+    return new Float64Array(capacity);
+  };
   function owlDraw(g) {
     if (!EXP.owl || !P || st !== 'play') return;
     const now = performance.now(), pulse = .55 + .35 * Math.sin(now / 260);
-    g.save(); g.strokeStyle = 'rgba(176,107,255,' + pulse + ')'; g.lineWidth = 2;
+    let itemCount = 0;
+    const addItem = (kind, x, y, rx, ry) => {
+      const offset = itemCount * 5;
+      owlItemsInput = growOwlInput(owlItemsInput, offset + 5);
+      owlItemsInput[offset] = kind; owlItemsInput[offset + 1] = x; owlItemsInput[offset + 2] = y;
+      owlItemsInput[offset + 3] = rx; owlItemsInput[offset + 4] = ry; itemCount++;
+    };
     const hidden = (x, y) => hyp(x - P.x, y - P.y) < 420 && !los(P, { x, y });
-    for (const p of pickups) if (hidden(p.x, p.y)) { g.strokeRect(p.x - 12, p.y - 12, 24, 24); }
-    for (const b of EXP.world.barrels) if (hidden(b.x, b.y)) { g.beginPath(); g.arc(b.x, b.y, b.r + 4, 0, TAU); g.stroke(); }
-    for (const c of EXP.world.cams) if (hidden(c.x, c.y)) { g.strokeRect(c.x - 10, c.y - 8, 20, 16); }
-    for (const e of enemies) if (e.ko <= 0 || e.ko === undefined) { if (hyp(e.x - P.x, e.y - P.y) < 300 && !los(P, e)) { g.beginPath(); g.arc(e.x, e.y, e.r + 5, 0, TAU); g.stroke(); } }
+    for (const p of pickups) if (hidden(p.x, p.y)) addItem(0, p.x, p.y, 12, 12);
+    for (const b of EXP.world.barrels) if (hidden(b.x, b.y)) addItem(1, b.x, b.y, b.r + 4, 0);
+    for (const c of EXP.world.cams) if (hidden(c.x, c.y)) addItem(2, c.x, c.y, 10, 8);
+    for (const e of enemies) if (e.ko <= 0 || e.ko === undefined) { if (hyp(e.x - P.x, e.y - P.y) < 300 && !los(P, e)) addItem(1, e.x, e.y, e.r + 5, 0); }
     // rota de fuga: até a saída (se aberta) ou até a porta mais próxima
     escT -= 1 / 60;
     if (escT <= 0) {
@@ -318,7 +331,22 @@
       else { let bd = 1e9; for (const d of doors) { const dd = hyp(d.x + d.w / 2 - P.x, d.y + d.h / 2 - P.y); if (dd < bd && dd > 60) { bd = dd; gx = d.x + d.w / 2; gy = d.y + d.h / 2; } } }
       escPath = gx === null ? null : EXP.navPath(P.x, P.y, gx, gy);
     }
-    if (escPath && escPath.length > 1) { g.setLineDash([10, 8]); g.lineDashOffset = -now / 40; g.beginPath(); g.moveTo(P.x, P.y); for (const q of escPath) g.lineTo(q.x, q.y); g.stroke(); }
+    const pathCount = escPath && escPath.length > 1 ? Math.min(4096, escPath.length + 1) : 0;
+    if (pathCount) {
+      owlPathInput = growOwlInput(owlPathInput, pathCount * 2);
+      owlPathInput[0] = P.x; owlPathInput[1] = P.y;
+      for (let i = 1; i < pathCount; i++) { owlPathInput[i * 2] = escPath[i - 1].x; owlPathInput[i * 2 + 1] = escPath[i - 1].y; }
+    }
+    const renderer = window.HM_WASM_RENDERER;
+    if (renderer && renderer.drawOwlOverlay && renderer.drawOwlOverlay(g, owlItemsInput, itemCount, owlPathInput, pathCount, now, pulse)) return;
+    g.save(); g.strokeStyle = 'rgba(176,107,255,' + pulse + ')'; g.lineWidth = 2;
+    for (let i = 0; i < itemCount; i++) {
+      const offset = i * 5, kind = owlItemsInput[offset], x = owlItemsInput[offset + 1], y = owlItemsInput[offset + 2];
+      const rx = owlItemsInput[offset + 3], ry = owlItemsInput[offset + 4];
+      if (kind === 0 || kind === 2) g.strokeRect(x - rx, y - ry, rx * 2, ry * 2);
+      else { g.beginPath(); g.arc(x, y, rx, 0, TAU); g.stroke(); }
+    }
+    if (pathCount) { g.setLineDash([10, 8]); g.lineDashOffset = -now / 40; g.beginPath(); g.moveTo(owlPathInput[0], owlPathInput[1]); for (let i = 1; i < pathCount; i++) g.lineTo(owlPathInput[i * 2], owlPathInput[i * 2 + 1]); g.stroke(); }
     g.restore();
   }
   const _wd2 = EXP.drawWorld; EXP.drawWorld = function (g) { _wd2(g); owlDraw(g); };
@@ -460,9 +488,7 @@
   // ================= HUD DOS MODOS =================
   const T = (s, x, y, c, f, al) => tx(s, x, y, c, f, al);
   const drawModeHudText = (g, entry) => {
-    const renderer = window.HM_WASM_RENDERER;
-    const drawn = renderer && renderer.drawHudTexts && renderer.drawHudTexts([entry],
-      (text, x, textY, color, font, align) => T(text, x, textY, color, font, align), g);
+    const drawn = typeof drawHudTextBatch === 'function' && drawHudTextBatch([entry]);
     if (!drawn) T(entry.text, entry.x, entry.y, entry.color, entry.font, entry.align || 'left');
   };
   EXP.drawHUD = function (g) {
@@ -491,9 +517,7 @@
         else if (r.id === 'classico' || r.id === 'historia') top = '';
         if (top) {
           const title = { text: top, x: W / 2, y: 56, color: m.color || '#19f0e6', font: 'bold 20px Impact, sans-serif', align: 'center' };
-          const modeTextRenderer = window.HM_WASM_RENDERER;
-          const titleDrawn = modeTextRenderer && modeTextRenderer.drawHudTexts && modeTextRenderer.drawHudTexts([title],
-            (text, x, textY, color, font, align) => T(text, x, textY, color, font, align), g);
+          const titleDrawn = typeof drawHudTextBatch === 'function' && drawHudTextBatch([title]);
           if (!titleDrawn) { g.save(); T(title.text, title.x, title.y, title.color, title.font, title.align); g.restore(); }
         }
         if (r.id === 'contrarrelogio' && r.timeLeft < 15) {
@@ -526,9 +550,9 @@
           g.strokeStyle = '#000'; g.lineWidth = 2; g.strokeRect(x, y, w, 14);
         }
         const bossTitle = b.boss.nome.toUpperCase() + ' · FASE ' + (b.ph + 1), titleFont = 'bold 18px Impact, sans-serif';
-        const titleDrawn = bossRenderer && bossRenderer.drawHudTexts && bossRenderer.drawHudTexts([
+        const titleDrawn = typeof drawHudTextBatch === 'function' && drawHudTextBatch([
           { text: bossTitle, x: W / 2, y: y - 8, color: '#fff', font: titleFont, align: 'center' }
-        ], (text, x, textY, color, font, align) => T(text, x, textY, color, font, align), g);
+        ]);
         if (!titleDrawn) T(bossTitle, W / 2, y - 8, '#fff', titleFont, 'center');
       }
     }
@@ -542,24 +566,23 @@
       y += t.sub ? 38 : 24;
     }
     if (toastEntries.length) {
-      const toastRenderer = window.HM_WASM_RENDERER;
-      const toastsDrawn = toastRenderer && toastRenderer.drawHudTexts && toastRenderer.drawHudTexts(toastEntries,
-        (text, x, textY, color, font, align) => T(text, x, textY, color, font, align), g);
+      const toastsDrawn = typeof drawHudTextBatch === 'function' && drawHudTextBatch(toastEntries);
       if (!toastsDrawn) {
         for (const entry of toastEntries) { g.globalAlpha = entry.alpha; T(entry.text, entry.x, entry.y, entry.color, entry.font, entry.align); }
         g.globalAlpha = 1;
       }
     }
     if (st === 'paused' && r) {
-      g.fillStyle = 'rgba(5,0,18,.55)'; g.fillRect(W / 2 - 230, H / 2 + 80, 460, 120);
+      const pauseSummaryRenderer = window.HM_WASM_RENDERER;
+      if (!(pauseSummaryRenderer && pauseSummaryRenderer.drawHudShape && pauseSummaryRenderer.drawHudShape(g, 4, W, H))) {
+        g.fillStyle = 'rgba(5,0,18,.55)'; g.fillRect(W / 2 - 230, H / 2 + 80, 460, 120);
+      }
       const pauseEntries = [
         { text: MODES[r.id].nome.toUpperCase() + ' · NÍVEL ' + EXP.save().level, x: W / 2, y: H / 2 + 110, color: '#19f0e6', font: 'bold 20px Impact, sans-serif', align: 'center' },
         { text: 'Abates ' + r.kills + ' · Pontos ' + score + ' · XP +' + (r.xp || 0), x: W / 2, y: H / 2 + 140, color: '#fff', font: '18px Impact, sans-serif', align: 'center' },
         { text: 'B · voltar ao lobby', x: W / 2, y: H / 2 + 172, color: '#ffd23f', font: '16px Impact, sans-serif', align: 'center' }
       ];
-      const pauseTextRenderer = window.HM_WASM_RENDERER;
-      const pauseTextsDrawn = pauseTextRenderer && pauseTextRenderer.drawHudTexts && pauseTextRenderer.drawHudTexts(pauseEntries,
-        (text, x, textY, color, font, align) => T(text, x, textY, color, font, align), g);
+      const pauseTextsDrawn = typeof drawHudTextBatch === 'function' && drawHudTextBatch(pauseEntries);
       if (!pauseTextsDrawn) for (const entry of pauseEntries) T(entry.text, entry.x, entry.y, entry.color, entry.font, entry.align);
     }
   };

@@ -2515,14 +2515,30 @@ function txSprite(s, c, font) {
   }
   return e;
 }
-function tx(s, x, y, c, font, al = 'left') {
+function txPlacement(s, x, y, c, font, al = 'left') {
   const e = txSprite(s, c, font);
   const ox = al === 'center' ? e.w / 2 : al === 'right' ? e.w - 6 : 6;
-  ctx.drawImage(e.k, Math.round(x - ox), Math.round(y - e.by));
+  return { image: e.k, x: Math.round(x - ox), y: Math.round(y - e.by) };
+}
+function tx(s, x, y, c, font, al = 'left') {
+  const placement = txPlacement(s, x, y, c, font, al), renderer = window.HM_WASM_RENDERER;
+  if (!(renderer && renderer.drawCanvasImage && renderer.drawCanvasImage(ctx, placement.image, placement.x, placement.y))) ctx.drawImage(placement.image, placement.x, placement.y);
 }
 function drawHudTextBatch(entries) {
   const renderer = window.HM_WASM_RENDERER;
-  if (renderer && renderer.drawHudTexts && renderer.drawHudTexts(entries, tx, ctx)) return true;
+  if (renderer && renderer.drawCanvasImageBatch && Array.isArray(entries) && entries.length <= 64) {
+    const images = [], placements = [];
+    let valid = true;
+    for (const entry of entries) {
+      const alpha = entry && entry.alpha === undefined ? 1 : entry && entry.alpha;
+      if (!entry || typeof entry.text !== 'string' || typeof entry.color !== 'string' || typeof entry.font !== 'string'
+        || !Number.isFinite(entry.x) || !Number.isFinite(entry.y) || !Number.isFinite(alpha) || alpha < 0 || alpha > 1
+        || !['left', 'center', 'right'].includes(entry.align || 'left')) { valid = false; break; }
+      const placement = txPlacement(entry.text, entry.x, entry.y, entry.color, entry.font, entry.align || 'left');
+      images.push(placement.image); placements.push(placement.x, placement.y, alpha);
+    }
+    if (valid && renderer.drawCanvasImageBatch(ctx, images, placements)) return true;
+  }
   const savedAlpha = ctx.globalAlpha;
   try {
     for (const entry of entries) { ctx.globalAlpha = entry.alpha === undefined ? 1 : entry.alpha; tx(entry.text, entry.x, entry.y, entry.color, entry.font, entry.align || 'left'); }
@@ -2666,30 +2682,30 @@ function advancePlayerVisualState(pl, isP2) {
   const skin = window.EXP && EXP.curSkin ? EXP.curSkin() : null;
   return { player: pl, isP2, state, skin, frame: ready(PSHEET) ? null : buildPlayerFrame(state, pl.anim, pl.atk > 0 ? pl.atk / .2 : 0, skin) };
 }
-function drawOnePlayerFallback(pl, isP2, visual) {
+function drawOnePlayerFallback(pl, isP2, visual, context = ctx) {
   if (!pl || pl.dead || !visual) return;
   const state = visual.state;
-  ctx.save(); ctx.translate(pl.x, pl.y); ctx.rotate(pl.a);
+  context.save(); context.translate(pl.x, pl.y); context.rotate(pl.a);
   const renderer = window.HM_WASM_RENDERER;
   let auraDrawn = false;
   try {
     if (renderer && renderer.active && renderer.drawPlayerAura) {
-      auraDrawn = renderer.drawPlayerAura(ctx, isP2, CFG.shadows !== false, CFG.glow !== false);
+      auraDrawn = renderer.drawPlayerAura(context, isP2, CFG.shadows !== false, CFG.glow !== false);
     }
   } catch (error) { console.warn('[Cappe WASM] sombra/aura do jogador usou fallback JS.', error); }
   if (!auraDrawn) {
     if (CFG.shadows !== false) {
-      ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.ellipse(2, 5, 13, 8, 0, 0, 6.28); ctx.fill();
+      context.fillStyle = 'rgba(0,0,0,.4)'; context.beginPath(); context.ellipse(2, 5, 13, 8, 0, 0, 6.28); context.fill();
     } else {
-      ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(1, 3, 11, 9, 0, 0, 6.28); ctx.fill();
+      context.fillStyle = 'rgba(0,0,0,.28)'; context.beginPath(); context.ellipse(1, 3, 11, 9, 0, 0, 6.28); context.fill();
     }
     if (CFG.glow !== false) {
-      ctx.fillStyle = isP2 ? 'rgba(255,46,147,.14)' : 'rgba(25,240,230,.14)';
-      ctx.beginPath(); ctx.ellipse(0, 0, 16, 16, 0, 0, 6.28); ctx.fill();
+      context.fillStyle = isP2 ? 'rgba(255,46,147,.14)' : 'rgba(25,240,230,.14)';
+      context.beginPath(); context.ellipse(0, 0, 16, 16, 0, 0, 6.28); context.fill();
     }
   }
-  if (cw !== 'punho') drawWeaponIcon(ctx, cw);
-  ctx.imageSmoothingEnabled = true;
+  if (cw !== 'punho') drawWeaponIcon(context, cw);
+  context.imageSmoothingEnabled = true;
   if (PSHEET.complete && PSHEET.naturalWidth > 0) {
     const renderer = window.HM_WASM_RENDERER;
     let cell = null;
@@ -2700,23 +2716,23 @@ function drawOnePlayerFallback(pl, isP2, visual) {
       cell = state === 'idle' ? [0, 0] : state === 'walk' ? [col, 1] : state === 'run' ? [col, 2]
         : [pl.atk > .13 ? 0 : pl.atk > .06 ? 1 : 2, 3];
     }
-    ctx.drawImage(PSHEET, cell[0] * 24, cell[1] * 24, 24, 24, -11.5, -11.5, 24, 24);
+    context.drawImage(PSHEET, cell[0] * 24, cell[1] * 24, 24, 24, -11.5, -11.5, 24, 24);
   } else {
-    ctx.drawImage(visual.frame || buildPlayerFrame(state, pl.anim, pl.atk > 0 ? pl.atk / .2 : 0, visual.skin), -11.5, -11.5);
+    context.drawImage(visual.frame || buildPlayerFrame(state, pl.anim, pl.atk > 0 ? pl.atk / .2 : 0, visual.skin), -11.5, -11.5);
   }
   // Identificador cosmético da skin também aparece quando o spritesheet animado está carregado.
   const skin = visual.skin;
   if (skin && PSHEET.complete && PSHEET.naturalWidth > 0) {
-    ctx.globalAlpha = .78; ctx.fillStyle = skin.color; ctx.fillRect(-4, -2, 6, 7);
-    ctx.fillStyle = skin.detail; ctx.fillRect(1, -2, 2, 7); ctx.globalAlpha = 1;
+    context.globalAlpha = .78; context.fillStyle = skin.color; context.fillRect(-4, -2, 6, 7);
+    context.fillStyle = skin.detail; context.fillRect(1, -2, 2, 7); context.globalAlpha = 1;
   }
   // tag P1 / P2
-  ctx.rotate(-pl.a);
-  ctx.fillStyle = isP2 ? '#ff2e93' : '#19f0e6';
-  ctx.font = 'bold 10px Rajdhani,sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(isP2 ? 'P2' : 'P1', 0, -18);
-  ctx.restore();
+  context.rotate(-pl.a);
+  context.fillStyle = isP2 ? '#ff2e93' : '#19f0e6';
+  context.font = 'bold 10px Rajdhani,sans-serif';
+  context.textAlign = 'center';
+  context.fillText(isP2 ? 'P2' : 'P1', 0, -18);
+  context.restore();
 }
 function drawPlayer() {
   const players = [];
@@ -2739,32 +2755,36 @@ function drawPlayer() {
 }
 window.EXP = window.EXP || {};
 window.EXP.onlineLocalState = () => P ? { x:P.x, y:P.y, a:P.a, alive:(st==='play'||st==='paused')&&!P.dead } : null;
-function body(e, c, mask, wp, shadowHandledByWasm = false) {
-  if (!shadowHandledByWasm) { ctx.fillStyle = 'rgba(0,0,0,.32)'; ctx.beginPath(); ctx.ellipse(e.x + 3, e.y + 5, 12, 10, 0, 0, 6.28); ctx.fill(); }   // sombra no chão
-  ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.a); if (e.fall) ctx.rotate(e.fall * 1.45);
-  if (wp === undefined) { ctx.fillStyle = '#111'; ctx.fillRect(4, -3, 22, 6); } else drawWeaponIcon(ctx, wp);
+function body(e, c, mask, wp, shadowHandledByWasm = false, context = ctx) {
+  if (!shadowHandledByWasm) { context.fillStyle = 'rgba(0,0,0,.32)'; context.beginPath(); context.ellipse(e.x + 3, e.y + 5, 12, 10, 0, 0, 6.28); context.fill(); }   // sombra no chão
+  context.save(); context.translate(e.x, e.y); context.rotate(e.a); if (e.fall) context.rotate(e.fall * 1.45);
+  if (wp === undefined) { context.fillStyle = '#111'; context.fillRect(4, -3, 22, 6); } else drawWeaponIcon(context, wp);
   if (ready(ESHEET) && e.type) {   // inimigo a partir do spritesheet PNG
     const moving = e.alert && !e.stun, now = performance.now(), renderer = window.HM_WASM_RENDERER;
     const frame = renderer && renderer.active && renderer.selectEnemySprite ? renderer.selectEnemySprite(moving, now) : null;
     const col = frame ? frame[0] : moving ? Math.floor(now / 110) % 4 : 0;
     const row = frame ? frame[1] : moving ? 1 : 0;
-    ctx.imageSmoothingEnabled = true;
-    ctx.drawImage(ESHEET, col * 24, row * 24, 24, 24, -11.5, -11.5, 24, 24);
-    ctx.restore(); return;
+    context.imageSmoothingEnabled = true;
+    context.drawImage(ESHEET, col * 24, row * 24, 24, 24, -11.5, -11.5, 24, 24);
+    context.restore(); return;
   }
-  ctx.fillStyle = '#e7b98f'; ctx.strokeStyle = '#0b0812'; ctx.lineWidth = 1.5;   // braços
-  ctx.beginPath(); ctx.ellipse(3, -11, 4.5, 3, .25, 0, 6.28); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.ellipse(3, 11, 4.5, 3, -.25, 0, 6.28); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = c; ctx.globalAlpha *= .25; ctx.beginPath(); ctx.ellipse(0, 0, 13, 18, 0, 0, 6.28); ctx.fill(); ctx.globalAlpha *= 4;   // halo barato
-  ctx.beginPath(); ctx.ellipse(0, 0, 9, 14, 0, 0, 6.28); ctx.fill();
-  ctx.strokeStyle = '#0b0812'; ctx.lineWidth = 2; ctx.stroke();
-  ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.beginPath(); ctx.ellipse(-2, -4, 4, 6, 0, 0, 6.28); ctx.fill();
-  ctx.fillStyle = '#16101f'; ctx.fillRect(1, -14, 5, 3); ctx.fillRect(1, 11, 5, 3);
+  context.fillStyle = '#e7b98f'; context.strokeStyle = '#0b0812'; context.lineWidth = 1.5;   // braços
+  context.beginPath(); context.ellipse(3, -11, 4.5, 3, .25, 0, 6.28); context.fill(); context.stroke();
+  context.beginPath(); context.ellipse(3, 11, 4.5, 3, -.25, 0, 6.28); context.fill(); context.stroke();
+  context.fillStyle = c; context.globalAlpha *= .25; context.beginPath(); context.ellipse(0, 0, 13, 18, 0, 0, 6.28); context.fill(); context.globalAlpha *= 4;   // halo barato
+  context.beginPath(); context.ellipse(0, 0, 9, 14, 0, 0, 6.28); context.fill();
+  context.strokeStyle = '#0b0812'; context.lineWidth = 2; context.stroke();
+  context.fillStyle = 'rgba(255,255,255,.22)'; context.beginPath(); context.ellipse(-2, -4, 4, 6, 0, 0, 6.28); context.fill();
+  context.fillStyle = '#16101f'; context.fillRect(1, -14, 5, 3); context.fillRect(1, 11, 5, 3);
   if (mask && mask.img.complete && mask.img.naturalWidth) {
-    ctx.save(); ctx.rotate(1.57); ctx.beginPath(); ctx.arc(0, 0, 11, 0, 6.28); ctx.clip(); ctx.drawImage(mask.img, -15, -15, 30, 30); ctx.restore();
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 11, 0, 6.28); ctx.stroke();
-  } else { ctx.fillStyle = '#e7b98f'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, 6.28); ctx.fill(); ctx.fillStyle = '#2a1a10'; ctx.beginPath(); ctx.arc(-2, 0, 7, 1.6, 4.7); ctx.fill(); }
-  ctx.restore();
+    context.save(); context.rotate(1.57); context.beginPath(); context.arc(0, 0, 11, 0, 6.28); context.clip(); context.drawImage(mask.img, -15, -15, 30, 30); context.restore();
+    context.strokeStyle = '#000'; context.lineWidth = 2; context.beginPath(); context.arc(0, 0, 11, 0, 6.28); context.stroke();
+  } else { context.fillStyle = '#e7b98f'; context.beginPath(); context.arc(0, 0, 8, 0, 6.28); context.fill(); context.fillStyle = '#2a1a10'; context.beginPath(); context.arc(-2, 0, 7, 1.6, 4.7); context.fill(); }
+  context.restore();
+}
+function drawGhostsFallback(ghosts, weapon, context = ctx) {
+  for (let i = 0; i < ghosts.length; i++) { context.globalAlpha = .06 + i * .04; body(ghosts[i], '#19f0e6', null, weapon, false, context); }
+  if (context.globalAlpha !== 1) context.globalAlpha = 1;
 }
 const COR = { gun: '#19f0e6', bat: '#ffd23f', shot: '#ff7a1a' };
 function exitArrow() {
@@ -2943,9 +2963,8 @@ function draw() {
     }
     const ghostRenderer = window.HM_WASM_RENDERER;
     if (!(ghostRenderer && ghostRenderer.drawGhosts && ghostRenderer.drawGhosts(ghosts, ctx, cw))) {
-      for (let i = 0; i < ghosts.length; i++) { ctx.globalAlpha = .06 + i * .04; body(ghosts[i], '#19f0e6', null, cw); }
+      drawGhostsFallback(ghosts, cw);
     }
-    if (ctx.globalAlpha !== 1) ctx.globalAlpha = 1;
     if (st !== 'dead' && !(P.inv > 0 && Math.floor(P.inv * 20) % 2)) drawPlayer();
     EXP.drawWorld(ctx);
     const np = nearPickup(); if (np && st === 'play') drawHudTextBatch([{ text: 'E · ' + WP[np.w].nome + (WP[np.w].gun ? ' (' + np.n + ')' : ''), x: np.x, y: np.y - 20, color: '#fff', font: 'bold 16px Impact, sans-serif', align: 'center' }]);

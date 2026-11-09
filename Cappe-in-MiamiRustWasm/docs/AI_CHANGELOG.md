@@ -1,3 +1,309 @@
+## Preview local v284.0 — 08/11/2026
+- Móveis, portas comuns, portas Neon e vidros intactos/estilhaços agora usam exclusivamente Rust/WebSys direto; removidos painters, buffers e callback de comando dessas camadas no WASM legado, e removidos os helpers JS sem chamada de produção. Canvas original permanece como fallback no jogo.
+- Build passou; regressão 104/104, ABI, browser bridge, paridade direta e teste Chrome de pixels passaram. Móveis, portas comuns, portas Neon e vidro tiveram zero diferenças RGBA nos casos exercitados.
+- WASM legado: 21.157 bytes, 2 imports e 27 exports (v283: 61.001 bytes, 3 imports e 36 exports). Sem benchmark, revisão visual manual ampla ou conclusão da migração. Nada publicado no GitHub.
+
+## Preview local v283.0 — 08/11/2026
+- Granulado, FTILES, sombras e rejunte usam apenas Rust/WebSys direto. Removidos os painters/buffers do piso no WASM legado, seus imports e o helper Rust de retângulos de piso; Canvas original permanece como fallback em index.html.
+- Build, regressão 104/104, ABI, browser bridge, paridade direta e auditoria Chrome passaram. O caso de gameplay preservou a semente RNG; diferença do piso contra Canvas: máximo 3 e média 0,188 por canal RGBA.
+- WASM legado: 61.001 bytes, 3 imports e 36 exports (v282: 68.531 bytes, 5 imports e 45 exports). Sem benchmark, campanha completa ou revisão visual manual ampla; migração integral pendente. Nada publicado no GitHub.
+
+## Preview local v282.0 — 08/11/2026
+- Texturas de mapa agora usam só o painter Rust/WebSys direto; removidos o rasterizador de textura, buffers e comandos 31/32 do WASM legado. A pintura Canvas do jogo permanece como fallback.
+- Build, regressão 105/105, ABI, browser bridge e auditoria Chrome passaram; o teste compara mapa texturizado ao painter Canvas original dentro dos limites existentes.
+- WASM legado: 68.531 bytes, 5 imports e 45 exports (v281: 74.877 bytes, 5 imports e 50 exports). Sem benchmark, campanha completa ou revisão visual manual ampla; migração integral pendente.
+
+## Preview local v281.0 — 08/11/2026
+- Textos comuns do HUD usam imagens cacheadas e batch de desenho Rust/WebSys; removidos o callback host de texto e exports/buffers correspondentes do WASM legado.
+- Build passou; regressão 105/105, ABI, browser bridge, paridade direta no Chrome e auditoria de pixels passaram. Nos frames exercitados, `globalAlpha` não foi alterado pelo host; comparação dos textos HUD teve zero diferenças RGBA.
+- WASM legado: 74.877 bytes, 5 imports e 50 exports (v280: 75.772 bytes, 6 imports e 53 exports). Sem benchmark, campanha completa ou revisão visual manual ampla; migração integral pendente.
+
+## Preview local v280.0 — 08/11/2026
+- Sombras de paredes/móveis e faces de paredes/postes migraram para Rust/WebSys direto. Removidos `paint_map_shadows`, `paint_map_structure` e o import legado `draw_map_command`; os painters Canvas originais permanecem como fallback.
+- Build passou sem warnings; regressão 104/104, ABI, browser bridge e paridade Chrome passaram. Sombras e estrutura tiveram zero diferenças RGBA nos casos exercitados.
+- WASM legado: 75.772 bytes, 6 imports e 53 exports. Sem benchmark, campanha completa ou revisão visual manual ampla; migração integral pendente.
+
+## Preview local v279.0 — 08/11/2026
+- Detalhes internos das salas e specks do piso migraram para Rust/WebSys direto. Removidos `paint_map_details` e o batch correspondente do WASM legado; o jogo mantém fallback Canvas original.
+- Build passou; regressão 104/104, ABI, browser bridge e paridade Chrome passaram. Detalhes de mapa tiveram zero diferenças RGBA e RNG idêntico ao Canvas.
+- WASM legado: 77.025 bytes, 7 imports e 55 exports. Sem benchmark, campanha completa ou revisão visual manual ampla; migração integral pendente.
+
+## Preview local v278.0 — 08/11/2026
+- Decoração estática dos mapas usa exclusivamente Rust/WebSys direto; removidos `paint_map_decor` e seu batch legado. `paintMap` mantém o Canvas original como fallback.
+- Build, regressão 104/104, ABI, browser bridge, paridade direta e auditoria de pixels passaram; a decoração comparada ao Canvas teve zero diferenças RGBA. Módulo legado: 78.156 bytes, 7 imports e 56 exports (v277: 78.561 bytes e 57 exports).
+- Sem benchmark ou revisão visual manual ampla; a migração integral continua pendente.
+
+## Preview local v277.0 — 08/11/2026
+- Ícones de todas as 24 armas e vidros quebráveis passaram exclusivamente aos painters Rust/WebSys diretos. Removidos `draw_weapon`, `draw_breakables` e seus caminhos de batch; fallback é o Canvas original do jogo.
+- Paridade RGBA das armas e vidros passou no Chrome. Build, regressão 104/104, ABI, browser bridge, paridade direta e auditoria de pixels passaram. Módulo legado: 78.561 bytes, 7 imports e 57 exports (v276: 103.429 bytes e 59 exports).
+- Sem benchmark ou revisão visual manual ampla; a migração integral continua pendente.
+
+## Preview local v276.0 — 08/11/2026
+- Fantasmas e arma passaram ao painter Rust/WebSys direto. Removidos `draw_ghosts`, `ghost_input_ptr` e buffer do módulo legado; fallback Canvas original permanece.
+- Comparação Chrome com painter Canvas e arma Taco: zero diferenças RGBA. Build, regressão 104/104, ABI, browser bridge, paridade direta e auditoria de pixels passaram.
+- Módulo legado: 103.429 bytes, 7 imports e 59 exports (v275: 120.272 bytes e 61 exports). Sem benchmark ou revisão visual manual ampla.
+
+## Preview local v275.0 — 08/11/2026
+- Jogadores P1/P2 passaram do batch gráfico WASM legado para drawPlayers Rust/WebSys direto. Removidos draw_players e player_draw_data_ptr; fallback Canvas original permanece no chamador.
+- Módulo legado: 120.272 bytes, 7 imports e 61 exports. Build, ABI, browser bridge e paridade Chrome passaram; sem benchmark ou revisão visual manual ampla.
+
+## Preview local v274.0 — 08/11/2026
+- Barra de combo, borda da máscara, véu de pausa e barra de recarga migraram para `drawHudShape` Rust/WebSys direto. Removidos `draw_hud_shape`, `hud_shape_input_ptr`, seu buffer, o import `draw_hud_shape_batch` e a ponte de comandos.
+- Os quatro estados tiveram zero diferenças RGBA contra Canvas no Chrome. Dealer continua direto desde v273. Regressão 103/103, ABI, browser bridge, paridade direta e pixels passaram.
+- WASM legado: 125.432 bytes, 7 imports e 63 exports (v273: 126.802 bytes e 65 exports). Sem benchmark ou revisão visual manual ampla.
+
+## Preview local v273.0 — 08/11/2026
+- Dealer da loja migrado exclusivamente ao painter Rust/WebSys direto; removidos `draw_shop_dealer`, `shop_dealer_input_ptr` e o buffer de entrada do WASM legado. Canvas original de `exp-shop.js` segue como fallback se a chamada direta falhar.
+- Comparação independente no Chrome reproduziu o Canvas original para os estados normal e caindo: zero diferenças RGBA. Regressão 103/103, ABI, browser bridge, paridade direta e pixels passaram.
+- WASM legado: 126.802 bytes, 8 imports e 65 exports (v272: 128.777 bytes e 67 exports). Sem benchmark ou validação visual manual ampla.
+
+## Preview local v272.0 — 08/11/2026
+- Painéis de balão, card e rerolar migraram para painters Rust/WebSys diretos; removidos `draw_shop_panel`, `shop_panel_input_ptr` e o buffer do módulo legado. O dealer permanece no batch antigo enquanto a paridade independente Canvas é investigada.
+- WASM legado: 128.777 bytes, 8 imports e 67 exports (v271: 129.725 bytes, 8 imports e 69 exports). Build, regressão 103/103, ABI, browser bridge e paridade Chrome dos painéis passaram. Sem benchmark ou revisão visual manual ampla.
+
+## Preview local v271.0 — 08/11/2026
+- Base dos mapas fixos e overlay translúcido migraram para painters Rust/WebSys diretos. Removidos `paint_map_base` e `paint_map_overlay` do WASM legado; os retângulos Canvas originais permanecem como fallback.
+- WASM legado: 129.725 bytes, 8 imports e 69 exports (v270: 129.918 bytes, 8 imports e 71 exports). Build, regressão 103/103, ABI, browser bridge e paridade Chrome passaram; os três casos comparados tiveram zero diferenças RGBA. Sem benchmark ou revisão visual manual ampla.
+
+## Preview local v270.0 — 08/11/2026
+- O menu de pausa migrou ao painter direto Rust/WebSys; `draw_pause_ui`, `pause_ui_input_ptr` e o buffer saíram do WASM legado. O painter Canvas original continua como fallback.
+- WASM legado: 129.918 bytes, 8 imports e 71 exports (v269: 131.018 bytes, 8 imports e 73 exports). Build, regressão 103/103, ABI, browser bridge e paridade Chrome do menu em todos os hovers e rótulos localizados passaram sem diferenças RGBA. Sem benchmark ou revisão visual manual ampla.
+
+## Preview local v269.0 — 08/11/2026
+- A barra do chefe migrou para o painter direto Rust/WebSys; os dois exports e o buffer correspondentes saíram do WASM legado. O painter Canvas original segue como fallback.
+- WASM legado: 131.018 bytes, 8 imports e 73 exports (v268: 132.196 bytes, 8 imports e 75 exports). Build, regressão 103/103, ABI, browser bridge, paridade Chrome da barra (zero diferenças RGBA) e auditoria de pixels passaram. Sem benchmark nem revisão visual manual ampla.
+
+## Preview local v251.0 — 08/11/2026
+- Removidas as rotas legadas de contorno noturno e máscara da lanterna; o bridge usa Rust direto e o jogo mantém fallback Canvas. Menos 2 imports de host, 4 exports, ~0,50 MiB de buffers estáticos e 1.456 bytes no binário. ABI, paridade Chrome e regressões 102/102 passaram. Sem benchmark; não publicado no GitHub.
+
+## Preview local v250.0 — 08/11/2026
+- Removido o batch legado `draw_layer`; o recorte/composição usa o painter Rust direto e o `drawImage` original é fallback. Binário legado 448 bytes menor e um import de host a menos. Build, Chrome e regressões 102/102 passaram; sem benchmark. Não publicado no GitHub.
+
+## Preview local v249.0 — 08/11/2026
+- Retirados do WASM legado cinco batches de poeira, faíscas, sangue e cadáveres. Foram eliminados ~2,69 MiB de buffers estáticos e 3.173 bytes do binário. Paridade Chrome de partículas/cadáveres e suíte 102/102 passaram; sem benchmark. Não publicado no GitHub.
+
+## Preview local v248.0 — 08/11/2026
+- Removidos do WASM antigo os callbacks, buffers e exports de desenho de projéteis e cartuchos. O bridge usa Rust direto e mantém fallback Canvas nos chamadores. Build e ABI passaram; paridade de ambos passou com zero diferença; regressões 102/102. Sem validação visual manual ou benchmark. Não publicado no GitHub.
+
+## Preview local v247.0 — 08/11/2026
+- Removidos do módulo legado os geradores radial/névoa, entradas/buffers duplicados e callback Canvas de upload. As versões Rust/WebSys diretas permanecem validadas; se falham, radial e névoa usam o fallback Canvas dos chamadores.
+- O WASM legado foi recompilado: 185.523 → 181.733 bytes (−3.790 bytes; −2,0%). Regressões 102/102, ABI, bridge, paridade procedural e paridade direta passaram. Sem medição de frame time. O módulo legado ainda inicia o renderer e serve outras camadas; não publicado no GitHub.
+
+## Preview local v246.0 — 08/11/2026
+- Sprites de névoa passaram a usar exclusivamente o módulo Rust/WebSys direto no wrapper. Em falha, `exp-fx.js` usa os próprios gradientes Canvas; o wrapper não lê mais a memória linear do renderer legado. Chrome confirmou paridade RGBA e regressão verifica que desativar o painter direto não ativa o antigo.
+- Mantém a alteração v245 dos sprites radiais. Regressões 102/102; sem build Rust novo, inspeção visual manual ou benchmark. Não publicado no GitHub.
+
+## Preview local v245.0 — 08/11/2026
+- Sprites radiais passaram a usar exclusivamente o módulo Rust/WebSys direto no wrapper. Se o painter direto estiver ausente ou falhar, o chamador de efeitos usa seu gradiente Canvas já existente; não há retorno ao gerador/buffer do WASM legado. Chrome confirmou pixels RGBA idênticos e regressão que desativa o painter direto confirma a rota sem legado.
+- Renderer segue híbrido; nenhum benchmark nem inspeção visual manual foi realizado. Não publicado no GitHub.
+
+## Preview local v244.0 — 08/11/2026
+- O painter Rust direto de carpetes, tiles e tijolos agora preserva o recorte da região; parity Chrome confirma pixels e avanço do RNG iguais ao caminho legado nesses padrões.
+- Corrigidos três valores de cor dos acabamentos dos ícones Rust de armas para usar as mesmas entradas da paleta legada. A comparação dos 24 nomes agora passa.
+- O painter da pausa recebe os rótulos já traduzidos por `tx()` e continua preservando a transformação/composição do Canvas. A referência de teste inclui os textos que a interface antiga acrescentava fora do lote geométrico.
+- O loader mantém uma cópia mutável das exportações do módulo ES para permitir que os testes desativem funções e realmente exercitem fallbacks. Fixtures de Neon doors usam imagens HTML carregadas, como no jogo. Comparação Chrome direta passou; sem benchmark ou inspeção visual manual.
+
+## Preview local v243.0 — 08/11/2026
+- Exportações de capacidade do renderer antigo deixaram de bloquear as rotas diretas de granulado/tile/acabamento do piso, detalhes/estrutura/sombras de mapa, móveis e portas comuns/Neon. Guardas de tamanho ficam no bridge e os exports/pointers antigos são consultados só no fallback.
+
+## Preview local v242.0 — 08/11/2026
+- Removida a verificação antecipada de `capacity()` legado nas rotas diretas de decoração de mapa, vidros quebráveis, poeira, faíscas, sangue vivo/estático e cadáveres. Os limites de entrada ficam no bridge; validações da memória antiga acontecem somente após falha do Rust direto.
+
+## Preview local v241.0 — 08/11/2026
+- A seleção da célula do spritesheet de jogadores e inimigos agora é calculada em Rust direto, antes de consultar a exportação antiga. Chrome compara 40 combinações de animação/tempo com o WASM legado.
+
+## Preview local v240.0 — 08/11/2026
+- A pausa chama o painter Rust direto antes de consultar exports legados. A regressão Chrome compara os pixels do painel, alpha e composição nas rotas direta e antiga.
+
+## Preview local v239.0 — 08/11/2026
+- Transformação, suavização e qualidade de imagem do Canvas raiz agora são aplicadas pelo módulo Rust direto, com fallback legado preservado. O fundo do quadro e formas fixas do HUD tentam o painter direto antes de exigir exports antigos. Chrome compara o estado do Canvas entre as duas rotas e a regressão cobre a prioridade dos caminhos.
+
+## Preview local v238.0 — 08/11/2026
+- Ícones de arma em pickups e arremessos agora são pintados pelo Rust direto, sem callback gráfico JS. Teste Chrome comparou as 24 armas nos dois contextos, pickups com e sem brilho: zero canais RGBA diferentes.
+
+## Preview local v237.0 — 08/11/2026
+- Sprite RGBA do clarão de disparo gerado em Rust/WebSys direto com paridade exata no Chrome. O batch de efeitos usa buffer reutilizável; pickups, arremessos e contornos noturnos só exigem exports antigos se o caminho direto falhar.
+
+## Preview local v236.0 — 08/11/2026
+- Luzes de mundo, anéis e overlays agora enviam dados por buffers diretos reutilizáveis ao painter Rust. As rotas tentam Rust antes de exigir exports do WASM legado; fallback e saída visual permanecem. Paridade Chrome e regressões foram repetidas após as alterações.
+
+## Preview local v235.0 — 08/11/2026
+- Chuva e partículas de clima agora preenchem buffers reutilizáveis do bridge para o painter Rust direto; os buffers do WASM legado só são escritos quando o fallback é necessário. Chrome comparou chuva nos modos normal/alternado e partículas em dois tempos: zero diferenças RGBA; confirmou reuso dos buffers.
+
+## Preview local v234.0 — 08/11/2026
+- Composição do vendedor, balão, cartões de item e botão de renovar movida para painters diretos Rust/WebSys. Seis paridades Chrome cobriram queda, timer, painel e estados de contorno; zero diferenças RGBA.
+
+## Preview local v233.0 — 08/11/2026
+- Rust/WebSys agora calcula o pulso do combo, formata o multiplicador e pinta contorno/preenchimento. Chrome comparou a rota antiga e a direta com zero diferenças RGBA e estado do contexto restaurado.
+
+## Preview local v232.0 — 08/11/2026
+- Formatação do tempo restante, posição e desenho do texto de alarme movidos para Rust/WebSys direto, preservando cor, fonte, alinhamento e as propriedades do contexto alteradas pelo renderer anterior. Teste Chrome: zero diferenças RGBA.
+
+## Preview local v231.0 — 08/11/2026
+- Seleção e desenho das imagens de vinheta, scanlines e máscara movidos para Rust/WebSys direto. Os estágios 0, 1, 2 e 3 foram comparados com o caminho legado no Chrome e tiveram zero diferenças RGBA.
+
+## Preview local v230.0 — 08/11/2026
+- O preenchimento de fundo do frame, com margem que cobre o viewport durante screen shake, agora é executado pelo painter Rust/WebSys direto. Paridade RGBA idêntica à implementação anterior no Chrome.
+
+## Preview local v229.0 — 08/11/2026
+- Migrados ao Rust/WebSys direto os quatro estágios geométricos do HUD: barra de combo, moldura da máscara, véu de pausa e barra auxiliar. Teste no Chrome comparou os pixels RGBA com o painter anterior e obteve zero diferenças em todos os estágios.
+- Migrada ao Rust/WebSys direto a composição de inimigos visíveis: sombra, corpo por spritesheet ou geometria procedural, alpha de nocaute, atordoamento e labels com imagens cacheadas. O host mantém a simulação e os assets; o batch do WASM antigo fica como fallback.
+- Paridade Chrome para inimigos com spritesheet e geometria procedural, incluindo estados de nocaute, atordoamento, alerta e investigação: zero diferenças RGBA nos casos comparados. Campanha completa, benchmark e revisão visual manual seguem pendentes.
+
+## Preview local v227.0 — 08/11/2026
+- Movida a composição dos rastros fantasma para Rust/WebSys direto, recebendo posições e alpha preparados pelo host. O WASM antigo continua fallback; a simulação e os dados de movimento continuam no JavaScript.
+- Build WASM, regressões 97/97, testes renderer/browser bridge e paridade Chrome passaram. A composição de jogadores, inimigos, armas, fantasmas e aura teve zero diferenças RGBA nos casos comparados; o painter direto de fantasmas foi chamado no teste.
+- Smoke `newGame()` iniciou em `play`; sem validação visual manual, campanha completa ou benchmark.
+
+## Preview local v226.0 — 08/11/2026
+- A composição dos jogadores em cena agora é desenhada pelo Rust direto: posição/rotação, sombra e aura, ícone da arma, recorte do spritesheet, faixas de skin e etiquetas P1/P2. JavaScript continua dono dos dados de simulação e animação; o batch antigo permanece fallback. Chrome comparou dois jogadores, incluindo P2 com skin, com zero diferenças RGBA. Sem benchmark ou publicação no GitHub.
+
+## Preview local v225.0 — 08/11/2026
+- Os pixels dos sprites procedurais de jogador agora são gerados pelo Rust direto em buffer RGBA, mantendo a simulação de animação no host e o painter antigo como fallback. Chrome comparou seis estados/fases com zero diferenças RGBA. Build e testes de paridade ampla passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v224.0 — 08/11/2026
+- A geometria e o desenho dos 17 tipos de móveis estáticos agora usam Rust/WebSys direto, sem gerar o batch pelo WASM legado no caminho normal; fallback preservado. Chrome comparou a rota direta ao fallback com zero canais RGBA diferentes e confirmou rejeição de geometria inválida. Build, regressões 97/97, renderer, browser bridge e paridade ampla passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v223.0 — 08/11/2026
+- As texturas repetidas das salas agora são compostas pelo Rust direto no ImageData do piso; a rota legado permanece fallback. Build, regressões 97/97, renderer, browser bridge e paridades Chrome do piso/mapas passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v222.0 — 08/11/2026
+- O granulado RGBA do piso agora é gerado em Rust/WASM direto a partir do buffer ImageData, mantendo a sequência RNG e a rota legada como fallback. Chrome comparou contra o fallback com zero canais RGBA diferentes e semente idêntica. Build, regressões 97/97, renderer, browser bridge e paridade ampla passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v221.0 — 08/11/2026
+- Sombras de sólidos e rejunte de 24 px agora são compostos em Rust/WebSys diretamente no ImageData do piso e aplicados com putImageData; o rasterizador legado permanece fallback. Chrome comparou pixels e seed do granulado com zero diferenças e estilos/alpha/composição preservados. Build, regressões 97/97, renderer, browser bridge e paridade ampla passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v220.0 — 08/11/2026
+- Vidros intactos e rastros dos fragmentos agora são gerados e pintados por Rust/WebSys em entrada compacta, com fallback legado preservado. Chrome comparou vidros e estilhaços na rota direta e fallback com zero diferenças RGBA; validações rejeitaram alpha inválido e o estado do Canvas permaneceu intacto. Build, regressões e bridge passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v219.0 — 08/11/2026
+- Faces de paredes e detalhes de postes agora são gerados e pintados diretamente em Rust/WebSys, preservando ordem, dimensões e cores; o gerador legado continua como fallback. Chrome comparou rota direta, fallback e referência Canvas com zero diferenças RGBA, incluindo alpha e estilos restaurados. Build, regressões e bridge passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v218.0 — 08/11/2026
+- Sombras de paredes e móveis agora são enviadas em buffer compacto e desenhadas diretamente no módulo Rust/WebSys. O caminho gerado pelo WASM legado continua como fallback. Chrome comparou os bytes RGBA com a referência e o fallback, com zero diferenças; entradas inválidas são rejeitadas e o estado do Canvas é preservado. Build, regressões e bridge passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v217.0 — 08/11/2026
+- Os contornos internos das salas e os detalhes aleatórios do piso agora são gerados e pintados diretamente no módulo Rust/WebSys. A ponte transfere o estado RNG e recebe a semente avançada para manter a sequência do mapa; fallback legado preservado. Chrome comparou pixels e estado RNG com zero diferenças. Build, regressões e bridge passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v216.0 — 08/11/2026
+- A decoração estática dos mapas agora é empacotada em buffer compacto e gerada/pintada no módulo Rust/WebSys direto. Tapetes mantêm preenchimento e dois contornos; outros itens conservam cores e ordem. O gerador legado segue como fallback. Chrome comparou rota direta, fallback e desenho de referência com zero diferenças RGBA; estilos do Canvas preservados. Build, regressões e bridge passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v215.0 — 08/11/2026
+- A base opcional escura e o overlay de luz dos mapas agora são pintados diretamente pelo módulo Rust/WebSys; o caminho gerado pelo WASM legado continua como fallback. Chrome comparou ambos com zero diferenças RGBA, incluindo mapa sem base fixa, e confirmou estado do Canvas preservado. Build, regressões e bridge passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v214.0 — 08/11/2026
+- O cálculo de projeção e seleção dos contornos de inimigos em cenas escuras agora passa diretamente do estado JS para Rust/WebSys, sem pedir o lote ao WASM legado no caminho normal. Fallback mantido. Chrome comparou inimigos vivos, derrubados e mortos com zero diferenças RGBA; alpha, composição e estilos do Canvas preservados. Build, regressões 90/90, renderer, browser bridge e paridade Chrome ampla passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v213.0 — 08/11/2026
+- Marcas de sangue ativo/estático e corpos agora recebem os estados diretamente no módulo Rust/WebSys, que valida os valores, calcula as formas e pinta sem passar pelo gerador de comandos do WASM legado no caminho normal. Fallback mantido. Chrome comparou os três casos com o fallback com zero diferenças RGBA, preservando alpha/composição. Build, regressões, renderer, browser bridge e teste focado de partículas passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v212.0 — 08/11/2026
+- Poeira e faíscas agora recebem os estados das partículas e montam sua geometria no módulo Rust/WebSys direto, sem passar pelo gerador de comandos do WASM legado no caminho normal. A rota antiga continua como fallback. O teste Chrome comparou Canvas legado/fallback com entradas diretas e teve zero diferenças RGBA, preservando alpha e composição. Build, regressões, renderer e browser bridge passaram. Sem benchmark, revisão visual ampla ou publicação no GitHub.
+
+## Preview local v211.0 — 08/11/2026
+- Geometria e pintura de escadas, elevadores e saídas agora são geradas e executadas pelo módulo Rust/WebSys direto, sem pedir os comandos ao WASM legado no caminho ativo. O host continua enviando estado/mapa e gradientes cacheados; rotas antigas permanecem fallback. Chrome comparou escada, elevador e estados de saída contra o fallback com zero diferenças RGBA. Build, regressões 90/90, renderer, browser bridge, paridade procedural e paridade direta ampla passaram. Sem benchmark, revisão visual ampla ou publicação no GitHub.
+
+## Preview local v210.0 — 08/11/2026
+- Gradientes cacheados de escada, elevador, portas e saída agora são gerados em Rust/WebSys; o WASM legado ainda emite a geometria das formas e permanece fallback.
+- Chrome comparou quatro variantes de transporte e dois estados de saída com zero diferenças RGBA; escada, elevador e saída passaram pela rota ativa. A paridade ampla direta também concluiu com zero diferenças RGBA nos caminhos cobertos. Build Rust/WASM, regressões 90/90, checks do renderer e browser bridge passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v209.0 — 08/11/2026
+- Geração em Rust/WebSys dos sprites de luz radial e névoa/fumaça; o host ainda fornece parâmetros e mantém os fallbacks.
+- Teste Chrome comparou radial 47×47 e névoa 512×256 sem diferenças RGBA. Build, regressões 90/90, checks do renderer e browser bridge passaram. Sem benchmark ou publicação no GitHub.
+
+## Preview local v208.0 — 08/11/2026
+- O lote de textos cacheados do HUD envia as imagens e seus dados de posição/opacidade ao painter Rust/WebSys direto. Fallback preservado; a lógica e a criação/cache dos textos ficam no host.
+- `node tests/wasm-hud-image-batch-parity.cjs`: três imagens, zero diferenças RGBA, estado restaurado e entradas inválidas rejeitadas. Regressões 90/90, checks do renderer e browser bridge passaram. A suíte Chrome ampla foi interrompida após passar de 4 GB; sem benchmark ou publicação no GitHub.
+
+## Preview local v204.0 — 07/11/2026
+- O Rust calcula os três vértices e pinta diretamente a seta de direção da Invasão; a rotação enviada pelo host mantém os mesmos valores do caminho antigo.
+- Chrome comparou cinco posições/ângulos com zero diferenças RGBA e estado Canvas restaurado. Build, regressões, renderer e browser bridge passaram. Sem benchmark, campanha completa ou revisão visual ampla.
+
+## Preview local v203.0 — 07/11/2026
+- Contornos dos pickups, barris, câmeras e inimigos escondidos da máscara Coruja, além da rota tracejada, agora são pintados diretamente pelo Rust/WebSys. Regras de visão e navegação permanecem na lógica JavaScript; buffers são reutilizados e o fallback Canvas continua disponível.
+- Chrome comparou cinco marcadores e a rota: zero diferenças RGBA; alpha, composição e transformação preservados. Build e regressões 86/86 passaram. Sem benchmark, campanha completa ou revisão visual ampla.
+
+## Preview local v202.0 — 07/11/2026
+- Projéteis agora enviam posição e dono diretamente aos sprites originais; Rust/WebSys aplica o deslocamento centralizado e desenha sem criar o lote WASM legado. Fallback legado mantido.
+- Chrome comparou cinco tiros dos dois donos e ignorou uma entrada inválida: zero diferenças RGBA, estado Canvas preservado. Build, regressões 85/85, renderer, browser bridge e teste focado passaram. Sem benchmark.
+
+## Preview local v201.0 — 07/11/2026
+- Cápsulas de munição agora são projetadas da posição de mundo e rasterizadas pelo módulo Rust/WebSys direto; a geração/cópia do lote antigo permanece como fallback. O buffer JS cresce sob demanda e é reutilizado.
+- Chrome comparou cinco cápsulas, incluindo linhas inválidas, com zero diferenças RGBA e estado Canvas restaurado. Build, regressões 85/85, renderer, browser bridge e testes focados passaram na fonte e no ZIP extraído (159 arquivos, 86 PNGs). Sem benchmark.
+
+## Preview local v200.0 — 07/11/2026
+- Pickups com/sem brilho e armas arremessadas agora enviam entradas diretamente aos painters Rust/WebSys; o batch legado continua como fallback.
+- Chrome comparou os dois caminhos em três cenários: zero diferenças RGBA e estado Canvas restaurado. Build, regressões 85/85, renderer, browser bridge e teste focado passaram na fonte e no ZIP extraído (158 arquivos, 86 PNGs). Sem benchmark.
+
+## Preview local v199.0 — 07/11/2026
+- Efeitos de disparo e impacto agora passam seus valores diretamente ao painter Rust/WebSys; o WASM legado e o batch no buffer antigo seguem como fallback.
+- Chrome comparou três efeitos, com e sem muzzle flash, em fundos iguais: zero canais RGBA divergentes; alpha e composição preservados. Build, regressões 85/85, renderer, browser bridge e teste focado passaram na fonte e no ZIP extraído (157 arquivos, 86 PNGs). O teste Chrome amplo excedeu 3 GB e foi interrompido. Sem benchmark.
+
+## Preview local v198.0 — 08/11/2026
+- Projeção do jogador e escala dos raios da máscara de blackout/lanterna agora são calculadas no módulo Rust direto; o painter e o fallback existente foram preservados.
+- Chrome comparou a máscara e o overlay de tela nos caminhos antigo e direto: zero diferenças RGBA em ambos. Build, regressões 85/85, renderer, browser bridge e teste focado passaram na fonte e na cópia extraída do ZIP (156 arquivos, 86 PNGs). Sem benchmark.
+
+## Preview local v197.0 — 07/11/2026
+- Neblina/fumaça agora calculam as posições dos três sprites e os desenham em Rust direto; o passo de desempenho, tipo de efeito e relógio permanecem do host.
+- Chrome comparou os caminhos antigo/direto para neblina e fumaça: zero diferenças RGBA, alpha/composição restaurados. Build, regressões 85/85, renderer, browser bridge e paridade de anéis/luzes/zona/neblina passaram na fonte; regressões, renderer e browser bridge passaram no ZIP extraído (155 arquivos, 86 PNGs). O parity amplo do Chrome na extração foi interrompido após alto consumo de memória. Sem benchmark.
+
+## Preview local v196.0 — 07/11/2026
+- A zona pulsante da Invasão agora calcula a senoide e desenha o contorno/preenchimento pelo painter direto Rust; o callback legado permanece como fallback.
+- Chrome comparou o caminho legado com o direto sob alpha/composição alterados: zero diferenças RGBA e estado restaurado. Build, regressões 85/85, renderer e browser bridge passaram. Sem benchmark.
+
+## Preview local v195.0 — 07/11/2026
+- O cálculo de pulso/flicker e a rasterização de luz ambiente, clarão de tiro e reflexo de chuva agora usam Rust/WebSys direto; estado, sprites e seleção de passo continuam no host. O gerador legado segue como fallback.
+- Chrome comparou luzes Neon, stride 2, clarão e reflexo sob alpha/composição alterados: zero diferenças RGBA e estado restaurado. Build, regressões 85/85, renderer, browser bridge, paridade do renderer e piso/mapa passaram na fonte e no ZIP extraído (155 arquivos, 86 PNGs). Sem benchmark.
+
+## Preview local v194.0 — 07/11/2026
+- O cálculo do raio, da espessura e do alpha dos anéis de mundo ativos, além da rasterização, agora ocorre diretamente no painter Rust/WebSys; o caminho anterior permanece como fallback.
+- Chrome comparou três fases de pulso e cores, incluindo alpha/composição alterados: zero diferenças RGBA e estado restaurado. Build, regressões 85/85, renderer, browser bridge e piso/mapa passaram na fonte e na cópia extraída do ZIP (155 arquivos, 86 PNGs). Sem benchmark.
+
+## Preview local v193.0 — 07/11/2026
+- Vidros intactos, brilho animado e estilhaços ativos agora são rasterizados pelo painter Rust direto a partir dos dados de simulação.
+- Chrome comparou brilho em dois estados e quatro cores de estilhaço: zero diferenças RGBA; build e regressões 85/85 passaram. Sem benchmark.
+
+## Preview local v192.0 — 07/11/2026
+- Os realces de inimigos da expansão — anéis de classe, barras, mira de atirador e carga do chefe — agora são rasterizados pelo painter Rust direto.
+- Chrome comparou blindado, líder, atirador e chefe carregado: zero diferenças RGBA; build e regressões 85/85 passaram. Sem benchmark.
+
+## Preview local v191.0 — 07/11/2026
+- Barris explosivos e câmeras agora são rasterizados no painter Rust direto a partir de registros compactos; a geração antiga fica apenas como fallback.
+- Chrome comparou os dois caminhos com alfa e composição alterados: zero diferenças RGBA; build e regressões 85/85 passaram. Sem benchmark.
+
+## Preview local v190.0 — 07/11/2026
+- Portas Neon passam por lote direto Rust/WebSys; deduplicação de imagens, ordem e fallback preservados.
+- Chrome comparou sprites, transforms e offsets com zero diferenças RGBA; regressões 85/85 e testes de renderer passaram. Sem benchmark.
+
+## Preview local v189.0 — 07/11/2026
+- O painter direto desenha portas de sala texturizadas e de geometria simples; geração de comandos antiga permanece fallback.
+- Comparações Chrome de portas horizontais/verticais com e sem imagem: zero diferenças RGBA. Build e regressões 85/85 passaram; sem benchmark.
+
+## Preview local v180.0 — 07/11/2026
+## Preview local v188.0 — 07/11/2026
+- O módulo Rust/WebSys direto agora gera e rasteriza os 24 ícones de armas; caminho antigo mantido como fallback.
+- Paridade Chrome para as 24 armas: zero canais diferentes. Build Rust/WASM e regressões 85/85 passaram; sem benchmark ou inspeção visual ampla.
+
+## Preview local v187.0 — 07/11/2026
+- Sólidos e aberturas são enviados ao compositor direto em arrays JavaScript; a rota normal deixa de depender das tabelas de geometria na memória do WASM legado.
+- Mantido fallback legado; seletores, assets, lógica de jogo e outras camadas não foram migrados nesta alteração.
+- Build Rust/WASM, regressões 85/85 e comparações Chrome passaram. Sem benchmark ou validação visual ampla.
+
+- Formas de HUD, barra do chefe e seta da Invasão passaram para rasterização direta via Rust/WebSys, preservando comandos, paleta, ordem e fallback.
+- Chrome 156 comparou HUD de combo, barra de chefe e seta com o caminho antigo: zero canais RGBA diferentes, alpha/composite restaurados. Regressões 82/82; sem benchmark.
+
+## Preview local v179.0 — 07/11/2026
+- Transformações e brilhos de pickups e armas arremessadas passaram ao painter Rust; o callback de ícone existente continua sob o transform para preservar o desenho da arma.
+- Chrome 156 comparou brilho ligado/desligado e arremesso com o fallback: zero canais RGBA diferentes, alpha/composite restaurados. Regressões 82/82; sem benchmark.
+
+## Preview local v178.0 — 07/11/2026
+- Brilho, clipping, gradiente, hachuras e bordas da saída de fase passaram ao painter Rust direto; WASM legado continua calculando o lote e gerando a imagem do gradiente.
+- Chrome 156 comparou o fallback com Rust em estado concluído e não concluído: zero canais RGBA diferentes, alpha/composite restaurados. Regressões 82/82; sem benchmark.
+
+## Preview local v177.0 — 07/11/2026
+- Escadas e elevadores agora enviam o lote de desenho do WASM legado ao painter direto Rust; gradientes de escada/corpo/portas permanecem imagens RGBA preparadas e cacheadas.
+- Chrome 156 comparou fallback e painter para os dois tipos com zero canais RGBA diferentes e alpha/composite restaurados. Regressões 82/82; sem benchmark.
+
 ## Preview local v176.0 — 07/11/2026
 - Gradação de cor e overlays finais de fade/flash passaram a chamar o painter Rust direto, preservando ordem, cores, dimensões e estado do Canvas.
 - Chrome 156 confirmou callback integrado e paridade RGBA exata nos cenários cobertos; regressões 82/82. Sem benchmark ou validação visual ampla.
@@ -623,4 +929,120 @@ Riscos/limites: partidas e instalação real do SW ainda não validadas; leitura
 - O callback de projéteis agora tenta rasterização direta no painter Rust, preservando ordem, sprites do proprietário, posições e fallback.
 - Chrome 156 confirmou callback integrado e paridade RGBA exata. Build direta 156.945 bytes WASM + glue 40.209 bytes; regressões 82/82.
 - Renderer segue híbrido. Sem benchmark, revisão visual ampla ou campanha completa.
+
+## Preview local v181.0 — 07/11/2026
+- Cópia ao canvas de texto já cacheado encaminhada ao módulo Rust direto; mantém o cache e fallback. Chrome confirmou paridade RGBA exata e estado do canvas; regressões 83/83. Sem benchmark ou revisão visual ampla.
+
+## Preview local v182.0 — 07/11/2026
+- Lote de retângulos do piso legado agora usa `drawFloorCommands` Rust direto; fallback mantido. Chrome 156 registrou 47 chamadas durante `newGame` e igualdade RGBA no caso sintético. Regressões 84/84. Sem benchmark.
+
+## Preview local v182.0 — 07/11/2026
+- Lote de retângulos do piso legado agora usa `drawFloorCommands` Rust direto; fallback mantido. Chrome 156 registrou 47 chamadas durante `newGame` e igualdade RGBA no caso sintético. Regressões 84/84. Sem benchmark.
+
+## Preview local v181.0 — 07/11/2026
+- Cópia ao canvas de texto já cacheado encaminhada ao módulo Rust direto; cache e fallback mantidos. Chrome confirmou paridade RGBA e estado do canvas; regressões 83/83. Sem benchmark ou revisão visual ampla.
+
+## Preview local v183.0 — 07/11/2026
+- Contornos de atores em cenas escuras agora tentam o painter Rust direto; o WASM legado conserva projeção/seleção e fallback. Chrome comparou os dois caminhos: dois contornos, zero diferença RGBA, estado do contexto restaurado. Regressões 85/85. Sem revisão visual ampla ou benchmark.
+
+## Preview local v184.0 — 07/11/2026
+- Leitura de texturas pequenas do piso/mapa via `HTMLCanvasElement` e `HTMLImageElement` agora chama WebSys/Rust, mantendo os bytes, o compositor legado e o fallback Canvas. Chrome 156 confirmou 0 diferenças nos dois tipos, rejeição de dimensão inválida e 5 chamadas diretas na cena de teste. Build Rust/WASM passou; regressões 85/85; o teste de paridade de mapa/piso também passou dentro das tolerâncias documentadas. Sem benchmark ou revisão visual ampla.
+
+## Preview local v185.0 — 07/11/2026
+- Compositor RGBA de paredes, móveis e portas passou do WASM legado para Rust/WebSys direto, com a rota antiga como fallback. Em mapa de 1440×900 houve zero diferença de canal frente ao compositor anterior e duas chamadas diretas observadas; a comparação Canvas existente segue com max 76/255 e média 0,001947/255. Build passou; regressões 85/85, parity direta, teste de piso/mapa e as mesmas validações no ZIP extraído passaram. Sem benchmark ou revisão visual ampla.
+
+## Preview local v186.0 — 07/11/2026
+- O caminho direto passou a montar os oito sprites em buffer JavaScript sem consultar/copiar os buffers de textura do WASM legado; o fallback ainda copia à tabela antiga. Chrome comparou compositor direto e fallback com 0 diferenças de canal; regressões 85/85 e testes no ZIP extraído passaram. Sem benchmark ou validação visual ampla.
+
+## Preview local v205.0 — 07/11/2026
+- Rasterização das 16 artes procedurais novas de máscaras portada para Rust/WebSys, com regeneração após o carregamento do WASM e fallback Canvas. Chrome comparou as 16 imagens com zero canais RGBA diferentes; regressões 88/88, renderer, browser bridge e teste focado passaram. Sem benchmark; a migração ainda é híbrida.
+
+## Preview local v206.0 — 07/11/2026
+- Corrigidas cores e detalhes dos ícones Rust das armas novas para coincidir com o renderer JS. Chrome comparou 12 armas: zero canais RGBA divergentes e estado do Canvas preservado. Regressões 89/89, renderer, browser bridge e testes focados passaram também no ZIP extraído. Sem benchmark; renderer segue híbrido.
+
+## Preview local v207.0 — 07/11/2026
+- A barra de vida/fases do chefe passou do batch legado e callback Canvas para o painter Rust/WebSys direto. Chrome comparou a barra completa com zero diferenças RGBA; alpha, composição e transformação preservados. No ZIP extraído, regressões 90/90, renderer, browser bridge e comparação Chrome passaram. Sem benchmark; renderer segue híbrido.
+## Preview local v252.0 — 08/11/2026
+- Removidas do WASM legado as rotas de FX, pickups, arremessos e sprite de muzzle. O módulo caiu 2.430 bytes (175.625 → 173.195), imports 31 → 27 e exports 134 → 127; seis buffers fixos de 8192 itens (~1,88 MiB) foram eliminados. Rust direto pinta clarões com gradiente radial idêntico ao Canvas; no Chrome, FX teve zero diferenças RGBA, e pickup glow ligado/desligado e 24 armas arremessadas também tiveram zero diferenças. Build, ABI, browser bridge, regressões 102/102 e paridade ampla passaram. Sem benchmark nem revisão visual manual; não publicado no GitHub.
+
+## Preview local v253.0 — 08/11/2026
+- Color grade e overlays finais usam somente os painters Rust/WebSys diretos; callbacks, buffers e exports correspondentes foram removidos do WASM legado. Canvas em `index.html` continua como fallback se o painter direto não estiver disponível.
+- Tamanho do módulo legado: 171.986 bytes; 25 imports e 123 exports (v252: 173.195 bytes, 27 imports, 127 exports). Regressão 102/102, ABI, browser bridge, paridade direta e parity de piso passaram. Sem benchmark ou validação visual manual ampla.
+## Preview local v254.0 — 08/11/2026
+- Combo e alarme passaram a usar somente os painters Rust/WebSys diretos. Foram removidos do WASM legado os respectivos callbacks, buffers, imports e exports; os painters originais de gameplay seguem como fallback.
+- WASM legado: 171.027 bytes, 23 imports, 119 exports (v253: 171.986 bytes, 25 imports, 123 exports). Build, regressão 102/102, ABI, browser bridge, paridade direta e piso passaram; os dois textos tiveram zero diferenças RGBA contra os painters Canvas originais nos casos testados. Sem benchmark ou revisão visual manual ampla.
+## Preview local v255.0 — 08/11/2026
+- Vinhetas e imagens de HUD passaram a ser selecionadas e desenhadas pelo painter Rust/WebSys direto. O batch, callback e armazenamento de entrada/saída equivalentes foram removidos do WASM legado; as rotinas Canvas do jogo continuam como fallback.
+- WASM legado: 170.183 bytes, 22 imports e 117 exports (v254: 171.027 bytes, 23 imports e 119 exports). Build, regressão 102/102, ABI, bridge, paridade direta e piso passaram. Cinco etapas de imagem do HUD: zero diferenças RGBA. Sem benchmark ou revisão visual manual ampla.
+## Preview local v256.0 — 08/11/2026
+- A seta da Invasão usa somente o painter Rust/WebSys direto; o batch legado de vértices foi removido e o chamador mantém o fallback Canvas.
+- WASM legado: 169.636 bytes, 21 imports, 115 exports (v255: 170.183 bytes, 22 imports, 117 exports). Build, regressões 102/102, ABI, bridge, comparações Chrome da seta, paridade direta e piso passaram. Sem benchmark ou revisão visual manual ampla.
+## Preview local v257.0 — 08/11/2026
+- O marcador pulsante da zona de Invasão agora usa somente o painter Rust/WebSys direto; removidos callback, buffers e exports legados, mantendo o painter Canvas do gameplay como fallback.
+- WASM legado: 168.837 bytes, 20 imports e 112 exports (v256: 169.636 bytes, 21 imports e 115 exports). Build, regressões 102/102, ABI, bridge, paridade direta e piso passaram. O teste Chrome comparou a zona ao Canvas original com zero diferenças RGBA. Sem benchmark ou revisão visual manual ampla.
+
+## Preview local v258.0 — 08/11/2026
+- Escadas e elevadores passaram ao painter Rust/WebSys direto; foram removidos do WASM legado o gerador de comandos, a entrada, os buffers e os dois callbacks/imports. O jogo preserva o painter Canvas como fallback.
+- WASM legado: 163.672 bytes, 18 imports e 109 exports (v257: 168.837 bytes, 20 imports e 112 exports). Regressão 102/102; ABI, browser bridge, paridade direta de escadas/elevadores e piso passaram. Os casos comparados no Chrome tiveram zero diferenças RGBA. Sem benchmark ou revisão visual manual ampla.
+
+## Preview local v259.0 — 08/11/2026
+- Névoa/fumaça agora usa o painter Rust/WebSys direto. Removidos os buffers, exports e callback do batch de fog do WASM legado, mantendo o fallback Canvas do jogo.
+- WASM legado: 162.701 bytes, 17 imports e 106 exports (v258: 163.672 bytes, 18 imports e 109 exports). Build, regressão 102/102, ABI, browser bridge, paridade dos efeitos e piso passaram; zero diferenças RGBA nos casos comparados. Sem benchmark ou revisão visual manual ampla.
+## Preview local v260.0 — 08/11/2026
+- Chuva e poeira agora passam pelos painters Rust/WebSys diretos; callbacks, buffers e exports redundantes foram removidos do WASM legado. A simulação e o painter Canvas de fallback continuam no JavaScript.
+- WASM legado: 161.040 bytes, 15 imports, 100 exports (v259: 162.701 bytes, 17 imports, 106 exports). Regressão 102/102, ABI, browser bridge e paridade Chrome passaram; chuva e poeira tiveram zero diferenças RGBA. Sem benchmark nem revisão visual manual ampla.
+
+## Preview local v261.0 — 08/11/2026
+- Barris, câmeras e realces/telegráficos de inimigos agora usam painters Rust/WebSys diretos. Removidos do WASM legado três batches e seis exports; fallback Canvas mantido.
+- WASM legado: 146.123 bytes, 15 imports e 94 exports (v260: 161.040 bytes, 15 imports e 100 exports). Build, regressão 102/102, ABI, browser bridge e paridade Chrome passaram; zero diferenças RGBA nos efeitos comparados. Sem benchmark nem revisão visual manual ampla.
+
+## Preview local v262.0 — 08/11/2026
+- Luzes de mundo e anéis animados agora usam apenas painters Rust/WebSys diretos; removidos do WASM legado dois callbacks e sete exports. Fallback Canvas do jogo mantido.
+- WASM legado: 142.552 bytes, 13 imports e 87 exports (v261: 146.123 bytes, 15 imports e 94 exports). Build, regressão 102/102, ABI, browser bridge e paridade Chrome passaram; zero diferenças RGBA nos casos comparados. Sem benchmark nem revisão visual manual ampla.
+
+## Preview local v263.0 — 08/11/2026
+- Overlays FX de tela usam painters Rust/WebSys diretos; removidos um callback e três exports do WASM legado. Fallback Canvas e lógica JS preservados.
+- WASM legado: 140.548 bytes, 12 imports e 84 exports (v262: 142.552 bytes, 13 imports e 87 exports). Build, regressão 102/102, browser bridge e paridade Chrome passaram; zero diferenças RGBA nos casos comparados. Sem benchmark nem revisão visual manual ampla.
+
+## Preview local v264.0 — 08/11/2026
+- Saída de fase e gradiente usam painters Rust/WebSys diretos; removidos dois callbacks, buffers e três exports do WASM legado. Painter Canvas do jogo mantido como fallback.
+- WASM legado: 138.556 bytes, 10 imports e 81 exports (v263: 140.548 bytes, 12 imports e 84 exports). Foram liberados 1.742.400 bytes de memória linear estática. Build, regressão 102/102, browser bridge e paridade Chrome passaram; zero diferenças RGBA nos casos comparados. Sem benchmark nem revisão visual manual ampla.
+
+## Preview local v266.0 — 08/11/2026
+- Setup do Canvas raiz e fundo do quadro usam painters Rust/WebSys diretos; removidos dois callbacks de host e dois exports do WASM legado. O jogo mantém os mesmos caminhos Canvas como fallback.
+- WASM legado: 134.896 bytes, 8 imports e 78 exports (v265: 135.898 bytes, 10 imports e 80 exports). Build, regressão 102/102, browser bridge e paridade Chrome passaram; paridade de pixels e estado do Canvas nos casos comparados. Sem benchmark nem revisão visual manual ampla.
+
+## Preview local v267.0 — 08/11/2026
+- Screen shake, recoil e câmera aplicam transformações por Rust/WebSys direto; removidos o buffer e dois exports do WASM legado. O Canvas original do jogo continua como fallback.
+- WASM legado: 132.404 bytes, 8 imports e 76 exports (v266: 134.896 bytes, 8 imports e 78 exports). Build, regressão 102/102, ABI, browser bridge e paridade Chrome passaram; transforms, sequência de save/restore e entradas inválidas foram conferidos. Sem benchmark nem revisão visual manual ampla.
+
+## Preview local v268.0 — 08/11/2026
+- Sombra e aura de jogador usam painter Rust/WebSys direto; removido o export `draw_player_aura` do WASM legado. O fallback Canvas original segue disponível se o painter direto falhar.
+- WASM legado: 132.196 bytes, 8 imports e 75 exports (v267: 132.404 bytes, 8 imports e 76 exports). Regressão 103/103, ABI, browser bridge, Chrome e paridade de pixels passaram; aura teve zero diferenças RGBA. Sem benchmark ou revisão visual manual ampla.
+## Preview local v285.0 — 08/11/2026
+- Inimigos agora usam Rust/WebSys direto para sombra, corpo/spritesheet, efeitos de atordoamento e composição dos labels; removidos buffers, exports e callbacks gráficos do renderer WASM legado para essa rota. Fallback Canvas do jogo continua disponível.
+- Build passou; regressão 104/104, ABI, browser bridge, paridade direta e auditoria Chrome passaram. No frame combinado, inimigo, jogador, armas, fantasmas e aura coincidiram em RGBA; spritesheet e transições de estado foram conferidos separadamente, com tolerância máxima de 3 níveis em até 8 canais para antialias de stun.
+- WASM legado caiu de 21.157 para 8.887 bytes e de 27 para 11 exports (2 imports). Migração integral continua pendente; sem benchmark ou revisão visual manual ampla. Nada publicado no GitHub.
+
+## Preview local v286.0 — 08/11/2026
+- Frames procedurais e seleção de sprites já não dependem do WASM legado. Rust/WebSys direto é tentado primeiro; se não puder desenhar, `buildPlayerFrame` e os seletores originais do jogo fazem fallback em JavaScript/Canvas.
+- Removidos do módulo legado o rasterizador procedural de jogadores, buffers de pixels/paleta e seletores de frames. Restam o trampoline/contadores das operações Canvas ainda não portadas. Build passou; regressão 104/104, ABI, browser bridge, paridade direta e Chrome passaram. Seis frames procedurais deram paridade RGBA exata contra o fallback original.
+- WASM legado caiu de 8.887 para 754 bytes e de 11 para 6 exports (2 imports). Migração integral pendente; sem benchmark ou revisão visual manual ampla. Nada publicado no GitHub.
+
+## Preview local v287.0 — 08/11/2026
+- Build passa a compilar e empacotar apenas `wasm-renderer-direct`; o antigo trampoline Canvas deixou de ser compilado, servido e pré-cacheado.
+- O bridge aplica wrappers de diagnóstico às APIs Canvas só com `wasmDiagnostics=1`, reduzindo overhead de instrumentação no modo comum.
+- Regressões 104/104; ABI/WASM direto: 113 exports e 107 imports de Web APIs; browser bridge passou. Paridade direta e teste de pixels no Chrome passaram nos casos cobertos. Piso: 347.083 canais diferentes, máximo 3 e média 0,188; textura de mapa: 240 canais, máximo 76, média 0,00195. Essas medições mostram tolerância não-zero, não equivalência visual perfeita.
+- Fallback Canvas ainda permanece em camadas não portadas. Sem benchmark FPS, sessão longa ou inspeção visual ampla; não publicado no GitHub.
+
+## Preview local v288.0 — 08/11/2026
+- Resumo da pausa (retângulo escuro de estatísticas da partida) migrou ao stage 4 do painter `drawHudShape` Rust/WebSys; fallback Canvas preservado.
+- Regressões 105/105 e paridade Chrome do stage 4 passaram sem diferenças RGBA. Auditoria diagnóstica não registrou chamadas Canvas do host em 12 cenas/estados amostrados.
+- Build direto, ABI (113 exports/107 imports) e bridge passaram. Eventos e modos não exercitados ainda precisam de auditoria; sem FPS, sessão longa ou revisão visual ampla. Não publicado no GitHub.
+
+## Preview local v289.0 — 08/11/2026
+- A preparação das paredes dos mapas de tiles da Campanha agora usa o painter Rust/WebSys direto. Ordem, cores, alpha, faixas de acabamento e geometria são preservados; o fallback Canvas permanece.
+- Auditoria ampliada encontrou limites e geometria subpixel em arenas: Horda usa canvases até 1050×920; Invasão chegou a 1456×1148 e suas salas têm pequenas frações de pixel. Os buffers e validadores relevantes agora aceitam até 1600×1200. Tiles e acabamento são desenhados via Canvas WebSys direto em Rust, preservando recorte fracionário, sem mudar dados de mapa.
+- Build passou; regressões 105/105, ABI (114 exports/107 imports), browser bridge, paridade direta e auditoria Chrome passaram. 23 cenas/estados amostrados não registraram chamadas Canvas do host. Paredes da Campanha e pisos/tile em canvases de 1440×900 e 1456×1148 tiveram paridade pixel a pixel exata.
+- Não houve benchmark FPS nem revisão visual ampla; o fallback continua para falhas e situações não exercitadas. Não publicado no GitHub.
 

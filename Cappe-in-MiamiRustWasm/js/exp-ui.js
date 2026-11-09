@@ -283,22 +283,8 @@
       return hover.x >= box.x && hover.x <= box.x + box.w && hover.y >= box.y && hover.y <= box.y + box.h;
     }) : -1;
     const pauseRenderer = window.HM_WASM_RENDERER;
-    if (pauseRenderer && pauseRenderer.drawPauseUiDirect && pauseRenderer.drawPauseUiDirect(g, W, H, hoverIndex)) return;
-    if (pauseRenderer && pauseRenderer.drawPauseUi && pauseRenderer.drawPauseUi(g, W, H, hoverIndex)) {
-      const entries = [{ text: 'PAUSADO', x: W / 2, y: H / 2 - 40, color: '#ff2e93', font: '64px Impact, sans-serif', align: 'center' }];
-      for (const button of BTN) {
-        const box = boxOf(button);
-        entries.push({ text: button.label, x: W / 2, y: box.y + box.h / 2 + 1, color: button.col, font: 'bold 22px Impact, sans-serif', align: 'center' });
-      }
-      const paintPauseText = (text, x, y, color, font, align) => {
-        g.save(); g.fillStyle = color; g.font = font; g.textAlign = align;
-        g.textBaseline = text === 'PAUSADO' ? 'alphabetic' : 'middle'; g.fillText(text, x, y); g.restore();
-      };
-      const textDrawn = pauseRenderer.drawHudTexts(entries, paintPauseText, g);
-      if (!textDrawn) for (const entry of entries) paintPauseText(entry.text, entry.x, entry.y, entry.color, entry.font, entry.align);
-      return;
-    }
-
+    const pauseLabels = [tx('PAUSADO'), tx('ESC · CONTINUAR'), tx('M · LOBBY')];
+    if (pauseRenderer && pauseRenderer.drawPauseUiDirect && pauseRenderer.drawPauseUiDirect(g, W, H, hoverIndex, pauseLabels)) return;
     // O painter Canvas original continua disponível se o batch Rust não aceitar os dados.
     g.save();
     g.fillStyle = 'rgba(5,0,18,.78)'; g.fillRect(0, 0, W, H);

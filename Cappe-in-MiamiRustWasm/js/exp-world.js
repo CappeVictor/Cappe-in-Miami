@@ -479,9 +479,13 @@
     refreshSol();
     transp.length = 0; for (const f of predio) if (f) f.transp = [];
     const tc = tp.getContext('2d'), th = G.theme;
-    for (const w of walls) {
-      tc.globalAlpha = .9; tc.fillStyle = th.wall; tc.fillRect(w[0], w[1], w[2], w[3]); tc.globalAlpha = 1;
-      tc.fillStyle = th.trim; tc.fillRect(w[0], w[1], w[2], 3); tc.fillRect(w[0], w[1] + w[3] - 3, w[2], 3);
+    const renderer = typeof window !== 'undefined' ? window.HM_WASM_RENDERER : null;
+    let tileWallsRendered = false;
+    try { tileWallsRendered = !!(renderer && renderer.paintTileWalls && renderer.paintTileWalls(tc, walls, th.wall, th.trim)); }
+    catch (error) { console.warn('[Cappe WASM] paredes da campanha usaram fallback JS.', error); }
+    if (!tileWallsRendered) for (const w of walls) {
+        tc.globalAlpha = .9; tc.fillStyle = th.wall; tc.fillRect(w[0], w[1], w[2], w[3]); tc.globalAlpha = 1;
+        tc.fillStyle = th.trim; tc.fillRect(w[0], w[1], w[2], 3); tc.fillRect(w[0], w[1] + w[3] - 3, w[2], 3);
     }
   }
   const _ors = EXP.onRoomStart;

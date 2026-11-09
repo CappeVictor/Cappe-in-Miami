@@ -1,4 +1,378 @@
-# Testes — até 07/11/2026
+## Preview Rust/WASM local v284.0 — 08/11/2026
+- Build Rust/WASM passou; WASM legado 21.157 bytes, 2 imports, 27 exports. Exports/buffers de móveis, portas, portas Neon e vidro, mais callback de batches, ausentes.
+- `node tests/regression.cjs`: 104/104; `wasm-renderer.cjs`, `wasm-renderer-browser.cjs` e `wasm-direct-draw-parity.cjs` passaram.
+- `wasm-floor-pixel-parity.cjs` passou no Chrome em gameplay; móveis, portas, Neon e vidro comparados ao painter Canvas de referência tiveram zero diferenças RGBA nos casos exercitados. Piso: RNG coincidente, diferença máxima 3 e média 0,188 por canal.
+- Sem benchmark, campanha completa ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v283.0 — 08/11/2026
+- Build Rust/WASM passou; WASM legado 61.001 bytes, 3 imports, 36 exports; exports/imports de piso ausentes.
+- node tests/regression.cjs: 104/104; wasm-renderer.cjs, wasm-renderer-browser.cjs, wasm-direct-draw-parity.cjs e wasm-floor-pixel-parity.cjs passaram.
+- Chrome em gameplay: semente RNG do piso coincidente; comparação Canvas teve diferença máxima 3 e média 0,188 por canal RGBA. Texturas de mapa ficaram nos limites já documentados.
+- Sem benchmark, campanha completa ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v282.0 — 08/11/2026
+- Build Rust/WASM passou sem warnings; WASM legado 68.531 bytes, 5 imports, 45 exports; painter e buffers legados de textura de mapa ausentes.
+- Regressão 105/105; testes ABI e browser bridge passaram. Sem o módulo direto, a ponte devolve controle ao fallback Canvas do jogo.
+- `wasm-floor-pixel-parity.cjs` passou no Chrome em gameplay real; comparação das texturas usa Canvas independente, com maxDifference <= 80 e meanDifference <= 0,0025.
+- Sem benchmark, campanha completa ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v281.0 — 08/11/2026
+- Build Rust/WASM passou sem warnings; WASM legado 74.877 bytes, 5 imports, 50 exports; exports e callback legados de HUD ausentes.
+- Regressão 105/105; checks do ABI e browser bridge passaram.
+- `wasm-direct-draw-parity.cjs` passou no Chrome; texto cacheado, HUD cru e batches exercitados tiveram zero diferenças RGBA.
+- `wasm-floor-pixel-parity.cjs` passou no Chrome; na sessão de gameplay testada, setters `globalAlpha` e chamadas `fillText`/`measureText` no host: zero.
+- Sem benchmark, campanha completa ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v280.0 — 08/11/2026
+- Build passou sem warnings. Módulo legado: 75.772 bytes, 6 imports, 53 exports; batches de detalhes, sombras e estrutura do mapa ausentes.
+- Regressão 104/104, ABI, browser bridge, paridade direta e auditoria de pixels passaram. Sombras/estrutura no Chrome: zero diferenças RGBA nos casos exercitados.
+- Sem benchmark, campanha completa ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v279.0 — 08/11/2026
+- Build Rust/WASM passou; módulo legado: 77.025 bytes, 7 imports, 55 exports; `paint_map_details` ausente.
+- Regressão 104/104, ABI, browser bridge, paridade direta e auditoria de pixels passaram. Detalhes de mapa no Chrome: zero diferenças RGBA, RNG idêntico e valores inválidos rejeitados.
+- Sem benchmark, campanha completa ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v278.0 — 08/11/2026
+- Build Rust/WASM passou. Módulo legado: 78.156 bytes, 7 imports e 56 exports; `paint_map_decor` ausente.
+- Regressão 104/104, ABI, browser bridge, paridade direta e teste amplo de pixels passaram. Decoração de mapa comparada no Chrome ao Canvas original: zero diferenças RGBA.
+- Sem benchmark, campanha completa ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v277.0 — 08/11/2026
+- Build Rust/WASM passou. Módulo legado: 78.561 bytes, 7 imports e 57 exports; `draw_weapon` e `draw_breakables` ausentes.
+- Regressão: 104/104. Testes ABI e browser bridge passaram. Chrome comparou os 24 ícones de armas com `wicon` e vidros com o Canvas original: zero diferenças RGBA; paridade direta ampla e auditoria de pixels passaram.
+- Sem benchmark, campanha completa ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v276.0 — 08/11/2026
+- Build Rust/WASM passou. Módulo legado: 103.429 bytes, 7 imports e 59 exports; `draw_ghosts` e `ghost_input_ptr` ausentes.
+- `node tests/regression.cjs`: 104/104. ABI, browser bridge e paridade direta passaram. Chrome comparou fantasmas com arma Taco ao Canvas original: zero diferenças RGBA.
+- Sem benchmark, campanha completa ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v275.0 — 08/11/2026
+- Build Rust/WASM passou. Módulo legado: 120.272 bytes, 7 imports e 61 exports; `draw_players` e `player_draw_data_ptr` ausentes. Regressão 104/104, ABI, browser bridge, paridade direta e auditoria de pixels passaram; paridade P1/P2 contra Canvas original: zero diferenças RGBA.
+- Testes ABI, browser bridge, paridade de desenho Chrome e regressão passaram, incluindo jogadores; a paridade P1/P2 usa agora uma referência independente do painter Canvas original.
+- Sem benchmark ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v274.0 — 08/11/2026
+- Build concluído; WASM legado 125.432 bytes, 7 imports e 63 exports. `draw_hud_shape`, `hud_shape_input_ptr`, o buffer e `draw_hud_shape_batch` foram removidos.
+- Regressão 103/103, teste ABI, browser bridge, paridade direta Chrome e teste de pixels passaram. Combo, máscara, pausa e recarga tiveram zero diferenças RGBA nos cenários comparados.
+- Sem benchmark ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v273.0 — 08/11/2026
+- Build concluído; WASM legado 126.802 bytes, 8 imports e 65 exports. `draw_shop_dealer`, `shop_dealer_input_ptr` e o buffer foram removidos.
+- Regressão 103/103, teste ABI, browser bridge, paridade direta Chrome e teste de pixels passaram. A comparação independente do dealer cobre estado normal e de queda com zero diferenças RGBA.
+- Sem benchmark ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v272.0 — 08/11/2026
+- Build concluído; WASM legado 128.777 bytes, 8 imports e 67 exports; exports e buffer de painéis da loja removidos. Dealer permanece legado.
+- Regressão 103/103, ABI, browser bridge e paridade Chrome passaram; painel da loja comparado com a referência Canvas. Dealer: comparação anterior com batch legado passa, mas referência Canvas independente ainda apresenta desvio de detalhes.
+- Sem benchmark ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v271.0 — 08/11/2026
+- Build concluído; WASM legado 129.725 bytes, 8 imports e 69 exports; `paint_map_base` e `paint_map_overlay` removidos.
+- Regressão 103/103, ABI, browser bridge e paridade Chrome passaram; fundo de mapa fixo, caminho procedural vazio e overlay comparados com Canvas com zero diferenças RGBA.
+- Sem benchmark ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v270.0 — 08/11/2026
+- Build concluído; WASM legado 129.918 bytes, 8 imports e 71 exports; `draw_pause_ui` e `pause_ui_input_ptr` removidos.
+- Regressão 103/103, ABI, browser bridge e paridade Chrome passaram. Menu de pausa comparado com Canvas nos três estados de hover e com rótulos localizados: zero diferenças RGBA.
+- Sem benchmark ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v269.0 — 08/11/2026
+- Build concluído; WASM legado 131.018 bytes, 8 imports e 73 exports; `draw_boss_health_bar` e `boss_health_input_ptr` removidos.
+- `node tests/regression.cjs`: 103/103; ABI, browser bridge e paridade Chrome da barra passaram. Boss HUD: zero diferenças RGBA, alpha/composição/transform restaurados.
+- `node tests/wasm-floor-pixel-parity.cjs` passou; os desvios preexistentes de textura/fog continuam registrados. Sem benchmark ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v259.0 — 08/11/2026
+- Build concluído; módulo legado 162.701 bytes, 17 imports e 106 exports; sem callback/buffers de fog.
+- Regressão 102/102; ABI, browser bridge, paridade direta e piso aprovados. Névoa/fumaça comparadas no Chrome ao Canvas original, zero diferenças RGBA.
+- Sem benchmark ou revisão visual manual ampla.
+
+## Preview Rust/WASM local v258.0 — 08/11/2026
+- Build concluído; WASM legado 163.672 bytes, 18 imports e 109 exports; sem callback de batch ou exports legados de transporte.
+- Regressão 102/102; ABI e browser bridge passaram. tests/wasm-direct-draw-parity.cjs comparou escada e elevador com zero diferenças RGBA; tests/wasm-floor-pixel-parity.cjs passou.
+- Sem benchmark ou revisão visual manual ampla.
+
+# Testes — até 08/11/2026
+## Preview Rust/WASM local v251.0 — 08/11/2026
+- `wasm-renderer/build.ps1`: passou; ABI confirma remoção dos imports/callbacks de contorno e máscara escura e dos exports/buffers associados.
+- `node tests/wasm-dark-overlay-input-parity.cjs`, `node tests/wasm-direct-draw-parity.cjs`, `node tests/wasm-floor-pixel-parity.cjs`: passaram no Chrome, sem diferença nas rotas verificadas.
+- `node tests/wasm-renderer.cjs`, `node tests/wasm-renderer-browser.cjs`: passaram.
+- `node tests/regression.cjs`: 102/102 passaram.
+- Sem validação visual manual ou medição de desempenho.
+
+## Preview Rust/WASM local v250.0 — 08/11/2026
+- `wasm-renderer/build.ps1`: passou; ABI confirma remoção de `draw_layer`/`draw_layer_command`.
+- `node tests/wasm-renderer.cjs`, `node tests/wasm-renderer-browser.cjs`: passaram.
+- `node tests/wasm-floor-pixel-parity.cjs`, `node tests/wasm-direct-draw-parity.cjs`, `node tests/wasm-particle-input-parity.cjs`: passaram no Chrome.
+- `node tests/regression.cjs`: 102/102 passaram.
+- Sem validação visual manual ou medição de desempenho.
+
+## Preview Rust/WASM local v249.0 — 08/11/2026
+- `wasm-renderer/build.ps1`: passou; ABI do WASM legado não tem os cinco callbacks nem exports/buffers removidos.
+- `node tests/wasm-particle-input-parity.cjs`: passou no Chrome, zero diferença nos cinco efeitos e estado Canvas restaurado.
+- `node tests/wasm-floor-pixel-parity.cjs`: passou; paridade de cadáveres, sangue e partículas em zero diferença.
+- `node tests/wasm-renderer-browser.cjs`: passou; wrapper escolhe fallback se o módulo direto estiver indisponível.
+- `node tests/regression.cjs`: 102/102 passaram.
+- Sem validação visual manual ou medição de desempenho.
+
+## Preview Rust/WASM local v248.0 — 08/11/2026
+- Build `wasm-renderer/build.ps1`: passou.
+- `node tests/wasm-bullet-input-parity.cjs` e `node tests/wasm-shell-input-parity.cjs`: passaram; zero diferença de canais.
+- `node tests/wasm-renderer.cjs`: ABI passou.
+- `node tests/regression.cjs`: 102/102 passaram.
+- Sem validação visual manual ou medição de desempenho.
+
+## Preview Rust/WASM local v247.0 — 08/11/2026
+- `powershell -NoProfile -ExecutionPolicy Bypass -File wasm-renderer/build.ps1`: passou; crate antigo recompilado e módulo direto gerado.
+- `node tests/wasm-renderer.cjs`, `node tests/wasm-renderer-browser.cjs`, `node tests/wasm-procedural-sprite-parity.cjs` e `node tests/wasm-floor-pixel-parity.cjs`: passaram; Chrome teve zero diferenças RGBA na comparação procedural direcionada e confirmou que radial/névoa não retornam ao renderer legado.
+- `node tests/wasm-direct-draw-parity.cjs`: passou; lotes principais mantiveram paridade, estado do Canvas e RNG.
+- `node tests/regression.cjs`: 102/102 passaram. `WebAssembly.Module.imports/exports` confirmou a remoção dos símbolos antigos; o WASM legado reduziu de 185.523 para 181.733 bytes.
+- Sem validação visual manual ou benchmark de desempenho; a migração completa permanece pendente.
+
+## Preview Rust/WASM local v246.0 — 08/11/2026
+- `node tests/wasm-procedural-sprite-parity.cjs`: passou no Chrome; névoa e radial tiveram zero canais diferentes; desativar cada painter direto não usa o renderer antigo. Gradientes de transporte/saída e sprite de disparo também passaram.
+- `node tests/wasm-renderer-browser.cjs`: passou; ausência do módulo direto retorna `false` para os fallbacks Canvas dos chamadores, sem pintar esses sprites pela memória antiga.
+- `node tests/regression.cjs`: 102/102 passaram.
+- Sem build Rust novo (o crate Rust não mudou), validação visual manual ou benchmark. Renderer ainda híbrido.
+
+## Preview Rust/WASM local v245.0 — 08/11/2026
+- `node tests/wasm-renderer-browser.cjs`: passou; wrapper radial sem módulo direto agora retorna `false` para ativar o fallback Canvas do chamador, sem usar o renderer antigo.
+- `node tests/wasm-procedural-sprite-parity.cjs`: passou no Chrome; sprite radial manteve zero canais diferentes e o painter radial desativado não voltou ao gerador legado; gradientes, névoa e outros sprites seguiram iguais.
+- `node tests/regression.cjs`: 102/102 passaram.
+- Sem build novo de Rust (o crate Rust não mudou), validação visual manual ou benchmark nesta versão. Renderer ainda híbrido.
+
+## Preview Rust/WASM local v244.0 — 08/11/2026
+- `powershell -NoProfile -ExecutionPolicy Bypass -File wasm-renderer/build.ps1`: passou; os dois módulos WASM release foram compilados.
+- `node tests/regression.cjs`: 102/102 passaram, na fonte e na cópia extraída do ZIP.
+- `node tests/wasm-renderer.cjs` e `node tests/wasm-renderer-browser.cjs`: passaram.
+- `node tests/wasm-direct-draw-parity.cjs`: passou na fonte e na cópia extraída; cobriu piso, RNG, mapas, os 24 ícones de arma, portas Neon, pausa, HUD e batches de mundo.
+- `node tests/wasm-floor-pixel-parity.cjs` e `node tests/wasm-particle-input-parity.cjs`: passaram nos limiares existentes. O ZIP contém 168 arquivos; caminhos, binários e hashes dos arquivos foram verificados.
+- Sem inspeção visual manual ou benchmark de desempenho; a migração integral do renderer segue pendente.
+
+## Preview Rust/WASM local v238.0 — 08/11/2026
+- `node tests/wasm-pickup-throw-input-parity.cjs`: passou no Chrome; todas as 24 armas tiveram zero diferenças RGBA em pickups com/sem brilho e arremessos.
+- `node tests/wasm-direct-draw-parity.cjs`: passou; pickups e arremessos diretos comparados com fallback.
+- `node tests/regression.cjs`: passou, 97/97.
+- `node tests/wasm-renderer.cjs` e `node tests/wasm-exp-weapon-icon-parity.cjs`: passaram.
+
+## Preview Rust/WASM local v237.0 — 08/11/2026
+- Build `wasm-renderer/build.ps1`: passou; crate Rust direto recompilado em release.
+- `node tests/wasm-procedural-sprite-parity.cjs`: passou no Chrome; sprite de clarão, radial, névoa, gradientes de transportes e saídas tiveram zero diferenças nos casos medidos.
+- `node tests/wasm-direct-draw-parity.cjs`: passou, incluindo efeitos, HUD, jogadores, portas e composição coberta.
+- `node tests/regression.cjs`: passou, 97/97.
+- `node tests/wasm-renderer.cjs` e `node tests/wasm-renderer-browser.cjs`: passaram.
+
+## Preview Rust/WASM local v236.0 — 08/11/2026
+- `node tests/regression.cjs`: passou, 97/97.
+- `node tests/wasm-direct-draw-parity.cjs`: passou; efeitos e anéis mantiveram paridade de pixels nos casos cobertos.
+- `node tests/wasm-floor-pixel-parity.cjs`: passou; luzes, anéis, overlays e chuva tiveram paridade direta/fallback nos casos exercitados.
+- `node tests/wasm-renderer-browser.cjs`: passou.
+
+## Preview Rust/WASM local v235.0 — 08/11/2026
+- `node tests/wasm-rain-mote-parity.cjs`: passou no Chrome. Chuva normal/alternada e partículas em dois tempos tiveram zero diferenças RGBA contra o fallback; confirmou reuso dos buffers de entrada.
+- `node tests/regression.cjs`: 97/97 passaram, incluindo metadados v235 e regressões existentes.
+- `node tests/wasm-renderer.cjs`: passou (ABI, composição e paridades do renderer legado/Rust).
+
+## Preview Rust/WASM local v234.0 — 08/11/2026
+- `node tests/wasm-direct-draw-parity.cjs`: passou; seis cenários da loja tiveram 0 diferenças RGBA, com alpha/composite preservados e chamada direta confirmada.
+
+## Preview Rust/WASM local v233.0 — 08/11/2026
+- `node tests/wasm-direct-draw-parity.cjs`: passou; o combo teve 0 diferenças RGBA e restaurou estado de contexto.
+
+## Preview Rust/WASM local v232.0 — 08/11/2026
+- `node tests/wasm-direct-draw-parity.cjs`: passou; texto de alarme teve 0 diferenças RGBA e preservou alpha/composite, fillStyle, fonte e alinhamento.
+
+## Preview Rust/WASM local v231.0 — 08/11/2026
+- `node tests/wasm-direct-draw-parity.cjs`: passou; seleção/desenho das imagens de vinheta, CRT, HUD, máscara e auxiliar teve 0 diferenças RGBA.
+
+## Preview Rust/WASM local v230.0 — 08/11/2026
+- `node tests/wasm-direct-draw-parity.cjs`: passou no Chrome; o fundo do frame teve 0 diferenças RGBA contra o callback anterior, preservando alpha, composite e fillStyle.
+
+## Preview Rust/WASM local v229.0 — 08/11/2026
+- `node tests/wasm-direct-draw-parity.cjs`: passou no Chrome; estágios 0–3 do HUD tiveram 0 canais RGBA diferentes e restauraram alpha/composite.
+- Build WASM, regressões 97/97, `wasm-renderer.cjs`, `wasm-renderer-browser.cjs`, `wasm-direct-draw-parity.cjs` e `wasm-floor-pixel-parity.cjs` passaram.
+- Chrome 156 confirmou zero diferenças RGBA na composição direta de inimigos com spritesheet e corpo procedural, incluindo estados de nocaute, atordoamento, alerta e investigação. Os contadores confirmaram que as rotas diretas de inimigos, jogadores e rastros foram exercitadas.
+- Smoke `newGame()` iniciou em `play`. Não equivale a validação visual manual nem a campanha completa. Sem benchmark.
+
+## Preview Rust/WASM local v227.0 — 08/11/2026
+- Build WASM, regressões 97/97, `wasm-renderer.cjs`, `wasm-renderer-browser.cjs` e `wasm-floor-pixel-parity.cjs` passaram. Chrome 156 comparou rastros fantasma com zero diferenças RGBA. Sem validação visual manual, campanha completa ou benchmark.
+
+## Preview Rust/WASM local v226.0 — 08/11/2026
+- Build Rust/WASM e paridade Chrome ampliada passaram. Dois jogadores foram comparados ao fallback, incluindo P2 com skin, armas, sombras e glow: zero diferenças RGBA. Também passaram regressões 97/97, renderer, browser bridge, paridade direta e piso/mapas. Sem benchmark ou validação visual manual.
+
+## Preview Rust/WASM local v225.0 — 08/11/2026
+- Build Rust/WASM, regressões 97/97, `wasm-renderer.cjs`, `wasm-renderer-browser.cjs`, `wasm-direct-draw-parity.cjs` e `wasm-floor-pixel-parity.cjs` passaram. Chrome comparou seis sprites procedurais do jogador e 17 tipos de móveis com fallback: zero diferenças RGBA; geometria inválida não alterou o Canvas. Paridades amplas de piso/mapas dentro dos limites registrados. Sem benchmark ou validação visual manual.
+
+## Preview Rust/WASM local v224.0 — 08/11/2026
+- Build Rust/WASM, regressões 97/97, `wasm-renderer.cjs`, `wasm-renderer-browser.cjs`, `wasm-direct-draw-parity.cjs` e `wasm-floor-pixel-parity.cjs` passaram. Chrome comparou os 17 tipos de móveis estáticos entre Rust direto e fallback: zero canais RGBA diferentes; geometria inválida foi rejeitada. Paridades amplas de piso e mapas mantiveram os limites registrados. Sem benchmark ou validação visual manual.
+
+## Preview Rust/WASM local v223.0 — 08/11/2026
+- Build Rust/WASM, regressões 97/97, `wasm-renderer.cjs` e `wasm-renderer-browser.cjs` passaram. Chrome comparou granulado e FTILES na rota Rust e no fallback: zero diferenças RGBA, estado RNG igual; entradas fracionárias foram rejeitadas.
+- `wasm-floor-pixel-parity.cjs` e `wasm-direct-draw-parity.cjs` passaram; comparação ampliada do piso/mapas ficou dentro dos limites registrados, com 0 diferenças entre compositor direto de textura e fallback legado. Sem benchmark ou validação visual manual.
+
+## Preview Rust/WASM local v207.0 — 07/11/2026
+- No ZIP v207 extraído (165 arquivos, 86 PNGs), `wasm-renderer/build.ps1`, regressões 90/90, `wasm-renderer.cjs` e `wasm-renderer-browser.cjs` passaram.
+- Chrome comparou barra e marcadores de chefe ao batch de referência: zero canais RGBA diferentes; alpha, composição e transformação restaurados. Paridades de 16 máscaras e 12 armas da expansão também passaram.
+- Sem benchmark, campanha completa ou revisão visual ampla.
+
+## Preview Rust/WASM local v206.0 — 07/11/2026
+- wasm-renderer/build.ps1, regressões 89/89, renderer e browser bridge passaram na validação final.
+- Chrome comparou as 12 armas da expansão: zero canais RGBA diferentes, uma chamada Rust por arma e estado do Canvas preservado. As 16 artes das máscaras também mantiveram zero canais diferentes e a grade atualizada.
+- Sem benchmark, campanha completa ou revisão visual ampla.
+
+## Preview Rust/WASM local v205.0 — 07/11/2026
+- No ZIP v205 extraído (163 arquivos, 86 PNGs), build, regressões 88/88, testes do renderer e browser bridge passaram.
+- Chrome comparou as 16 artes procedurais com fallback Canvas: zero canais RGBA diferentes; 16 chamadas Rust após inicialização, grade atualizada e estado do Canvas restaurado.
+- Sem benchmark, campanha completa ou revisão visual ampla.
+
+## Preview Rust/WASM local v204.0 — 07/11/2026
+- No ZIP v204 extraído (162 arquivos, 86 PNGs), `wasm-renderer/build.ps1`, regressões 87/87, renderer e browser bridge passaram.
+- `node tests/wasm-invasion-arrow-parity.cjs` comparou cinco ângulos/posições em Chrome: zero canais RGBA divergentes; alpha, composição e transformação preservados.
+- Sem campanha completa, revisão visual ampla ou benchmark.
+
+## Preview Rust/WASM local v203.0 — 07/11/2026
+- No ZIP v203 extraído (161 arquivos, 86 PNGs), `wasm-renderer/build.ps1`, regressões 86/86, renderer e browser bridge passaram.
+- No ZIP extraído, `node tests/wasm-owl-overlay-parity.cjs` comparou cinco marcadores da máscara Coruja e uma rota tracejada em Chrome: zero canais RGBA diferentes; alpha, composição e transformação restaurados.
+- Sem campanha completa, revisão visual ampla ou benchmark.
+
+## Preview Rust/WASM local v202.0 — 07/11/2026
+- No ZIP v202 extraído (160 arquivos, 86 PNGs), `wasm-renderer/build.ps1`, regressões 85/85, `node tests/wasm-renderer.cjs` e `node tests/wasm-renderer-browser.cjs` passaram.
+- No ZIP extraído, `node tests/wasm-bullet-input-parity.cjs`, `wasm-shell-input-parity.cjs`, `wasm-pickup-throw-input-parity.cjs`, `wasm-fx-input-parity.cjs` e `wasm-dark-overlay-input-parity.cjs` passaram; comparação RGBA sem diferenças, com estado Canvas restaurado nos casos aplicáveis.
+- Sem campanha completa, revisão visual ampla ou benchmark.
+
+## Preview Rust/WASM local v201.0 — 07/11/2026
+- Build Rust/WASM, regressões 85/85, renderer e browser bridge passaram na fonte e no ZIP extraído (159 arquivos, 86 PNGs).
+- `node tests/wasm-shell-input-parity.cjs` comparou o painter antigo e a projeção direta para cinco cápsulas na fonte e no ZIP extraído, incluindo inválidas: zero canais RGBA divergentes; alpha/composição preservados; rota direta confirmada.
+- Sem campanha completa, revisão visual ampla ou benchmark.
+
+## Preview Rust/WASM local v200.0 — 07/11/2026
+- Build Rust/WASM passou. O módulo direto já continha os painters usados; esta etapa alterou a ponte para enviar entradas diretamente e reutilizar buffers de entrada.
+- Regressões 85/85, renderer e browser bridge passaram na fonte e no ZIP extraído (158 arquivos, 86 PNGs).
+- `node tests/wasm-pickup-throw-input-parity.cjs` comparou fallback e rota direta na fonte e no ZIP extraído para pickups com glow ligado/desligado e armas arremessadas: zero canais RGBA divergentes e estado Canvas restaurado.
+- Sem campanha completa, revisão visual ampla ou benchmark.
+
+## Preview Rust/WASM local v199.0 — 07/11/2026
+- Build Rust/WASM, regressões 85/85, renderer e browser bridge passaram na fonte e na cópia extraída do ZIP (157 arquivos, 86 PNGs; sem cache de build ou ZIP interno).
+- `node tests/wasm-fx-input-parity.cjs` comparou fallback e Rust direto para três efeitos (dois clarões e um arco) na fonte e no ZIP extraído: zero canais RGBA divergentes; alpha/composição preservados; chamada de entradas diretas confirmada.
+- `node tests/wasm-direct-draw-parity.cjs` iniciou Chrome e o jogo em `play`, mas ultrapassou 3 GB e parou de avançar; foi encerrado. Não houve validação visual ampla, campanha completa ou benchmark.
+
+## Preview Rust/WASM local v198.0 — 08/11/2026
+- Build Rust/WASM e regressões 85/85 passaram na fonte e na cópia extraída do ZIP (156 arquivos, 86 PNGs, sem target ou ZIP interno).
+- Renderer e browser bridge passaram na fonte e no ZIP. `node tests/wasm-dark-overlay-input-parity.cjs` comparou máscara e overlay nos caminhos Chrome, com zero diferenças RGBA e duas chamadas diretas.
+- Sem benchmark ou validação visual ampla.
+
+## Preview Rust/WASM local v197.0 — 07/11/2026
+- Build Rust/WASM passou; regressões 85/85, renderer, browser bridge e parity direta passaram na fonte. Regressões 85/85, renderer e browser bridge passaram na cópia extraída do ZIP (155 arquivos, 86 PNGs, sem target ou ZIP interno).
+- Chrome comparou neblina e fumaça em tempos distintos entre o caminho legado e o Rust direto: zero canais RGBA divergentes; alpha e composição restaurados. A execução do parity amplo na extração foi interrompida por alto consumo de memória do Chrome.
+- Sem benchmark ou validação visual ampla.
+
+## Preview Rust/WASM local v196.0 — 07/11/2026
+- Build Rust/WASM passou; regressões 85/85, renderer e browser bridge passaram na fonte.
+- Chrome comparou o pulso/zona da Invasão gerado pelo código antigo e pelo painter Rust direto: zero canais RGBA divergentes; alpha e composição restaurados.
+- Sem benchmark ou validação visual ampla; validar pacote após empacotar esta etapa.
+
+## Preview Rust/WASM local v195.0 — 07/11/2026
+- Build Rust/WASM passou; regressões 85/85, renderer, browser bridge, piso/mapa e parity dos anéis/luzes passaram na fonte e na cópia extraída do ZIP (155 arquivos, 86 PNGs, sem target ou ZIP interno).
+- Chrome comparou a geração antiga com o cálculo/draw Rust direto para luzes comuns/Neon, stride 2, clarão e reflexo: zero diferenças RGBA; alpha e composição restaurados.
+- Sem benchmark ou validação visual ampla.
+
+## Preview Rust/WASM local v194.0 — 07/11/2026
+- Build Rust/WASM passou; regressões 85/85, parity dos anéis, renderer, browser bridge e piso/mapa passaram na fonte.
+- Chrome comparou os caminhos legado e direto dos anéis em três fases e cores, sob alpha reduzido e composição `multiply`: zero canais RGBA divergentes; estado do Canvas restaurado.
+- A cópia extraída do ZIP também passou em regressões 85/85, parity dos anéis, renderer, browser bridge e piso/mapa. Pacote contém 155 arquivos, 86 PNGs, sem target ou ZIP aninhado.
+- A comparação de piso/mapa manteve as diferenças conhecidas nas camadas do piso e da névoa; as camadas migradas próprias tiveram paridade, e o mapa direto versus WASM legado teve zero diferenças. Sem validação visual ampla ou benchmark.
+
+## Preview Rust/WASM local v193.0 — 07/11/2026
+- Build Rust/WASM passou; regressões 85/85, renderer, browser bridge e piso/mapa passaram.
+- Chrome comparou dois painéis (com e sem shimmer) e quatro cores de estilhaço: zero canais RGBA divergentes, alpha/composição restaurados.
+- ZIP v193 extraído: 155 arquivos, 86 PNGs, sem target/ZIP aninhado; regressões 85/85, paridade do vidro, renderer, browser bridge e piso/mapa passaram na cópia distribuível.
+
+## Preview Rust/WASM local v192.0 — 07/11/2026
+- Build Rust/WASM passou; regressões 85/85; renderer, browser bridge e piso/mapa passaram.
+- Chrome comparou blindado, líder, atirador com telegraph e chefe carregado; zero canais RGBA divergentes e alpha/composição restaurados.
+- ZIP v192 extraído: 155 arquivos, 86 PNGs, sem target/ZIP aninhado; regressões 85/85, paridade dos realces, renderer, browser bridge e piso/mapa passaram na cópia distribuível.
+
+## Preview Rust/WASM local v191.0 — 07/11/2026
+- Build Rust/WASM passou; regressões 85/85; renderer, browser bridge e piso/mapa passaram.
+- Chrome comparou barris com timers em ambos os estados e câmeras frias/quentes com seus cones; zero canais RGBA divergentes e alpha/composição restaurados.
+- ZIP v191 extraído: 155 arquivos, 86 PNGs, sem target/ZIP aninhado; regressões 85/85, paridade dos dois painters, renderer, browser bridge e piso/mapa passaram na cópia distribuível.
+
+## Preview Rust/WASM local v190.0 — 07/11/2026
+- Build Rust/WASM passou; regressões: 85/85.
+- Chrome: duas portas Neon com sprites diferentes, rotação e offsets tiveram zero diferenças RGBA contra o caminho anterior; estado Canvas restaurado.
+- WASM legado, bridge browser e integração mapa/piso passaram.
+- ZIP v190 extraído: 155 arquivos, 86 PNGs, sem target/ZIP aninhado; regressões 85/85, paridade direta das portas Neon (0 canais divergentes, alpha/composição restaurados), renderer, bridge browser e piso/mapa passaram.
+
+## Preview Rust/WASM local v189.0 — 07/11/2026
+- Build Rust/WASM passou; regressões: 85/85.
+- Chrome comparou portas horizontais/verticais com e sem sprite contra o caminho anterior: zero diferenças RGBA e estado do contexto restaurado.
+- ZIP v189 extraído: 155 arquivos exatos, 86 PNGs, sem target; regressões 85/85, paridade de portas horizontais/verticais com e sem sprite (zero diferenças), 24 armas e mapa/piso passaram. Sem benchmark, campanha completa ou validação visual ampla.
+
+## Preview Rust/WASM local v188.0 — 07/11/2026
+- Build Rust/WASM passou; regressões: 85/85.
+- Chrome: os 24 ícones gerados no painter direto versus gerador WASM legado tiveram zero canais diferentes; estado do contexto restaurado.
+- Testes na fonte: node tests/wasm-floor-pixel-parity.cjs passou, incluindo a integração dos ícones de arma; a paridade de mapa/piso manteve os limites documentados.
+- ZIP v188 extraído: 155 arquivos exatos, incluindo 86 PNGs, sem target ou ZIP aninhado; regressões 85/85, paridade de 24 armas com zero diferenças e mapa/piso passaram na cópia extraída. Sem benchmark, campanha completa ou validação visual ampla.
+
+## Preview Rust/WASM local v187.0 — 07/11/2026
+- wasm-renderer/build.ps1: passou; ambos os módulos Rust/WASM foram compilados.
+- node tests/regression.cjs: 85/85 passou.
+- node tests/wasm-direct-draw-parity.cjs: passou em Chrome.
+- node tests/wasm-floor-pixel-parity.cjs: passou em Chrome, incluindo igualdade pixel a pixel do compositor direto e fallback legado.
+- ZIP v187 extraído: manifesto de 155 arquivos conferido sem ausências/extras, 86 PNGs incluídos e nenhum diretório target; regressões 85/85, paridade direta e mapa/piso passaram também na cópia extraída. Sem benchmark, revisão visual ampla ou campanha completa.
+## Preview Rust/WASM local v186.0 — 07/11/2026
+- Build Rust/WASM passou; `node tests/regression.cjs`: 85/85.
+- `node tests/wasm-direct-draw-parity.cjs`: leitura de `HTMLCanvasElement` e `HTMLImageElement` preservou os bytes testados; suíte de paridade passou.
+- `node tests/wasm-floor-pixel-parity.cjs`: compositor direto versus fallback em 1440×900 teve 0 canais diferentes; 2 chamadas diretas observadas. A comparação Canvas conhecida segue em max 76/255/média 0,001947/255.
+- As três verificações passaram novamente com o ZIP extraído. Sem benchmark, revisão visual ampla ou campanha completa.
+## Preview Rust/WASM local v185.0 — 07/11/2026
+- Build Rust/WASM passou.
+- `tests/wasm-floor-pixel-parity.cjs`: Chrome 156 comparou o novo compositor ao fallback WASM anterior em mapa 1440×900: 0 canais diferentes; a comparação Canvas existente manteve max 76/255 e média 0,001947/255.
+- `node tests/regression.cjs`: 85/85 passou. `node tests/wasm-direct-draw-parity.cjs`: passou; fontes canvas e imagem preservam os bytes testados.
+- ZIP extraído em diretório limpo de build: regressões 85/85, paridade direta e compositor de mapa passaram; o ZIP não inclui `target`.
+- Sem benchmark, revisão visual ampla ou campanha completa.
+## Preview Rust/WASM local v184.0 — 07/11/2026
+- wasm-renderer/build.ps1: passou; build principal e módulo direto Rust/WASM concluídos.
+- node tests/regression.cjs: 85/85 passou.
+- node tests/wasm-direct-draw-parity.cjs: Chrome 156 confirmou leitura via Rust de canvas e imagem HTML (48×24), bytes idênticos, rejeição de dimensão inválida e os demais cenários existentes.
+- node tests/wasm-floor-pixel-parity.cjs: jogo entrou em `play`, cinco leituras diretas registradas; piso e texturas de mapa renderizaram e passaram nos limites de paridade já documentados. Sem campanha completa ou avaliação visual ampla.
+## Preview Rust/WASM local v183.0 — 07/11/2026
+- wasm-renderer/build.ps1: passou; módulo Rust direto compilado.
+- node tests/regression.cjs: 85/85 passou.
+- node tests/wasm-direct-draw-parity.cjs: Chrome 156 comparou fallback e painter Rust para contornos de atores: zero diferenças RGBA e estado do contexto restaurado; demais cenários cobertos passaram.
+- Sem benchmark, revisão visual ampla ou campanha completa.
+## Preview Rust/WASM local v182.0 — 07/11/2026
+- wasm-renderer/build.ps1: passou; compilação do painter Rust direto concluída.
+- node tests/regression.cjs: 84/84 passou.
+- node tests/wasm-direct-draw-parity.cjs: Chrome 156 confirmou 47 chamadas do painter de piso durante `newGame`; lote de retângulos sintético teve zero diferença RGBA, e os cenários de paridade existentes passaram.
+- Sem benchmark, revisão visual ampla ou campanha completa.
+
+## Preview Rust/WASM local v181.0 — 07/11/2026
+- node tests/regression.cjs: 83/83 passou.
+- node tests/wasm-direct-draw-parity.cjs: Chrome 156 confirmou o blit Rust de imagem cacheada com zero canais RGBA diferentes; alpha/composite restaurados. Demais cenários de paridade incluídos também passaram.
+- Sem benchmark, inspeção visual ampla ou campanha completa.
+
+## Preview Rust/WASM local v180.0 — 07/11/2026
+- wasm-renderer/build.ps1: passou; módulo direto 169.458 bytes WASM e glue 44.420 bytes.
+- node tests/regression.cjs: 82/82 passou, incluindo health/cache e vínculos dos painters HUD.
+- node tests/wasm-direct-draw-parity.cjs: passou em Chrome 156; HUD de combo, barra do chefe e seta da Invasão tiveram zero canais RGBA diferentes, alpha/composite restaurados.
+- Sem benchmark, revisão visual ampla, campanha completa ou validação de todos os callbacks.
+## Preview Rust/WASM local v179.0 — 07/11/2026
+- wasm-renderer/build.ps1: passou; módulo direto 167.003 bytes WASM e glue 43.554 bytes.
+- node tests/regression.cjs: 82/82 passou, incluindo health/cache e rotas dos painters de pickup/arremesso.
+- node tests/wasm-direct-draw-parity.cjs: passou em Chrome 156; brilho ligado/desligado e arremesso tiveram zero canais RGBA diferentes do fallback, com alpha/composite restaurados.
+- Sem benchmark, revisão visual ampla, campanha completa ou validação de todos os callbacks.
+## Preview Rust/WASM local v178.0 — 07/11/2026
+- wasm-renderer/build.ps1: passou; módulo direto 162.146 bytes WASM e glue 42.371 bytes.
+- node tests/regression.cjs: 82/82 passou, incluindo health/cache e vínculo do painter da saída.
+- node tests/wasm-direct-draw-parity.cjs: passou em Chrome 156; fallback e painter Rust foram comparados nas saídas não concluída/concluída, sem diferença RGBA e com alpha/composite restaurados.
+- Sem benchmark, revisão visual ampla, campanha completa ou validação de todos os callbacks.
+## Preview Rust/WASM local v177.0 — 07/11/2026
+- wasm-renderer/build.ps1: passou; módulo direto 160.467 bytes WASM e glue 41.796 bytes.
+- node tests/regression.cjs: 82/82 passou, incluindo health/cache e rota direta do lote de transporte.
+- node tests/wasm-direct-draw-parity.cjs: passou em Chrome 156; escada e elevador foram comparados ao fallback, ambos com zero canais RGBA diferentes e alpha/composite restaurados.
+- Sem benchmark, revisão visual ampla, campanha completa ou validação de todos os callbacks.
 ## Preview Rust/WASM local v176.0 — 07/11/2026
 - wasm-renderer/build.ps1: passou; módulo direto 158.600 bytes WASM e glue 41.212 bytes.
 - node tests/regression.cjs: 82/82 passou, incluindo health/cache e vínculo dos dois novos painters.
@@ -646,4 +1020,94 @@ Os mesmos testes foram avaliados contra os arquivos anteriores: 7 PASS / 18 FAIL
 
 ## Limitação concreta
 As rotas foram testadas sem socket por causa da política que bloqueia loopback (EACCES). Não foi validada a experiência em dois navegadores/dispositivos, reconexão visual, console real ou FPS nesta rodada.
+
+## Preview Rust/WASM local v252.0 — 08/11/2026
+- `wasm-renderer/build.ps1`, `node tests/wasm-renderer.cjs`, `node tests/wasm-renderer-browser.cjs`, `node tests/regression.cjs`: passaram; regressões 102/102. ABI confirma remoção dos imports e exports de FX/pickups/arremessos/muzzle.
+- `node tests/wasm-fx-input-parity.cjs`: Chrome, zero canais diferentes/max 0 contra o fallback FX, alpha e composição restaurados.
+- `node tests/wasm-pickup-throw-input-parity.cjs`: Chrome, glow ligado/desligado e 24 armas arremessadas, zero canais diferentes/max 0; estado restaurado.
+- `node tests/wasm-direct-draw-parity.cjs`: passou; inclui smoke no jogo em `play` e paridade sintética das camadas cobertas. Sem revisão visual manual ampla ou benchmark.
+
+## Preview Rust/WASM local v253.0 — 08/11/2026
+- Build Rust/WASM: passou.
+- `node tests/regression.cjs`: 102/102.
+- `node tests/wasm-renderer.cjs`: ABI passou.
+- `node tests/wasm-renderer-browser.cjs`: bridge e fallbacks passaram.
+- `node tests/wasm-direct-draw-parity.cjs`: passou; color grade e overlays finais com zero canais RGBA diferentes nos casos exercitados.
+- `node tests/wasm-floor-pixel-parity.cjs`: passou; suíte ampla reporta deltas preexistentes de referência em composição de piso/textura e neblina (direto vs legado do mapa: zero diferenças; fog alpha max 1). Sem revisão visual manual ou benchmark.
+## Preview Rust/WASM local v254.0 — 08/11/2026
+- Build Rust/WASM: passou; módulo legado 171.027 bytes, 23 imports, 119 exports.
+- `node tests/regression.cjs`: 102/102; inclui verificação de ausência dos exports/callbacks antigos e preservação dos painters Canvas para fallback.
+- `node tests/wasm-renderer.cjs`: ABI passou e confirma ausência dos quatro exports de combo/alarme.
+- `node tests/wasm-renderer-browser.cjs`: bridge passou; renderer inativo retorna `false` sem pintar, permitindo o fallback no jogo.
+- `node tests/wasm-direct-draw-parity.cjs`: passou; painters combo/alarme comparados aos desenhos Canvas do jogo com zero canais RGBA diferentes.
+- `node tests/wasm-floor-pixel-parity.cjs`: passou; sem revisão visual manual ou benchmark.
+## Preview Rust/WASM local v255.0 — 08/11/2026
+- Build Rust/WASM: passou; módulo legado 170.183 bytes, 22 imports e 117 exports; nenhum import/export antigo `hud_image` permaneceu.
+- `node tests/regression.cjs`: 102/102; verifica a rota direta, ausência do batch legado e preservação do fallback de gameplay.
+- `node tests/wasm-renderer.cjs`: ABI passou e confirma ausência dos dois exports legados.
+- `node tests/wasm-renderer-browser.cjs`: bridge passou; renderer desativado retorna `false`, permitindo ao jogo usar seu painter Canvas.
+- `node tests/wasm-direct-draw-parity.cjs`: passou; cinco estágios de imagem HUD comparados com Canvas de referência sem diferenças RGBA.
+- `node tests/wasm-floor-pixel-parity.cjs`: passou. Sem benchmark ou validação visual manual ampla.
+## Preview Rust/WASM local v256.0 — 08/11/2026
+- Build Rust/WASM: passou; módulo legado 169.636 bytes, 21 imports e 115 exports; sem import/export legado da seta de Invasão.
+- `node tests/regression.cjs`: 102/102; rota direta e ausência do batch legado verificadas; fallback de `exp-modes.js` preservado.
+- `node tests/wasm-renderer.cjs`: ABI passou e confirma ausência dos exports da seta.
+- `node tests/wasm-renderer-browser.cjs`: bridge passou; renderer inativo devolve `false` sem pintar a seta.
+- `node tests/wasm-invasion-arrow-parity.cjs`: cinco posições e ângulos comparados no Chrome; zero diferenças RGBA e estado Canvas restaurado.
+- `node tests/wasm-direct-draw-parity.cjs` e `node tests/wasm-floor-pixel-parity.cjs`: passaram. Sem benchmark ou revisão visual manual ampla.
+## Preview Rust/WASM local v257.0 — 08/11/2026
+- Build Rust/WASM: passou; módulo legado 168.837 bytes, 20 imports e 112 exports; sem import/export legado `invasion_zone`.
+- `node tests/regression.cjs`: 102/102; rota direta e fallback Canvas em `exp-modes.js` cobertos.
+- `node tests/wasm-renderer.cjs`: ABI passou e confirma a ausência de três exports antigos.
+- `node tests/wasm-renderer-browser.cjs`: bridge passou; renderer inativo devolve `false` sem pintar.
+- `node tests/wasm-direct-draw-parity.cjs`: passou; zona comparada ao Canvas original com zero diferenças RGBA.
+- `node tests/wasm-floor-pixel-parity.cjs`: passou. Sem benchmark ou revisão visual manual ampla.
+## Preview Rust/WASM local v260.0 — 08/11/2026
+- Build Rust/WASM concluído; módulo legado: 161.040 bytes, 15 imports, 100 exports; exports e callbacks legados de chuva/poeira ausentes.
+- Regressão 102/102, ABI e browser bridge aprovados. Chrome comparou chuva e partículas de poeira ao Canvas original: zero diferenças RGBA. Paridade direta ampla e piso passaram.
+- Sem benchmark nem revisão visual manual ampla.
+
+## Preview Rust/WASM local v261.0 — 08/11/2026
+- `wasm-renderer/build.ps1`: build dos módulos Rust/WASM concluído; renderer legado com 146.123 bytes, 15 imports e 94 exports.
+- `node tests/wasm-direct-draw-parity.cjs`: Chrome; barris, câmeras e acentos/telegráficos de inimigos com zero diferenças RGBA, estado de alpha/composição restaurado. Paridade ampla restante também passou.
+- `node tests/regression.cjs`: 102/102; `node tests/wasm-renderer.cjs`: passou; `node tests/wasm-renderer-browser.cjs`: passou.
+- Sem campanha completa, revisão visual manual ampla ou benchmark.
+
+## Preview Rust/WASM local v262.0 — 08/11/2026
+- `wasm-renderer/build.ps1`: build concluído; renderer legado com 142.552 bytes, 13 imports e 87 exports.
+- `node tests/regression.cjs`: 102/102; `node tests/wasm-renderer.cjs`: passou; `node tests/wasm-renderer-browser.cjs`: passou.
+- `node tests/wasm-direct-draw-parity.cjs`: Chrome comparou luzes do mundo e anéis com o painter Canvas de referência, zero diferenças RGBA e alpha/composição restaurados; paridade ampla restante passou.
+- Sem campanha completa, revisão visual manual ampla ou benchmark.
+
+## Preview Rust/WASM local v263.0 — 08/11/2026
+- Build concluído; renderer legado com 140.548 bytes, 12 imports e 84 exports.
+- `node tests/regression.cjs`: 102/102; `node tests/wasm-renderer.cjs`, `node tests/wasm-renderer-browser.cjs` e `node tests/wasm-direct-draw-parity.cjs`: passaram.
+- Chrome comparou overlays FX com o Canvas de referência, zero diferenças RGBA nos casos exercitados. Sem campanha completa, revisão visual manual ampla ou benchmark.
+
+## Preview Rust/WASM local v264.0 — 08/11/2026
+- Build concluído; renderer legado com 138.556 bytes, 10 imports e 81 exports; buffers antigos da saída removidos.
+- `node tests/regression.cjs`: 102/102; `node tests/wasm-renderer.cjs`, `node tests/wasm-renderer-browser.cjs` e `node tests/wasm-direct-draw-parity.cjs`: passaram.
+- Chrome comparou a saída com o painter host de referência, zero diferenças RGBA nos casos exercitados. Sem campanha completa, revisão visual manual ampla ou benchmark.
+
+## Preview Rust/WASM local v267.0 — 08/11/2026
+- Build concluído; renderer legado com 132.404 bytes, 8 imports e 76 exports. Screen shake, recoil e câmera comparados com fallback Canvas, incluindo balanceamento dos escopos; casos inválidos rejeitados. Regressão 102/102, ABI, browser bridge e paridade Chrome passaram.
+- `node tests/regression.cjs`: 102/102; `node tests/wasm-renderer.cjs`, `node tests/wasm-renderer-browser.cjs` e `node tests/wasm-direct-draw-parity.cjs`: passaram.
+- Chrome comparou transforms e matrizes de Canvas com o fallback: sequência `save/restore` equilibrada; entradas inválidas não alteram o contexto. Sem campanha completa, revisão visual manual ampla ou benchmark.
+
+## Preview Rust/WASM local v268.0 — 08/11/2026
+- Build concluído; renderer legado com 132.196 bytes, 8 imports e 75 exports; `draw_player_aura` removido.
+- Regressão 103/103, ABI, browser bridge, paridade Chrome e auditoria de pixels passaram. Sombra/aura teve zero diferenças RGBA; gameplay registrou o painter direto em uso. Sem campanha completa, revisão visual manual ampla ou benchmark.
+## Preview Rust/WASM local v287.0 — 08/11/2026
+- `wasm-renderer/build.ps1`: build release do módulo Rust/WebSys direto passou; só o crate `wasm-renderer-direct` é compilado e gerado com wasm-bindgen.
+- `node tests/regression.cjs`: 104/104; inclui versão/rotas do servidor e manifesto offline sem o trampoline.
+- `node tests/wasm-renderer.cjs`: passou; módulo direto válido, 113 exports, 107 imports Web APIs, nenhuma rota/build/cache legado.
+- `node tests/wasm-renderer-browser.cjs`: passou; bridge direto, diagnóstico opt-in, modo desativado e fallback seguro.
+- `node tests/wasm-direct-draw-parity.cjs` e `node tests/wasm-floor-pixel-parity.cjs`: passaram no Chrome 156 nos casos cobertos. Sem benchmark FPS, inspeção visual ampla ou campanha completa.
+
+## Preview Rust/WASM local v288.0 — 08/11/2026
+- `wasm-renderer/build.ps1`: build release Rust/WebSys passou; módulo direto válido com 113 exports e 107 imports de Web APIs.
+- `node tests/regression.cjs`: 105/105, incluindo cache/health v288 e paridade do painel de resumo de pausa.
+- `node tests/wasm-direct-draw-parity.cjs`: passou no Chrome 156; HUD stages 0–4 incluem caixa de resumo, com zero diferenças RGBA nos casos cobertos.
+- `node tests/wasm-renderer-residual-audit.cjs`: menu, gameplay, pausa, morte, resumo, resultado, vitória, briefing, dificuldade, seleção de máscara, opções e expansão UI não registraram chamadas Canvas host. A amostra não cobre todos os eventos ou modos.
+- `node tests/wasm-renderer.cjs` e `node tests/wasm-renderer-browser.cjs`: passaram. Sem benchmark FPS, sessão longa ou revisão visual ampla.
 

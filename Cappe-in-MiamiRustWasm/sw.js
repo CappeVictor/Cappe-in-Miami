@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v176.0-screen-compositing';
+const CACHE = 'cappe-v289.0-campaign-tile-walls-rust';
 const ASSETS = [
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",
@@ -109,7 +109,6 @@ const ASSETS = [
   "js/exp-world.js",
   "js/maps.js",
   "js/wasm-renderer.js",
-  "wasm-renderer/pkg/renderer.wasm",
   "wasm-renderer/pkg/direct/direct_renderer.js",
   "wasm-renderer/pkg/direct/direct_renderer_bg.wasm"
 ];

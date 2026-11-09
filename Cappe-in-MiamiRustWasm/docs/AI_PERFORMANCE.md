@@ -1,5 +1,143 @@
+## Preview Rust/WASM local v283.0 — piso
+Remover as rotas legadas de granulado, FTILES, sombras e rejunte reduziu o WASM legado de 68.531 para 61.001 bytes, imports de 5 para 3 e exports de 45 para 36. Isso mede o arquivo e a ABI, não FPS, memória em execução ou tempo de quadro. Nenhum benchmark foi feito.
+
+## Preview Rust/WASM local v282.0 — textura de mapa direta
+Remover o painter duplicado de textura reduziu o WASM legado de 74.877 para 68.531 bytes e de 50 para 45 exports; os 5 imports permaneceram. Isso mede tamanho/ABI, não FPS, memória em execução ou frame time. Nenhum benchmark foi feito.
+
+## Preview Rust/WASM local v281.0 — batch do HUD
+Remover o batch legado do texto HUD reduziu o WASM legado de 75.772 para 74.877 bytes, exports de 53 para 50 e imports de 6 para 5. Isso mede tamanho/ABI, não FPS, memória em execução nem frame time. Nenhum benchmark foi feito.
+
+## Preview Rust/WASM local v280.0 — batches do mapa removidos
+Remover os batches de sombras e estrutura reduziu o WASM legado de 77.025 para 75.772 bytes, exports de 55 para 53 e imports de 7 para 6. Isso mede somente o arquivo e a ABI, não FPS, memória em execução ou frame time. Nenhum benchmark foi feito.
+
+## Preview Rust/WASM local v279.0 — detalhes do mapa
+Remover `paint_map_details` reduziu o WASM legado de 78.156 para 77.025 bytes e os exports de 56 para 55; imports permaneceram em 7. A comparação mede apenas arquivo e ABI, não FPS ou frame time. Nenhum benchmark foi feito.
+
+## Preview Rust/WASM local v278.0 — batch de decoração removido
+Remover `paint_map_decor` reduziu o WASM legado de 78.561 para 78.156 bytes e os exports de 57 para 56; imports permaneceram em 7. Essa redução de tamanho/ABI não comprova aumento de FPS. Nenhum benchmark foi feito.
+
+## Preview Rust/WASM local v277.0 — ícones sem batch legado
+Remover os batches de armas e vidros reduziu o WASM legado de 103.429 para 78.561 bytes e os exports de 59 para 57; imports permaneceram em 7. Isso mede apenas tamanho do arquivo e superfície ABI, não FPS, memória em execução ou frame time. Nenhum benchmark foi feito.
+
+## Preview Rust/WASM local v276.0 — composição de fantasmas
+O batch de fantasmas foi removido do WASM legado após a migração ao painter direto. O módulo principal caiu de 120.272 para 103.429 bytes e de 61 para 59 exports; não foi feito benchmark de FPS.
+
+## Preview Rust/WASM local v274.0 — formas fixas do HUD
+- WASM legado: 125.432 bytes, 7 imports e 63 exports (v273: 126.802 bytes e 65 exports). A redução não demonstra aumento de FPS; não foi feito benchmark.
+- Quatro estágios fixos do HUD tiveram paridade RGBA exata contra Canvas no Chrome.
+
+## Preview Rust/WASM local v273.0 — dealer da loja
+- WASM legado: 126.802 bytes, 8 imports e 65 exports (v272: 128.777 bytes e 67 exports). O binário menor não comprova ganho de FPS; não foi feito benchmark.
+- Dealer normal e caindo foram comparados no Chrome ao Canvas original com zero diferenças RGBA.
+
+## Preview Rust/WASM local v272.0 — painéis da loja
+- WASM legado: 128.777 bytes, 8 imports e 67 exports (v271: 129.725 bytes e 69 exports). A redução do binário não demonstra aumento de FPS; sem benchmark.
+- Os casos Canvas dos painéis foram comparados no Chrome; a paridade independente do dealer está em investigação.
+
+## Preview Rust/WASM local v271.0 — base e overlay do mapa
+- WASM legado: 129.725 bytes, 8 imports e 69 exports (v270: 129.918 bytes e 71 exports). A redução do binário não demonstra aumento de FPS; não foi feito benchmark.
+- Casos de mapa fixo, mapa procedural vazio e overlay comparados no Chrome tiveram zero diferenças RGBA.
+
+## Preview Rust/WASM local v270.0 — menu de pausa
+- WASM legado: 129.918 bytes, 8 imports e 71 exports (v269: 131.018 bytes e 73 exports). A redução do binário não demonstra aumento de FPS; não foi feito benchmark.
+- Paridade Chrome do menu nos estados sem hover e com cada botão em hover: zero diferenças RGBA; também passou a versão com rótulos localizados.
+
+## Preview Rust/WASM local v269.0 — barra de vida do chefe
+- WASM legado: 131.018 bytes, 8 imports e 73 exports (v268: 132.196 bytes e 75 exports). A redução do binário não demonstra aumento de FPS; não foi feito benchmark.
+- A paridade Chrome da barra teve zero diferenças RGBA e preservou alpha, composição e transformação.
+
+## Preview Rust/WASM local v259.0 — camada de névoa/fumaça
+A aplicação de sprites e cálculo de posições passam pelo painter Rust/WebSys direto; o WASM legado perdeu buffers, exports e callback. Estado do tempo, fumaça e perf tier continuam no JS. O fallback Canvas do jogo permanece. Módulo legado: 162.701 bytes, 17 imports e 106 exports. Sem benchmark.
+
+## Preview Rust/WASM local v258.0 — transportes diretos
+Escadas e elevadores usam painter Rust/WebSys direto, com gradientes gerados por Rust e cacheados. O WASM legado já não implementa essa camada; o fallback Canvas original continua no jogo. Módulo legado: 163.672 bytes, 18 imports e 109 exports. Paridade Chrome, regressão e testes de ABI/bridge passaram; sem benchmark.
+
+## v251 — batches de contorno e máscara escura removidos
+O módulo legado reserva 524.432 bytes a menos em arrays fixos, perde dois imports de host e o binário reduz 1.456 bytes comparado à v250. Isso não mede FPS ou frame time; não foi feito benchmark.
+
+## v250 — batch de composição de camadas removido
+A compilação removeu 448 bytes do módulo legado e um import de desenho pelo host (34 → 33). A cena continua usando o mesmo `drawImage` para fallback se o painter Rust direto falhar. Isso não representa uma medição de FPS; não foi feito benchmark.
+
+## v249 — remoção de buffers de efeitos do WASM legado
+A remoção dos arrays fixos para poeira, faíscas, sangue e cadáveres reduz em ~2.818.048 bytes (2,69 MiB) os dados estáticos reservados no módulo antigo; o arquivo `.wasm` reduziu 3.173 bytes comparado ao ZIP v248. Isso informa tamanho de memória/código, não FPS: não foi feito benchmark.
+
+## v247 — geradores de sprites radiais/névoa removidos do WASM legado
+Recompilar após retirar geradores e buffers diminuiu o binário legado em 3.790 bytes (cerca de 2,0%). É redução de tamanho do arquivo, não medição de desempenho; FPS, CPU e frame time não foram medidos.
+
+## v246 — sprite de névoa sem memória WASM antiga
+Rust direto agora recebe os anéis como typed array do bridge e grava o RGBA no canvas. A remoção evita cópia intermediária para memória linear e callback host nessa geração; não houve medição de frame time, CPU, GPU ou memória, então não afirmamos ganho no jogo.
+
+## v245 — sprite radial sem buffer WASM legado
+O wrapper elimina a cópia para memória linear e a passagem pelo callback antigo ao gerar esse sprite. Isso remove tráfego e trabalho dessa rota específica, mas não houve medição de frame time, CPU, GPU ou memória; não afirmamos ganho de desempenho no jogo.
+
+## v204 — seta da Invasão
+Rust calcula e pinta a seta sem criar/copyar o batch legado de vértices. Não foram medidos frame time, CPU, GPU ou memória; não afirmamos ganho de desempenho.
+
+## v203 — máscara Coruja
+JavaScript reusa buffers para enviar os contornos visíveis e a rota; Rust/WebSys desenha as formas e o caminho em Canvas. Não houve medição de frame time, CPU, GPU ou memória; nenhum ganho de desempenho é afirmado.
+
+## v202 — projéteis
+Rust recebe as entradas e executa `drawImage` sem montar o comando WASM legado; os sprites e o buffer são reutilizados. Sem medições de frame time, CPU, GPU ou memória; não afirmamos ganho.
+
+## v201 — cápsulas de munição
+Rust projeta e rasteriza os dados diretos, evitando a geração/cópia do batch legado. O buffer JS é reutilizado; sem medição de frame time, CPU, GPU ou memória e sem alegação de ganho.
+
+## v200 — pickups e armas arremessadas
+A mudança remove a cópia do batch legado para estas chamadas no caminho normal e reutiliza buffers JS após o crescimento inicial. Sem medidas de frame time, CPU, GPU ou memória; nenhum ganho de desempenho é afirmado.
+
+## v199 — efeitos de disparo e impacto
+Esta mudança remove o batch intermediário no WASM antigo para a rota normal dos efeitos. Não foram medidos frame time, CPU, GPU ou memória; nenhum ganho de desempenho é afirmado.
+
+## v198 — blackout e lanterna
+Rust calcula a projeção e os raios para evitar o lote intermediário do WASM legado. Não há medição de frame time, CPU, GPU ou memória; nenhum ganho é afirmado.
+
+## v197 — neblina e fumaça
+Rust calcula offsets e rasteriza os três sprites sem montar uma lista intermediária no WASM legado. Sem medições de frame time, CPU, GPU ou memória; não há alegação de ganho.
+
+## v196 — zona da Invasão
+Rust calcula a pulsação e rasteriza o marcador sem gerar um comando intermediário no WASM legado. Não foram medidos frame time, CPU, GPU ou memória; não há alegação de ganho de desempenho.
+
+## v195 — luzes de mundo
+Rust calcula pulso/flicker e pinta luzes, clarão e reflexo, evitando o batch intermediário do WASM legado nessa camada. JavaScript ainda prepara os dados e mantém sprites/estado; não foram medidos frame time, CPU, GPU ou memória, portanto não há alegação de ganho de desempenho.
+
+## v194 — anéis de mundo
+Rust calcula a geometria do pulso e rasteriza os anéis ativos, reduzindo o trabalho de desenho e de geração de comandos no WASM legado nessa camada. A preparação dos dados e a filtragem continuam em JavaScript. Frame time, CPU, GPU e memória não foram medidos; não há alegação de ganho de desempenho.
+
+## v193 — vidro e estilhaços
+O painter direto elimina a geração e transferência de comandos pelo WASM antigo nessa camada. Preparação de arrays ainda ocorre em JavaScript. Sem medições de frame time, CPU, GPU ou memória; nenhum ganho é afirmado.
+
+## v192 — realces de inimigos
+O caminho direto evita gerar e transferir comandos do WASM antigo para anéis, barras e vetores. A seleção de entidades e a montagem do payload ainda são feitas no host. Frame time, CPU, GPU e memória não foram medidos; não há alegação de ganho.
+
+## v191 — barris e câmeras
+As rotas normais deixam de gerar comandos no WASM antigo e enviam registros compactos ao painter direto. O custo de preparação ainda inclui arrays no host; não foram medidos frame time, CPU, GPU ou memória, portanto não há alegação de ganho de desempenho.
+
+## v190 — portas Neon
+O módulo direto aplica os mesmos transforms e drawImage em ordem, retirando a geração/transferência do lote de cinco comandos pelo WASM legado. Operações Canvas permanecem equivalentes. Não foram medidos frame time, CPU, GPU ou memória; sem alegação de ganho.
+
+## v189 — portas de sala
+A geometria simples e os dois contornos são desenhados pelo módulo Rust direto sem gerar um command batch no WASM legado. O número de operações Canvas se mantém. Não foram medidos frame time, CPU, GPU ou memória; não se afirma ganho de desempenho.
+
 ## v176 — composição de tela
+## v188 — ícones de armas
+O módulo direto desenha o mesmo conjunto de primitivas e evita gerar/transferir lotes de comandos pelo WASM legado para os ícones. Chrome confirmou pixels iguais em 24 armas. Não foram medidos frame time, CPU, GPU ou memória; não se afirma ganho de desempenho.
+
+## v187 — entrada do compositor de mapa
+Arrays JavaScript próprios alimentam o painter Rust direto, evitando a cópia de retângulos para a memória do WASM legado na rota normal. O trabalho de composição e os passes de pixels permanecem equivalentes. Não foram medidos frame time, CPU, GPU ou memória; não se afirma ganho de desempenho.
+
 Gradação e fade/flash executam as mesmas duas chamadas de composição via painter WebSys/Rust. O trabalho efetivo por pixel e o número de passes permanecem os mesmos; tempo de quadro, CPU/GPU e memória não foram medidos, portanto não se afirma ganho de desempenho.
+
+## v177 — transporte
+Escada e elevador mantêm os mesmos comandos e operações Canvas, agora chamados pelo módulo direto Rust. Não houve redução de passes; tempo de quadro, CPU/GPU e memória seguem sem medição.
+
+## v178 — saída de fase
+Brilho, gradiente cacheado, hachuras e bordas mantêm a mesma quantidade de operações, agora pelo painter Rust. Não houve medição de tempo de quadro, CPU/GPU ou memória.
+
+## v179 — itens de arma
+Transformações e círculos de brilho são rasterizados em Rust, enquanto o mesmo painter do ícone roda aninhado. A quantidade total de operações Canvas se mantém e o ícone preserva o caminho existente; não foram medidos frame time, CPU/GPU ou memória.
+
+## v180 — formas de HUD
+O painter direto executa as mesmas formas/ordem e a mesma quantidade de chamadas Canvas para barras, arcos e triângulos; não há redução de trabalho por pixel nem medição de frame time, CPU/GPU ou memória.
 
 ## v169.0 — dark overlay direto; sem benchmark
 O recorte de escuridão/lanterna usa Rust para rasterizar os dois contextos Canvas; paridade RGBA exata em Chrome. Não foram medidos frame time, CPU, memória ou FPS.
@@ -305,4 +443,77 @@ O painter direto faz drawImage para as camadas HUD cobertas. Não foram medidos 
 
 ## v175.0 — projéteis por Rust; sem benchmark
 O painter direto executa drawImage para os projéteis do lote coberto. Não foram medidos frame time, CPU, memória ou FPS; nenhum ganho é afirmado.
+
+## v181 — texto cacheado
+O mesmo `drawImage` e o mesmo bitmap permanecem; agora a chamada é emitida pelo módulo Rust. A quantidade de pixels e o número de operações Canvas não foram reduzidos. Frame time, CPU/GPU e memória não foram medidos.
+
+## v182 — retângulos de piso
+O mesmo lote de `fillRect` continua sendo executado, agora por Rust/WebSys. Não reduz número de operações ou pixels; frame time, CPU/GPU e memória não foram medidos.
+
+## v183 — contornos noturnos de atores
+O mesmo número de arcos/strokes continua sendo desenhado pelo painter Rust direto; não reduz trabalho por pixel nem número de operações. Frame time, CPU/GPU e memória não foram medidos.
+
+## v184 — leitura de pixels de texturas
+Canvas/WebSys e rasterização de HTMLImageElement agora ocorrem pelo módulo direto Rust para folhas pequenas do piso/mapa; Chrome observou cinco chamadas na cena de teste. Número de pixels copiados e compositor RGBA não mudaram. Frame time, CPU/GPU, memória e FPS não foram medidos; nenhum ganho de desempenho é afirmado.
+
+## v185 — compositor de textura do mapa
+Rasterização e `putImageData` passam ao módulo Rust direto; seleção/cache e preparação dos buffers continuam no host, e compositor antigo continua fallback. Duas chamadas diretas foram observadas na cena de teste. Não foram medidos frame time, FPS, CPU/GPU nem a memória adicional de 5 MB do buffer de saída direto; não se afirma ganho de desempenho.
+
+## v186 — preparação do input de textura
+O crop dos oito sprites agora escreve num buffer JS curto, não nos buffers da memória WASM antiga durante o caminho direto. Uma cópia à memória antiga acontece apenas no fallback. Reduz a dependência de memória legada do caminho normal; não foram medidos frame time, FPS, CPU/GPU ou tempo de cópia e não se afirma ganho de desempenho.
+## v205 — arte procedural de máscaras
+A pintura passa a chamar Rust/WebSys uma vez para cada sprite das 16 máscaras expandidas, em vez de executar a sequência de comandos Canvas no JavaScript. Isso reduz trabalho de desenho na VM JS durante a geração dos sprites; não foi medido tempo de abertura, frame time, CPU ou GPU. O fallback Canvas é mantido.
+
+## v206 — ícones de armas da expansão
+O painter Rust já é usado em modo WASM; esta etapa corrige a paridade visual com o callback JS. Não há mudança mensurada de velocidade ou custo, sem benchmark de CPU, GPU ou tempo de frame.
+
+## v207 — barra do chefe
+A barra deixou de gerar um batch Rust legado e não recebe mais pintura de Canvas por callback JS no caminho direto. A entrada continua calculada no JS; não foi medido ganho de tempo, CPU ou GPU.
+
+## v252 — batches de FX, pickups e arremessos removidos
+Seis buffers fixos removidos do WASM antigo ocupavam ~1,88 MiB de memória linear reservada. O binário caiu 2.430 bytes; imports 31 → 27 e exports 134 → 127. Essa redução de memória e tamanho não demonstra FPS nem melhora de tempo por frame; benchmark não realizado.
+
+## v253 — color grade e overlays finais
+Dois imports, quatro exports e quatro buffers de comando do módulo legado foram removidos. O WASM encolheu 1.209 bytes; imports 27 → 25 e exports 127 → 123. As mesmas operações de Canvas continuam ocorrendo via painter direto, sem medições de frame time, FPS, CPU/GPU ou memória alocada; não se afirma ganho de desempenho.
+## v254 — textos de combo e alarme
+Dois imports, quatro exports e quatro buffers do WASM legado foram removidos; o binário diminuiu 959 bytes. Os traços de texto ainda são desenhados em Canvas via WebSys Rust, então isso não elimina rasterização, nem comprova melhora de frame time/FPS. Nenhum benchmark foi feito.
+## v255 — imagens do HUD
+Um import, dois exports e dois arrays estáticos foram removidos; o binário diminuiu 844 bytes. Os mesmos `drawImage` continuam no Canvas através de WebSys. Não foram medidos frame time, FPS, CPU, GPU ou memória, portanto não há ganho de desempenho afirmado.
+## v256 — seta da Invasão
+Um import, dois exports e os buffers fixos de vértices foram removidos; o binário diminuiu 547 bytes. A mesma forma continua sendo pintada em Canvas através de WebSys; não foram medidos frame time/FPS, CPU, GPU ou memória. Não se afirma ganho de velocidade.
+## v257 — marcador da zona de Invasão
+Um import, três exports e os buffers fixos da zona foram removidos; o WASM diminuiu 799 bytes. Círculo e preenchimento ainda são rasterizados em Canvas via WebSys. Sem medição de frame time/FPS, CPU, GPU ou memória; não se declara ganho de desempenho.
+## Preview Rust/WASM local v260.0 — efeitos climáticos
+A remoção das rotas duplicadas de chuva e poeira reduziu o módulo legado para 161.040 bytes, 15 imports e 100 exports. Isso é tamanho/complexidade do binário, não uma medição de FPS; nenhum benchmark foi feito.
+
+## Preview Rust/WASM local v261.0 — efeitos do mundo
+- Renderer WASM legado: 146.123 bytes, 15 imports e 94 exports (v260: 161.040 bytes, 15 imports e 100 exports). O código/buffers removidos reduziram o módulo; isso não demonstra aumento de FPS.
+- Sem benchmark de frame time, CPU, GPU ou memória.
+
+## Preview Rust/WASM local v262.0 — luzes e anéis
+- Renderer WASM legado: 142.552 bytes, 13 imports e 87 exports (v261: 146.123 bytes, 15 imports e 94 exports). Os buffers e callbacks removidos reduziram o módulo; isso não demonstra aumento de FPS.
+- Sem benchmark de frame time, CPU, GPU ou memória.
+
+## Preview Rust/WASM local v263.0 — overlays FX
+- Renderer WASM legado: 140.548 bytes, 12 imports e 84 exports (v262: 142.552 bytes, 13 imports e 87 exports). A redução do módulo não demonstra aumento de FPS.
+- Sem benchmark de frame time, CPU, GPU ou memória.
+
+## Preview Rust/WASM local v264.0 — saída de fase
+- Renderer WASM legado: 138.556 bytes, 10 imports e 81 exports; buffers removidos liberaram 1.742.400 bytes na memória linear. Isso não demonstra aumento de FPS.
+- Sem benchmark de frame time, CPU, GPU ou memória.
+
+## Preview Rust/WASM local v266.0 — setup e fundo do quadro
+- Renderer WASM legado: 134.896 bytes, 8 imports e 78 exports (v265: 135.898 bytes, 10 imports e 80 exports). A redução do módulo não demonstra aumento de FPS; não foi feito benchmark.
+
+## Preview Rust/WASM local v267.0 — transforms do quadro
+- Renderer WASM legado: 132.404 bytes, 8 imports e 76 exports (v266: 134.896 bytes, 8 imports e 78 exports). A redução do módulo não demonstra aumento de FPS; não foi feito benchmark.
+
+## Preview Rust/WASM local v268.0 — sombra/aura de jogador
+- Renderer WASM legado: 132.196 bytes, 8 imports e 75 exports (v267: 132.404 bytes, 8 imports e 76 exports). A redução do módulo não demonstra aumento de FPS; não foi feito benchmark.
+- Sem benchmark de frame time, CPU, GPU ou memória.
+## v287.0 — overhead de diagnóstico
+Os wrappers de métodos/propriedades Canvas agora só são instalados em sessões com `?renderer=wasm&wasmDiagnostics=1`; o modo WASM comum não intercepta cada chamada para contar operações. Build e paridade foram verificados, mas não há comparação FPS/CPU anterior e posterior. Não inferir ganho de desempenho a partir desta remoção de wrappers.
+
+## v288.0 — painel de pausa e auditoria de chamadas
+A caixa de resumo da pausa chama Rust direto. Na sessão de auditoria Chrome, 12 estados não geraram chamadas Canvas no host; a instrumentação estava ativada e, portanto, essa sessão serve como amostra funcional, não benchmark de desempenho. O painel/diagnóstico têm custo de execução e não medem FPS, CPU média ou p95. Sem ganho de performance comprovado.
 

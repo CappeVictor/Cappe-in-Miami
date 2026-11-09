@@ -1,4 +1,124 @@
+## Preview Rust/WASM local v283.0 — piso direto
+Granulado, FTILES, sombras e rejunte usam os painters Rust/WebSys diretos. O WASM legado não contém mais os buffers, exports ou imports de piso; o painter Canvas da construção da fase segue como fallback.
+
+## Preview Rust/WASM local v282.0 — texturas dos mapas
+Paredes, móveis e portas abertas recebem textura composta em Rust/WebSys a partir dos sprites do jogo. Em falha, o painter Canvas original da construção de fase continua disponível.
+
+## Preview Rust/WASM local v281.0 — composição do texto HUD
+HUD comum rasteriza os textos uma vez em imagens cacheadas via Rust/WebSys e compõe cada grupo no Canvas em um batch Rust direto, com alpha individual. Fallbacks Canvas do jogo continuam disponíveis.
+
+## Preview Rust/WASM local v280.0 — paredes e sombras
+Sombras de paredes e móveis, faces de paredes e detalhes de postes são desenhados por painters Rust/WebSys diretos. Em falha, o jogo usa os painters Canvas originais.
+
+## Preview Rust/WASM local v279.0 — detalhes do mapa
+Contornos internos, linhas das salas e specks estáticos são pintados pelo módulo Rust/WebSys direto. A semente aleatória é preservada; em falha, o jogo usa seu Canvas original.
+
+## Preview Rust/WASM local v278.0 — decoração dos mapas
+A decoração estática dos mapas agora usa o painter Rust/WebSys direto; tapetes e itens de piso continuam com o fallback Canvas original. A comparação Chrome teve paridade RGBA exata.
+
+## Preview Rust/WASM local v277.0 — ícones de armas
+Os ícones das 24 armas e a pintura de vidros quebráveis usam exclusivamente Rust/WebSys direto. Em falha, o jogo recorre ao painter Canvas original. Paridade Chrome dos ícones e dos vidros: zero diferenças RGBA.
+
+## Preview Rust/WASM local v276.0 — fantasmas Rust/WebSys
+Fantasmas e arma são compostos pelo painter Rust/WebSys direto; o renderer legado não possui mais o batch de fantasmas. O painter Canvas original permanece como fallback, com zero diferenças RGBA no caso Chrome validado com Taco. P1/P2 também usam o painter direto desde v275.
+
+## Preview Rust/WASM local v274.0 — formas fixas do HUD
+Barra de combo, contorno da máscara, véu de pausa e barra de recarga chamam diretamente os painters Rust/WebSys. Os painters Canvas originais seguem como fallback no jogo; o batch genérico de formas saiu do WASM legado.
+
+## Preview Rust/WASM local v273.0 — dealer da loja
+A Madame Piranha é desenhada diretamente pelo Rust/WebSys; a referência Canvas original teve paridade RGBA exata nos estados normal e de queda. O jogo mantém a pintura Canvas em fallback no chamador, sem manter buffer ou export de desenho no módulo legado.
+
+## Preview Rust/WASM local v272.0 — painéis da loja
+Os painters diretos cobrem balão, cards com contorno dinâmico e botão de rerolar. Os três chamadores mantêm o desenho Canvas completo. O dealer segue temporariamente na rota híbrida antiga.
+
+## Preview Rust/WASM local v271.0 — base e overlay do mapa
+Pintura do fundo de mapas fixos e camada translúcida superior usa Rust/WebSys direto, com fallback Canvas do chamador.
+
+## Preview Rust/WASM local v270.0 — menu de pausa
+O painter direto Rust/WebSys desenha o véu, título, botões, rótulos localizados e realce do botão em hover. O painter Canvas completo segue disponível no chamador se Rust/WebSys falhar.
+
+## Preview Rust/WASM local v269.0 — barra de vida do chefe
+A barra e os marcadores de fase são desenhados pelo painter direto Rust/WebSys. Se o módulo direto não desenhar, o jogo usa a pintura Canvas original. Os dois exports antigos e seu buffer foram removidos do WASM legado.
+
+## Preview Rust/WASM local v259.0 — camada de névoa/fumaça
+A aplicação de sprites e cálculo de posições passam pelo painter Rust/WebSys direto; o WASM legado perdeu buffers, exports e callback. Estado do tempo, fumaça e perf tier continuam no JS. O fallback Canvas do jogo permanece. Módulo legado: 162.701 bytes, 17 imports e 106 exports. Sem benchmark.
+
+## Preview Rust/WASM local v258.0 — transportes diretos
+Escadas e elevadores usam painter Rust/WebSys direto, com gradientes gerados por Rust e cacheados. O WASM legado já não implementa essa camada; o fallback Canvas original continua no jogo. Módulo legado: 163.672 bytes, 18 imports e 109 exports. Paridade Chrome, regressão e testes de ABI/bridge passaram; sem benchmark.
+
 # Catálogo observado no código
+## Preview Rust/WASM local v204
+A seta fora da tela no modo Invasão é posicionada e pintada diretamente por Rust/WebSys; o painter antigo permanece fallback.
+
+## Preview Rust/WASM local v203
+Contornos de pickups, barris, câmeras e inimigos ocultos, mais a rota tracejada da máscara Coruja, são desenhados por Rust/WebSys; JavaScript ainda determina visibilidade, posições e navegação.
+
+## Preview Rust/WASM local v202
+Projéteis são desenhados com os sprites originais pelo painter Rust/WebSys direto; lote legado como fallback.
+
+## Preview Rust/WASM local v201
+Cápsulas de munição usam projeção e painter Rust/WebSys direto; o batch antigo é fallback.
+
+## Preview Rust/WASM local v200
+Entradas para pickups com ou sem brilho e armas arremessadas passam diretamente aos painters Rust; o caminho pelo batch legado permanece como fallback.
+
+## Preview Rust/WASM local v199
+O painter Rust recebe diretamente as entradas de efeitos de disparo e impacto e desenha clarões e arcos. O modo JavaScript permanece independente; o caminho de comando legado é fallback.
+
+## Preview Rust/WASM local v198
+Projeção do jogador para a máscara escura e escala da lanterna passam pelo módulo Rust direto.
+
+## Preview Rust/WASM local v197
+As posições, composição e desenho dos sprites de neblina/fumaça são executados diretamente por Rust.
+
+## Preview Rust/WASM local v196
+O pulso, contorno e preenchimento da zona de Invasão são gerados e desenhados diretamente por Rust.
+
+## Preview Rust/WASM local v195
+Luzes pulsantes, flicker Neon, clarão de tiro e reflexo de chuva são calculados e rasterizados pelo painter direto; o host conserva os emissores e sprites.
+
+## Preview Rust/WASM local v194
+Raio, largura e transparência dos anéis de mundo ativos são calculados e desenhados por Rust/WebSys; a filtragem de expirados e a preparação da paleta permanecem no host.
+
+## Preview Rust/WASM local v193
+Vidros intactos, brilho animado e estilhaços ativos são desenhados por Rust/WebSys; estado e física permanecem na simulação atual.
+
+## Preview Rust/WASM local v192
+Realces de classe, barras de vida de blindados, mira de atirador e ataque carregado de chefe são rasterizados pelo módulo direto; seleção e estado permanecem no jogo.
+
+## Preview Rust/WASM local v191
+Barris explosivos e câmeras de segurança usam o painter Rust direto; o host continua selecionando e empacotando seus dados de gameplay.
+
+## Preview Rust/WASM local v190
+Portas Neon animadas são rasterizadas pelo módulo Rust direto após o host resolver e deduplicar sprites; a rota antiga permanece fallback.
+
+## Preview Rust/WASM local v189
+Portas de sala horizontais/verticais são rasterizadas pelo painter Rust direto; quando o painter falha, a rota anterior continua como fallback.
+
+## Preview Rust/WASM local v188
+Os 24 ícones de armas são gerados e rasterizados pelo módulo Rust direto; o gerador de comandos legado permanece fallback.
+## Preview Rust/WASM local v186
+O caminho principal prepara oito sprites de texturas em buffer próprio JavaScript e chama o compositor Rust direto; a cópia para a memória WASM antiga só ocorre em fallback.
+## Preview Rust/WASM local v185
+Rust direto rasteriza texturas de paredes, móveis e portas e atualiza o ImageData/canvas. Mantém os mesmos inputs, contagem/ordem e fallback do compositor legado.
+## Preview Rust/WASM local v184
+A leitura de pixels de Canvas e HTMLImageElement para texturas pequenas do piso e do mapa passa por WebSys em Rust; fontes incompatíveis mantêm caminho Canvas JS.
+## Preview Rust/WASM local v183
+Contornos de atores em cenas escuras são rasterizados pelo painter Rust direto; cálculo e ordenação seguem no WASM legado, com fallback Canvas.
+## Preview Rust/WASM local v182
+Os comandos legados de retângulos de piso são rasterizados pelo painter Rust direto quando disponível, com fallback Canvas preservado; paridade RGBA exata no lote testado.
+
+## Preview Rust/WASM local v181
+Blit das imagens de texto cacheadas pelo módulo Rust direto, mantendo cache e fallback JavaScript; paridade RGBA exata no cenário testado.
+
+## Preview Rust/WASM local v180
+O painter direto rasteriza os comandos de formas do HUD (incluindo a barra do chefe) e desenha a seta da Invasão pelos vértices enviados pelo WASM legado. Fallback e lógica permanecem; paridade RGBA exata nos cenários testados.
+## Preview Rust/WASM local v179
+Transformações/brilhos de pickups e arremessos são executados pelo painter Rust direto e usam o mesmo callback de ícone de arma. O fallback Canvas permanece; paridade RGBA exata foi confirmada para glow ligado/desligado e um arremesso.
+## Preview Rust/WASM local v178
+O painter Rust direto rasteriza a saída da fase com a imagem de gradiente existente, incluindo glow, clipping, hachuras e bordas; caminho Canvas antigo permanece fallback. Paridade sintética RGBA exata nos estados cobertos.
+## Preview Rust/WASM local v177
+O painter Rust direto rasteriza os lotes de escadas e elevadores com os gradientes já cacheados, preservando callback Canvas de fallback. Paridade RGBA sintética exata em Chrome 156.
 ## Preview Rust/WASM local v176
 Gradação de cor e overlays finais agora usam o painter Rust direto nos casos cobertos. Os valores e a ordem das operações são preservados; o dispatcher Canvas segue como fallback. Paridade sintética RGBA exata em Chrome 156.
 ## Preview Rust/WASM local v169
@@ -184,4 +304,59 @@ Imagens de HUD selecionadas pelo WASM legado são desenhadas pelo painter Rust d
 
 ## Preview Rust/WASM local v175
 Projéteis com sprites já existentes agora chamam o painter Rust direto, mantendo projeção e seleção do sprite no WASM legado. Fallback Canvas permanece; paridade RGBA exata em Chrome; sem benchmark.
+
+## Preview Rust/WASM local v205
+- As 16 artes procedurais novas de máscaras podem ser rasterizadas em Rust/WebSys; JavaScript mantém os dados e oferece o fallback Canvas.
+
+## Preview Rust/WASM local v206
+- Ícones de pistola automática, Magnum, Pump, escopeta dupla, carabina, sniper, LMG, katana, machado, garrafa, extintor e lança-chamas são pintados no Rust direto quando o renderer está ativo.
+
+## Preview Rust/WASM local v207
+- Barra de vida/fases do chefe desenhada diretamente em Rust quando o renderer está ativo.
+
+## Preview Rust/WASM local v252
+Efeitos de disparo/impacto, brilho de pickups e transforms de armas arremessadas são pintados pelo módulo Rust/WebSys direto. Os dados de gameplay continuam em JS e o painter Canvas original é fallback.
+
+## Preview Rust/WASM local v253.0 — color grade e overlays finais
+As camadas de color grade e fade/flash chamam os painters diretos Rust/WebSys. Os callbacks de Canvas do WASM legado foram retirados; `index.html` mantém os painters Canvas como fallback se Rust estiver inativo ou recusar os dados. A simulação e os valores de entrada seguem no JavaScript.
+## Preview Rust/WASM local v254.0 — textos de combo e alarme
+O combo e o alarme agora são desenhados pelos painters Rust/WebSys. A lógica de combo, timer, texto e condição de exibição continuam no jogo; se o renderer direto não desenhar, os painters originais em `index.html` e `js/exp-fx.js` permanecem como fallback.
+## Preview Rust/WASM local v255.0 — imagens do HUD
+As vinhetas de jogo, imagem CRT, retrato da máscara e imagem auxiliar agora passam ao painter Rust/WebSys direto com os mesmos recursos existentes. Condições e fallback Canvas permanecem nos chamadores JavaScript.
+## Preview Rust/WASM local v256.0 — seta da Invasão
+A seta fora da tela continua sendo posicionada e orientada pela lógica de Invasão já existente; Rust/WebSys calcula o triângulo e o rasteriza. Se o painter direto não desenhar, o chamador usa o fallback Canvas existente.
+## Preview Rust/WASM local v257.0 — marcador da zona de Invasão
+O marcador da zona continua pulsando conforme o tempo da partida. Rust/WebSys desenha o círculo e seu preenchimento; a simulação e a posição vêm do gameplay, e o painter Canvas original segue como fallback.
+## Preview Rust/WASM local v260.0 — painter climático direto
+Chuva e partículas de poeira usam painter Rust/WebSys direto; animação, respawn e aleatoriedade seguem em JavaScript. Sem o módulo direto, o jogo usa seu painter Canvas original.
+
+## Preview Rust/WASM local v261.0 — painter de efeitos do mundo
+Barris, câmeras e realces de inimigos/telegráficos do chefe usam Rust/WebSys direto com fallback Canvas. Foram removidos os batches e seis exports redundantes do WASM legado; Chrome confirmou paridade RGBA nos casos exercitados.
+
+## Preview Rust/WASM local v262.0 — iluminação e anéis
+As luzes aditivas, o clarão e o reflexo de chuva, além dos anéis de mundo, usam painters Rust/WebSys diretos. Os batches/callbacks equivalentes saíram do WASM legado; os chamadores ainda preservam Canvas como fallback quando Rust não está disponível ou rejeita os dados.
+
+## Preview Rust/WASM local v263.0 — overlays FX de tela
+Flash climático/neon, alarme, barras cinematográficas e flash da contagem regressiva usam painter Rust/WebSys direto; o Canvas original continua como fallback.
+
+## Preview Rust/WASM local v264.0 — saída de fase
+Gradiente, brilho, hachuras e bordas da saída são desenhados pelo Rust/WebSys direto. O painter Canvas do jogo permanece como fallback.
+
+## Preview Rust/WASM local v266.0 — Canvas raiz e fundo do quadro
+
+Setup de transformação/smoothing do Canvas raiz e preenchimento do fundo de cada quadro usam painter Rust/WebSys direto. O jogo mantém fallback Canvas e os testes verificam paridade de pixels e estado.
+
+## Preview Rust/WASM local v267.0 — transforms de quadro
+
+Screen shake, recoil e câmera usam chamadas diretas Rust/WebSys, com fallback Canvas no chamador e sequência de `save`/`restore` coberta em Chrome.
+
+## Preview Rust/WASM local v268.0 — sombra e aura
+
+O painter da sombra elíptica e do brilho de jogador P1/P2 usa Rust/WebSys direto, mantendo cores e geometria do fallback Canvas.
+Carpete, ladrilho e tijolo usam Rust/WebSys direto com a mesma paleta, espaçamento e sequência aleatória. O fallback Canvas segue no jogo.
+## Renderer Rust/WASM v287.0
+O módulo direto Rust/WebSys é o único WASM carregado/buildado. O trampoline Canvas antigo saiu de build, servidor e cache offline. O modo diagnóstico é opt-in para evitar interceptação por chamada no uso normal. Várias camadas já usam painters Rust diretos; Canvas segue como fallback funcional para as ainda não portadas. Consulte `WASM_RENDERER_MIGRATION.md` para escopo e evidências.
+
+## Renderer Rust/WASM v288.0
+Retângulo de resumo da partida na pausa usa `drawHudShape` stage 4 em Rust/WebSys, mantendo fallback. A paridade do stage é exata nos pixels testados; a auditoria opt-in não encontrou chamadas Canvas no host em 12 estados amostrados.
 

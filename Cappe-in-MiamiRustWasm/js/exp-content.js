@@ -30,6 +30,9 @@
   // ================= MÁSCARAS =================
   function makeMaskArt(sp) {
     const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+    if (window.HM_WASM_RENDERER && window.HM_WASM_RENDERER.drawMaskArt && window.HM_WASM_RENDERER.drawMaskArt(g, sp)) {
+      c.complete = true; c.naturalWidth = 128; return c;
+    }
     const bg = g.createLinearGradient(0, 0, 0, 128); bg.addColorStop(0, '#1a0840'); bg.addColorStop(1, '#07020f');
     g.fillStyle = bg; g.fillRect(0, 0, 128, 128);
     g.strokeStyle = sp.b + '55'; g.lineWidth = 1;   // grade neon ao fundo
@@ -102,9 +105,28 @@
   MASKS.forEach(m => { m.rar = OLD_RAR[m.id] || 'comum'; m.unl = OLD_COMBO[m.id] || null; });
   const OLD_N = MASKS.length;
   for (const d of NEW_MASKS) {
-    const m = { id: d.id, nome: d.nome, desc: d.desc, fx: d.fx, rar: d.rar, unl: d.unl, exp: true };
+    const m = { id: d.id, nome: d.nome, desc: d.desc, fx: d.fx, rar: d.rar, unl: d.unl, exp: true, art: d.art };
     m.img = makeMaskArt(d.art); MASKS.push(m);
   }
+  function renderExpansionMaskArtWithRust() {
+    const renderer = window.HM_WASM_RENDERER;
+    if (!renderer || !renderer.directReady || typeof renderer.drawMaskArt !== 'function') return false;
+    let rendered = 0;
+    for (const mask of MASKS) {
+      if (!mask.exp || !mask.art) continue;
+      const before = renderer.directMaskArtCalls || 0;
+      const image = makeMaskArt(mask.art);
+      if (image && (renderer.directMaskArtCalls || 0) === before + 1) {
+        mask.img = image; rendered++;
+      }
+    }
+    if (rendered !== NEW_MASKS.length) return false;
+    EXP.rebuildMaskGrid();
+    if (typeof mark === 'function') mark();
+    return true;
+  }
+  window.addEventListener('hm-wasm-renderer-ready', renderExpansionMaskArtWithRust);
+  if (window.HM_WASM_RENDERER && window.HM_WASM_RENDERER.active) renderExpansionMaskArtWithRust();
   EXP.OLD_MASKS = OLD_N;
   EXP.maskLocked = i => { const m = MASKS[i]; if (!m) return true; if (i < OLD_N) return !!(m.lock && !unlockInfo(m.unl).ok); return !unlockInfo(m.unl).ok; };
   // Combinações de habilidades: pares de máscaras que se destacam em estilos complementares (exibido na coleção)
@@ -149,13 +171,13 @@
     const draw = () => { switch (w) {
       case 'pistola_aut': g.fillStyle = '#2b2b33'; g.fillRect(4, -3, 22, 6); g.fillStyle = '#19f0e6'; g.fillRect(20, -1, 6, 2); g.fillStyle = '#555'; g.fillRect(8, 2, 5, 8); return;
       case 'magnum': g.fillStyle = '#d7dbe6'; g.fillRect(4, -3, 26, 6); g.fillStyle = '#7a4d28'; g.fillRect(2, 2, 7, 9); g.fillStyle = '#999'; g.fillRect(12, -5, 8, 4); return;
-      case 'pump': g.fillStyle = '#4a2c14'; g.fillRect(2, -3, 14, 6); g.fillStyle = '#6a6a74'; g.fillRect(14, -2, 30, 4); g.fillStyle = '#3a2410'; g.fillRect(24, -4, 10, 8); return;
+      case 'pump': g.fillStyle = '#4a2c14'; g.fillRect(2, -3, 14, 6); g.fillStyle = '#6a6a74'; g.fillRect(14, -2, 30, 4); g.fillStyle = '#444'; g.fillRect(24, -4, 10, 8); return;
       case 'dupla': g.fillStyle = '#4a2c14'; g.fillRect(2, -4, 14, 8); g.fillStyle = '#777'; g.fillRect(14, -4, 26, 3); g.fillRect(14, 1, 26, 3); return;
       case 'carabina': g.fillStyle = '#3a3a44'; g.fillRect(2, -3, 38, 6); g.fillStyle = '#19f0e6'; g.fillRect(30, -5, 4, 2); g.fillStyle = '#222'; g.fillRect(14, 2, 6, 9); return;
       case 'sniper': g.fillStyle = '#2a2f2a'; g.fillRect(2, -3, 56, 5); g.fillStyle = '#111'; g.fillRect(14, -8, 16, 4); g.fillStyle = '#ff2e93'; g.fillRect(28, -7, 2, 2); return;
       case 'lmg': g.fillStyle = '#2a2a30'; g.fillRect(2, -4, 40, 8); g.fillStyle = '#444'; g.fillRect(12, 3, 14, 8); g.fillStyle = '#888'; g.fillRect(38, -2, 12, 4); return;
       case 'katana': g.fillStyle = '#e8f6ff'; g.beginPath(); g.moveTo(10, -2); g.lineTo(52, -1); g.lineTo(54, 1); g.lineTo(10, 2); g.fill(); g.fillStyle = '#ff2e93'; g.fillRect(2, -2, 9, 4); g.fillStyle = '#ffd23f'; g.fillRect(9, -4, 2, 8); return;
-      case 'machado': g.fillStyle = '#7a4d28'; g.fillRect(4, -2, 34, 4); g.fillStyle = '#b8c4d0'; g.beginPath(); g.moveTo(30, -3); g.lineTo(44, -12); g.lineTo(44, 12); g.lineTo(30, 3); g.fill(); return;
+      case 'machado': g.fillStyle = '#7a4d28'; g.fillRect(4, -2, 34, 4); g.fillStyle = '#aeb7c2'; g.beginPath(); g.moveTo(30, -3); g.lineTo(44, -12); g.lineTo(44, 12); g.lineTo(30, 3); g.fill(); return;
       case 'garrafa': g.fillStyle = '#2f9e5a'; g.fillRect(6, -3, 16, 6); g.fillRect(22, -1.5, 12, 3); g.fillStyle = '#bff5d2'; g.fillRect(8, -2, 5, 2); return;
       case 'extintor': g.fillStyle = '#d02020'; g.fillRect(4, -5, 26, 10); g.fillStyle = '#222'; g.fillRect(30, -2, 8, 4); g.fillStyle = '#eee'; g.fillRect(12, -5, 3, 10); return;
     }
