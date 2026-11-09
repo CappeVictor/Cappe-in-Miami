@@ -149,7 +149,7 @@ async function measure(build) {
     }
 
     await evaluate('CFG.fps = 60');
-    const instrument = "P.inv = 10000; ammo = 10000; keys.w = true; keys.d = true; mouse.x = W * .78; mouse.y = H * .5; mouse.down = true; window.__perf = { work: [], gaps: [] }; const previous = loop; let sampledDraw = lastDraw; window.loop = function(t) { window.__perfKeepSparks?.(); const before = performance.now(), priorDraw = lastDraw; previous(t); if (st === 'play' && lastDraw !== priorDraw) { __perf.work.push(performance.now() - before); __perf.gaps.push(lastDraw - (sampledDraw || lastDraw)); sampledDraw = lastDraw; } }; st";
+    const instrument = "P.inv = 10000; ammo = 10000; keys.w = true; keys.d = true; mouse.x = W * .78; mouse.y = H * .5; mouse.down = true; window.__perf = { work: [], gaps: [] }; window.__navPerf = []; const navPathBeforeProfile = EXP.navPath; EXP.navPath = function(...args) { const began = performance.now(); try { return navPathBeforeProfile.apply(this, args); } finally { window.__navPerf.push(performance.now() - began); } }; const previous = loop; let sampledDraw = lastDraw; window.loop = function(t) { window.__perfKeepSparks?.(); const before = performance.now(), priorDraw = lastDraw; previous(t); if (st === 'play' && lastDraw !== priorDraw) { __perf.work.push(performance.now() - before); __perf.gaps.push(lastDraw - (sampledDraw || lastDraw)); sampledDraw = lastDraw; } }; st";
     let start;
     if (ASSERT_LAZY_MAPS) {
       const newGameStart = await evaluate("window.__lazyMapStarted = performance.now(); window.addEventListener('error', e => (window.__lazyErrors ||= []).push(String(e.error?.stack || e.error || e.message))); window.__neonStoryIndex = STORY.findIndex(phase => phase.neon); if (window.__neonStoryIndex < 1) throw new Error('A campanha não possui uma fase Neon posterior ao início.'); historia = true; capIdx = window.__neonStoryIndex - 1; st = 'play'; advance()");
@@ -189,7 +189,7 @@ async function measure(build) {
       await cdp('Profiler.start');
     }
     await until(async () => (await evaluate('__perf.work.length >= 180')).result?.value, 45000, '180 quadros de gameplay');
-    const sample = (await evaluate('({work: __perf.work.slice(0, 180), gaps: __perf.gaps.slice(0, 180), tier: EXP.perfTier, state: st, canvas: [c.width, c.height], renderer: window.HM_WASM_RENDERER?.status || "Canvas", maskImageRequestCount: performance.getEntriesByType("resource").filter(r => window.__perfMaskPaths.includes(new URL(r.name).pathname)).length})')).result.value;
+    const sample = (await evaluate('({work: __perf.work.slice(0, 180), gaps: __perf.gaps.slice(0, 180), navPathTimes: window.__navPerf.slice(), navigationCells: EXP.NAV.ok?.length || 0, adjacencyBytes: (EXP.NAV.neighbors?.byteLength || 0) + (EXP.NAV.neighborCounts?.byteLength || 0), tier: EXP.perfTier, state: st, canvas: [c.width, c.height], renderer: window.HM_WASM_RENDERER?.status || "Canvas", maskImageRequestCount: performance.getEntriesByType("resource").filter(r => window.__perfMaskPaths.includes(new URL(r.name).pathname)).length})')).result.value;
     if (sample.state !== 'play') throw new Error(`A amostra terminou fora do gameplay (${sample.state}).`);
     if (build.wasm && sample.renderer !== 'ready') throw new Error(`Renderer WASM não ficou ativo (${sample.renderer}).`);
     if (ASSERT_LAZY_MASKS && sample.maskImageRequestCount < 1) throw new Error('A máscara selecionada não foi requisitada após iniciar.');
@@ -235,6 +235,8 @@ async function measure(build) {
       ...(lazyMapLoad ? { lazyMapLoad } : {}),
       maskImageRequestCountAfterStart: sample.maskImageRequestCount,
       governorTier: sample.tier,
+      navigation: { cells: sample.navigationCells, adjacencyBytes: sample.adjacencyBytes, pathCalls: sample.navPathTimes.length,
+        pathCost: { ...summary(sample.navPathTimes), totalMs: +sample.navPathTimes.reduce((sum, ms) => sum + ms, 0).toFixed(1) } },
       initialCanvas,
       finalCanvas: sample.canvas,
       ...(cpuHotspots ? { cpuHotspots } : {}),

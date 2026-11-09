@@ -29,7 +29,7 @@ function run() {
   return { environment:'Node '+process.version+' / '+process.platform+' '+process.arch,
     warning:'Microbenchmark sintético, sem navegador; não representa FPS nem frame time de partidas.',
     maps:{bytes:Buffer.byteLength(source),parseSamples:5,parseP50Ms:percentile(parse,.5),parseP95Ms:percentile(parse,.95)},
-    navigation:{world:[1200,800],cells:exp.NAV.ok.length,obstacles:ctx.sol.length,buildMs,samples:200,pathsFound:found,p50Ms:percentile(timings,.5),p95Ms:percentile(timings,.95)},
+    navigation:{world:[1200,800],cells:exp.NAV.ok.length,obstacles:ctx.sol.length,buildMs,adjacencyBytes:(exp.NAV.neighbors?.byteLength||0)+(exp.NAV.neighborCounts?.byteLength||0),samples:200,pathsFound:found,p50Ms:percentile(timings,.5),p95Ms:percentile(timings,.95)},
     navigationReuse:{samples:500,runs:routeReuseRuns,warning:'As contagens são objetos de ponto criados pelo gerador de caminhos; não representam o heap total do jogo.'} };
 }
 module.exports={run};

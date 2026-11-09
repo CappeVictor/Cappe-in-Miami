@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v88.0-lazy-neon-maps-web';
+const CACHE = 'cappe-v89.0-nav-neighbors-web';
 const ASSETS = [
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",

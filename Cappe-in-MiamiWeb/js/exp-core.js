@@ -239,7 +239,7 @@
   'use strict';
   const EXP = window.EXP;
   EXP.glass = { list: [], map: new Map() };       // tiles de vidro vivos (preenchido por exp-world.js, quebrado em exp-fx.js)
-  const NAV = { cs: 20, cols: 0, rows: 0, ok: null, par: null, seen: null, q: null, stamp: 0, built: false, solids: [], solidBuckets: null, bucketSize: 64, bucketCols: 0, bucketRows: 0 };
+  const NAV = { cs: 20, cols: 0, rows: 0, ok: null, par: null, seen: null, q: null, neighbors: null, neighborCounts: null, stamp: 0, built: false, solids: [], solidBuckets: null, bucketSize: 64, bucketCols: 0, bucketRows: 0 };
   const CLR = 14;   // folga da grade: raio do inimigo (13) + 1 px, para que nenhum caminho passe rente à quina
   EXP.NAV = NAV;
   const DI = [1, -1, 0, 0, 1, 1, -1, -1], DJ = [0, 0, 1, -1, 1, -1, 1, -1];
@@ -274,6 +274,24 @@
       for (let by = y0; by <= y1; by++) for (let bx = x0; bx <= x1; bx++) { const idx = by * NAV.bucketCols + bx; (NAV.solidBuckets[idx] || (NAV.solidBuckets[idx] = [])).push(solid); }
     }
     for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) NAV.ok[j * cols + i] = circleHits(NAV.solids, i * cs + cs / 2, j * cs + cs / 2, CLR) ? 0 : 1;
+    if (!NAV.neighbors || NAV.neighbors.length !== n * 8) {
+      NAV.neighbors = n <= 65536 ? new Uint16Array(n * 8) : new Uint32Array(n * 8);
+      NAV.neighborCounts = new Uint8Array(n);
+    }
+    const neighbors = NAV.neighbors, neighborCounts = NAV.neighborCounts;
+    for (let c = 0; c < n; c++) {
+      const base = c * 8, ci = c % cols, cj = (c / cols) | 0;
+      let count = 0;
+      if (NAV.ok[c]) for (let k = 0; k < 8; k++) {
+        const di = DI[k], dj = DJ[k], i = ci + di, j = cj + dj;
+        if (i < 0 || j < 0 || i >= cols || j >= rows) continue;
+        const next = j * cols + i;
+        if (!NAV.ok[next]) continue;
+        if (di && dj && (!NAV.ok[cj * cols + i] || !NAV.ok[j * cols + ci])) continue;
+        neighbors[base + count++] = next;
+      }
+      neighborCounts[c] = count;
+    }
     NAV.built = true;
   };
   function cellOf(x, y) { return Math.max(0, Math.min(NAV.rows - 1, (y / NAV.cs) | 0)) * NAV.cols + Math.max(0, Math.min(NAV.cols - 1, (x / NAV.cs) | 0)); }
@@ -290,15 +308,13 @@
   EXP.navPath = function (sx, sy, gx, gy, reusePath, pointPool) {
     if (!NAV.built) return null;
     const s = nearestOk(cellOf(sx, sy)), g = nearestOk(cellOf(gx, gy)); if (s < 0 || g < 0) return null;
-    const stamp = ++NAV.stamp, cols = NAV.cols, rows = NAV.rows, seen = NAV.seen, par = NAV.par, q = NAV.q, ok = NAV.ok;
+    const stamp = ++NAV.stamp, cols = NAV.cols, seen = NAV.seen, par = NAV.par, q = NAV.q;
+    const neighbors = NAV.neighbors, neighborCounts = NAV.neighborCounts;
     let h = 0, t = 0, found = s === g; q[t++] = s; seen[s] = stamp; par[s] = -1;
     while (h < t && !found) {
-      const c = q[h++], ci = c % cols, cj = (c / cols) | 0;
-      for (let k = 0; k < 8; k++) {
-        const di = DI[k], dj = DJ[k], i = ci + di, j = cj + dj;
-        if (i < 0 || j < 0 || i >= cols || j >= rows) continue;
-        const n = j * cols + i; if (seen[n] === stamp || !ok[n]) continue;
-        if (di && dj && (!ok[cj * cols + i] || !ok[j * cols + ci])) continue;      // sem cortar quinas
+      const c = q[h++], base = c * 8, count = neighborCounts[c];
+      for (let k = 0; k < count; k++) {
+        const n = neighbors[base + k]; if (seen[n] === stamp) continue;
         seen[n] = stamp; par[n] = c; q[t++] = n; if (n === g) { found = true; break; }
       }
     }
@@ -313,122 +329,4 @@
   // raio livre de sólidos com o tamanho do próprio inimigo (portas contam como livres: os inimigos as abrem)
   function clearRay(x1, y1, x2, y2, r) {
     const rr = r || 13, d = hyp(x2 - x1, y2 - y1), n = Math.max(1, Math.ceil(d / 8));
-    for (let i = 1; i < n; i++) if (circleHits(NAV.solids, x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n, rr)) return false;
-    return true;
-  }
-  function okAt(x, y) { return NAV.built && !!NAV.ok[cellOf(x, y)]; }
-  // devolve o ponto intermediário a perseguir (puxa o caminho até o nó mais distante visível)
-  function navTarget(e, gx, gy, dt) {
-    e.pathT = (e.pathT || 0) - dt; const gk = ((gx / 32) | 0) * 4096 + ((gy / 32) | 0);
-    if (!e.path || e.pathT <= 0 || e.pathK !== gk) {
-      e.pathPoints = e.pathPoints || (e.path ? e.path.slice() : []);
-      e.path = EXP.navPath(e.x, e.y, gx, gy, e.path, e.pathPoints); e.pathT = .9 + Math.random() * .4; e.pathK = gk; e.pk = 0; e.smT = 0; e.pi = 0;
-      // começa no nó do caminho mais próximo do inimigo (não no início, que pode estar atrás dele)
-      if (e.path) { let bi = 0, bd = 1e9; for (let i = 0; i < e.path.length; i++) { const dd = hyp(e.path[i].x - e.x, e.path[i].y - e.y); if (dd < bd) { bd = dd; bi = i; } } e.pi = bi; }
-    }
-    const p = e.path; if (!p || !p.length) return null;
-    while (e.pi < p.length - 1 && hyp(p[e.pi].x - e.x, p[e.pi].y - e.y) < 26) e.pi++;
-    e.smT -= dt; if (e.smT <= 0 || e.pk < e.pi) {
-      e.smT = .15; let k = e.pi; for (let j = Math.min(p.length - 1, e.pi + 7); j > e.pi; j--) if (clearRay(e.x, e.y, p[j].x, p[j].y)) { k = j; break; } e.pk = k;
-    }
-    const out = e.navTmp || (e.navTmp = { x: 0, y: 0 });
-    if (e.pk >= p.length - 1) { out.x = gx; out.y = gy; } else { out.x = p[e.pk].x; out.y = p[e.pk].y; }
-    return out;
-  }
-  EXP.navTarget = navTarget;
-
-  // Direção de perseguição. Linha livre (com o tamanho real do inimigo) → vai reto; senão, segue o caminho.
-  // chase=true: inimigo ainda longe pega um dos dois flancos do jogador (pinça), em vez de formar fila atrás.
-  // Se fica preso sem avançar, replaneja e dá um passo lateral por um instante.
-  EXP.steer = function (e, gx, gy, dt, chase) {
-    const out = e.steerOut || (e.steerOut = { x: 0, y: 0 });
-    let tx = gx, ty = gy;
-    if (chase && hyp(e.x - gx, e.y - gy) > 140) {
-      // o ponto de flanco é reavaliado só de tempos em tempos: se mudasse a cada quadro, o caminho seria refeito a cada quadro
-      e.flT = (e.flT || 0) - dt;
-      if (e.flT <= 0 || e.flOk === undefined) {
-        e.flT = .6; e.flOk = false;
-        const ap = Math.atan2(e.y - gy, e.x - gx) + ((e.id || 0) % 2 ? 1 : -1) * 1.0;
-        const fx = gx + Math.cos(ap) * 110, fy = gy + Math.sin(ap) * 110;
-        if (okAt(fx, fy)) { e.flOk = true; e.flX = fx; e.flY = fy; }
-      }
-      if (e.flOk) { tx = e.flX; ty = e.flY; }
-    } else e.flOk = undefined;
-    e.stT = (e.stT || 0) - dt;
-    if (e.stT <= 0) { e.stT = .12; e.direct = clearRay(e.x, e.y, tx, ty, 13); }
-    e.spT = (e.spT || 0) - dt;
-    if (e.spT <= 0) {
-      e.spT = .7;
-      if (e.spX !== undefined && (!e.vis || hyp(e.x - gx, e.y - gy) > 230) && hyp(e.x - e.spX, e.y - e.spY) < 8 && hyp(tx - e.x, ty - e.y) > 40) {
-        e.path = null; e.pathK = -1; e.dodgeT = .4; e.dodgeA = e.a + (Math.random() < .5 ? 1 : -1) * (1.2 + Math.random() * .6);
-      }
-      e.spX = e.x; e.spY = e.y;
-    }
-    if (e.dodgeT > 0) { e.dodgeT -= dt; out.x = e.x + Math.cos(e.dodgeA) * 40; out.y = e.y + Math.sin(e.dodgeA) * 40; return out; }
-    if (e.direct) { out.x = tx; out.y = ty; return out; }
-    const t = navTarget(e, tx, ty, dt);
-    if (t) { out.x = t.x; out.y = t.y; } else { out.x = tx; out.y = ty; }
-    return out;
-  };
-
-  EXP.mind = function (e) {
-    if (e.ko > 0 || e.stun > 0) return 'down';
-    const s = e.state;
-    if (s === 'PATROL') return 'patrol';
-    if (s === 'CHASE' || s === 'ALERT') return 'chase';
-    if (s === 'INVESTIGATE' || s === 'SEARCH' || s === 'SUSPICIOUS') return 'investigate';
-    return 'idle';
-  };
-
-  // abre a porta que está na frente do inimigo (o jogo só deixava o jogador abrir portas)
-  function enemyOpenDoor(e) {
-    for (let i = 0; i < doors.length; i++) {
-      const d = doors[i]; if (d.open || d.swing) continue;
-      const cx = d.x + d.w / 2, cy = d.y + d.h / 2; if (Math.abs(cx - e.x) > 32 || Math.abs(cy - e.y) > 32) continue;
-      let ax = cx - e.x, ay = cy - e.y; const L = hyp(ax, ay) || 1; ax /= L; ay /= L;
-      d.swing = true; d.fast = false; d.target = d.vert ? -(ax >= 0 ? 1 : -1) * Math.PI / 2 : (ay >= 0 ? 1 : -1) * Math.PI / 2; return;
-    }
-  }
-  function patrol(e, dt) {
-    const w = e.route[e.wp || 0];
-    if (e.wait > 0) { e.wait -= dt; return; }
-    const t = navTarget(e, w.x, w.y, dt) || w;
-    e.a = Math.atan2(t.y - e.y, t.x - e.x); move(e, Math.cos(e.a) * 52 * dt, Math.sin(e.a) * 52 * dt);
-    if (hyp(w.x - e.x, w.y - e.y) < 20) { e.wp = ((e.wp || 0) + 1) % e.route.length; e.wait = .6; e.path = null; }
-  }
-  // chamado uma vez por quadro (por EXP.worldTick), antes do laço de IA do jogo
-  EXP.aiExtTick = function (dt) {
-    if (!NAV.built) return;
-    for (let i = 0; i < enemies.length; i++) {
-      const e = enemies[i];
-      if (e.ko > 0 || e.stun > 0) { e.mind = 'down'; continue; }
-      const s = e.state;
-      if (doors.length && !historia && s !== 'IDLE' && s !== 'SUSPICIOUS') enemyOpenDoor(e);
-      if (e.route && e.route.length && (s === 'IDLE' || s === 'PATROL')) { if (s === 'IDLE') e.state = 'PATROL'; e.goal = null; patrol(e, dt); }
-      else if (s === 'PATROL') e.state = 'IDLE';
-      if (s === 'INVESTIGATE' || s === 'SEARCH') {
-        if (e.lkp && e.lkp !== e.navPt) e.goal = { x: e.lkp.x, y: e.lkp.y };          // alvo novo (ruído, última posição vista)
-        e.invT = (e.invT || 0) + dt;
-        if (e.invT > 14) { e.goal = null; e.lkp = null; e.heard = null; e.invT = 0; e.state = 'IDLE'; continue; }
-        if (e.goal) {
-          const n = navTarget(e, e.goal.x, e.goal.y, dt);
-          if (n) { const np = e.navPt || (e.navPt = { x: 0, y: 0 }); np.x = n.x; np.y = n.y; e.lkp = np; }
-        }
-      } else if (s !== 'SUSPICIOUS') { e.goal = null; e.invT = 0; }
-      e.mind = EXP.mind(e);
-    }
-  };
-  // tiro do jogador: 450 px de raio, sem depender de paredes (máscaras silenciosas reduzem o raio)
-  EXP.gunshotAlert = function (x, y) {
-    const R = 450 * ((typeof S !== 'undefined' && S.quiet) || 1);
-    for (let i = 0; i < enemies.length; i++) {
-      const e = enemies[i];
-      if (e.ko > 0 || e.stun > 0 || e.state === 'CHASE' || e.state === 'ALERT') continue;
-      if (hyp(e.x - x, e.y - y) > R) continue;
-      e.heard = { x, y }; e.lkp = { x, y }; e.goal = { x, y }; e.invT = 0; e.path = null;
-      setEnemyState(e, 'INVESTIGATE', 4);
-    }
-  };
-  const _emit = emitNoise;
-  emitNoise = function (x, y, r, kind) { if (kind === 'gunshot') EXP.gunshotAlert(x, y); _emit(x, y, r, kind); };
-})();
+    for (let i = 1; i < n; i++) if (circleHits(NAV.solids

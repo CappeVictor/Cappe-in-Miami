@@ -1,4 +1,4 @@
-# Cappe in Miami Web — v88.0
+# Cappe in Miami Web — v89.0
 
 Versão para navegador com HTML, CSS e JavaScript; o jogo usa o renderer Canvas 2D em JavaScript e não depende de Rust nem WebAssembly.
 
@@ -43,6 +43,10 @@ As 14 imagens de máscara não são mais baixadas no início do jogo. Elas são 
 ## Otimização v88 — carregamento adiado dos mapas Neon
 
 `js/maps.js` agora só é requisitado quando a campanha chega à primeira fase Neon ou quando o jogador escolhe um mapa Neon. A lista de 61 mapas permanece no seletor, sem baixar a geometria antes da hora; depois do primeiro uso, o service worker pode armazenar o arquivo para uso offline. Em Chrome local, a abertura inicial transferiu 301.534 bytes a menos e decodificou 1.616.616 bytes a menos. O início da campanha foi conferido até a primeira expansão e o mapa correto carregou em uma única requisição. Suíte de regressão: 110/110. Os tempos variam por computador; não houve medição de FPS nem revisão visual ampla.
+
+## Otimização v89 — vizinhos de navegação pré-calculados
+
+O BFS da IA reutiliza uma tabela compacta de vizinhos caminháveis construída junto com a grade de navegação. A ordem de exploração, os bloqueios diagonais e a rota resultante foram preservados; a regressão compara 700 rotas determinísticas com a implementação anterior. No perfil de CPU local, `EXP.navPath` acumulou 103 ms nesta versão, contra 135 ms na referência (uma captura por build). A tabela usa cerca de 17 bytes por célula e acrescenta alguns milissegundos à montagem da grade. O ensaio com 120 inimigos teve grande variação entre rodadas, portanto não há afirmação de ganho geral de FPS. Suíte: 111/111.
 
 ## Otimização v87 — grade de colisão da IA
 
