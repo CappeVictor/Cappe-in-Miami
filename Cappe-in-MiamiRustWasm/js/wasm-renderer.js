@@ -1080,4 +1080,797 @@
         if (!context || !image || !(pixels instanceof Uint8ClampedArray) || pixels.length !== width * height * 4) return false;
         if (state.directReady && state.direct && state.direct.putCanvasImageData) {
           try {
-            if (withCanvasBypass(() => state.direct.putCanvasImageData(context, image, pixels, width, height))) { state.di
+            if (withCanvasBypass(() => state.direct.putCanvasImageData(context, image, pixels, width, height))) { state.directImageDataPutCalls++; return true; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        try { return withCanvasBypass(() => { image.data.set(pixels); context.putImageData(image, 0, 0); return true; }); }
+        catch (_) { return false; }
+      };
+      state.clearCanvasRect = (context, x, y, width, height) => {
+        if (!context || ![x, y, width, height].every(Number.isFinite)) return false;
+        if (state.directReady && state.direct && state.direct.clearCanvasRect) {
+          try {
+            if (withCanvasBypass(() => state.direct.clearCanvasRect(context, x, y, width, height))) { state.directClearRectCalls++; return true; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        try { return withCanvasBypass(() => { context.clearRect(x, y, width, height); return true; }); }
+        catch (_) { return false; }
+      };
+      state.setCanvasImageSmoothing = (context, enabled) => {
+        if (!context || typeof enabled !== 'boolean') return false;
+        if (state.directReady && state.direct && state.direct.setCanvasImageSmoothing) {
+          try {
+            if (withCanvasBypass(() => state.direct.setCanvasImageSmoothing(context, enabled))) { state.directImageSmoothingCalls++; return true; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.createTextImage = (canvas, text, font, color, outlined = false) => {
+        if (!state.active || !state.directReady || !state.direct || !state.direct.createTextImage
+          || !(canvas instanceof HTMLCanvasElement) || typeof text !== 'string' || typeof font !== 'string' || typeof color !== 'string' || typeof outlined !== 'boolean') return false;
+        try {
+          const created = withCanvasBypass(() => state.direct.createTextImage(canvas, text, font, color, outlined));
+          if (created) state.directTextImageFrames++;
+          return created;
+        } catch (error) { state.directError = String(error && error.message || error); return false; }
+      };
+      function drawRawHudTextEntries(entries, context) {
+        if (!state.active || !Array.isArray(entries) || entries.length > 64 || !context) return false;
+        for (const entry of entries) {
+          const alpha = entry && entry.alpha === undefined ? 1 : entry && entry.alpha;
+          if (!entry || typeof entry.text !== 'string' || typeof entry.color !== 'string' || typeof entry.font !== 'string' || !Number.isFinite(entry.x) || !Number.isFinite(entry.y) || !['left', 'center', 'right'].includes(entry.align || 'left') || !Number.isFinite(alpha) || alpha < 0 || alpha > 1) return false;
+          if (entry.absoluteAlpha !== undefined && typeof entry.absoluteAlpha !== 'boolean') return false;
+        }
+        if (!state.directReady || !state.direct || !state.direct.drawRawHudTexts) return false;
+        try {
+          const directCount = withCanvasBypass(() => state.direct.drawRawHudTexts(context, entries));
+          if (Number.isInteger(directCount) && directCount === entries.length) {
+            state.directHudTextFrames++;
+            state.hudTextCommands += directCount;
+            return true;
+          }
+        } catch (error) { state.directError = String(error && error.message || error); }
+        return false;
+      };
+      state.drawRain = (context, drops, step = 1) => {
+        if (!state.active || !Array.isArray(drops) || drops.length > 256 || (step !== 1 && step !== 2)) return false;
+        const input = rainDirectInputBuffer.subarray(0, drops.length * 3);
+        for (let i = 0; i < drops.length; i++) {
+          const drop = drops[i];
+          if (!drop || !Number.isFinite(drop.x) || !Number.isFinite(drop.y) || !Number.isFinite(drop.l) || drop.l < 0) return false;
+          input.set([drop.x, drop.y, drop.l], i * 3);
+        }
+        if (state.directReady && state.direct && state.direct.drawRain) {
+          try {
+            const directCount = withCanvasBypass(() => state.direct.drawRain(context, input, drops.length, step));
+            if (Number.isInteger(directCount) && directCount >= 0) { state.directRainFrames++; state.rainCommands += directCount; return true; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.drawWeatherMotes = (context, motes, nowMs) => {
+        if (!state.active || !Array.isArray(motes) || motes.length > 128 || !Number.isFinite(nowMs)) return false;
+        const input = weatherMoteDirectInputBuffer.subarray(0, motes.length * 4);
+        for (let i = 0; i < motes.length; i++) {
+          const mote = motes[i];
+          if (!mote || !Number.isFinite(mote.x) || !Number.isFinite(mote.y) || !Number.isFinite(mote.r) || mote.r < 0 || !Number.isFinite(mote.p)) return false;
+          input.set([mote.x, mote.y, mote.r, mote.p], i * 4);
+        }
+        if (state.directReady && state.direct && state.direct.drawWeatherMotes) {
+          try {
+            const directCount = withCanvasBypass(() => state.direct.drawWeatherMotes(context, input, motes.length, nowMs));
+            if (Number.isInteger(directCount) && directCount >= 0) { state.directWeatherMoteFrames++; state.weatherMoteCommands += directCount; return true; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.drawFog = (context, image, nowMs, smoke, perfTier = 0) => {
+        if (!state.active || !image || !(image.width > 0) || !(image.height > 0)
+          || !Number.isFinite(nowMs) || typeof smoke !== 'boolean' || !Number.isFinite(perfTier) || perfTier < 0) return false;
+        if (state.directReady && state.direct && state.direct.drawFogInputs) {
+          try {
+            const directCount = withCanvasBypass(() => state.direct.drawFogInputs(context, image, nowMs, smoke, perfTier));
+            if (Number.isInteger(directCount) && directCount >= 0) {
+              state.directFogInputCalls++;
+              state.fogCommands += directCount;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };      state.drawFxOverlays = (context, stage, width, height, nowMs = 0, primary = 0, secondary = 0, enabled = true) => {
+        if (!state.active || ![stage, width, height, nowMs, primary, secondary].every(Number.isFinite)
+          || !Number.isInteger(stage) || stage < 0 || stage > 3 || width <= 0 || height <= 0
+          || typeof enabled !== 'boolean' || primary < 0 || secondary < 0
+          || (stage === 0 && (primary > 1 || secondary > 1))) return false;
+        if (state.directReady && state.direct && state.direct.drawFxOverlays) {
+          try {
+            const directCount = withCanvasBypass(() => state.direct.drawFxOverlays(context, stage, width, height, nowMs, primary, secondary, enabled));
+            if (Number.isInteger(directCount) && directCount >= 0) { state.directFxOverlayFrames++; state.fxOverlayCommands += directCount; return true; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.drawWorldLights = (context, lights, nowMs, dim, neon, stride, playerX, playerY, fireFlash, rainReflection, flashImage) => {
+        if (!state.active || !Array.isArray(lights) || lights.length > 6 || !Number.isFinite(nowMs) || nowMs < 0
+          || !Number.isFinite(dim) || dim < 0 || dim > 1 || typeof neon !== 'boolean' || ![1, 2].includes(stride)
+          || !Number.isFinite(playerX) || !Number.isFinite(playerY) || typeof fireFlash !== 'boolean' || typeof rainReflection !== 'boolean'
+          || (fireFlash && !flashImage)) return false;
+        let expected = (fireFlash ? 1 : 0) + (rainReflection ? 1 : 0);
+        const directValues = worldLightDirectInputBuffer.subarray(0, lights.length * 5);
+        for (let i = 0; i < lights.length; i++) {
+          const light = lights[i];
+          if (!light || !Number.isFinite(light.x) || !Number.isFinite(light.y) || !Number.isFinite(light.r) || light.r <= 0 || !Number.isFinite(light.p) || typeof light.on !== 'boolean') return false;
+          directValues.set([light.x, light.y, light.r, light.p, light.on ? 1 : 0], i * 5);
+          if (light.on && i % stride === 0) expected++;
+        }
+        if (state.directReady && state.direct && state.direct.drawWorldLightInputs) {
+          try {
+            const directImages = worldLightDirectImages;
+            directImages.length = lights.length;
+            for (let i = 0; i < lights.length; i++) directImages[i] = lights[i] && lights[i].spr;
+            const metadata = worldLightDirectMetaBuffer;
+            metadata[0] = nowMs; metadata[1] = dim; metadata[2] = neon ? 1 : 0; metadata[3] = stride;
+            metadata[4] = playerX; metadata[5] = playerY; metadata[6] = fireFlash ? 1 : 0; metadata[7] = rainReflection ? 1 : 0;
+            const drawn = withCanvasBypass(() => state.direct.drawWorldLightInputs(context, directValues, directImages, metadata, flashImage || null));
+            if (drawn === expected) {
+              state.worldLightCommands += drawn;
+              state.directWorldLightInputCalls += drawn;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.drawWorldRings = (context, rings) => {
+        if (!state.active || !Array.isArray(rings) || rings.length > 14) return false;
+        const colors = worldRingColors;
+        colors.length = 0;
+        for (const ring of rings) {
+          if (!ring || !Number.isFinite(ring.x) || !Number.isFinite(ring.y) || !Number.isFinite(ring.R)
+            || !Number.isFinite(ring.t) || !Number.isFinite(ring.T) || typeof ring.c !== 'string') return false;
+          if (ring.t <= 0) continue;
+          if (!colors.includes(ring.c)) colors.push(ring.c);
+        }
+        if (!colors.length) return true;
+        const directValues = worldRingDirectInputBuffer.subarray(0, rings.length * 6);
+        let directValueCount = 0;
+        for (const ring of rings) {
+          if (ring.t <= 0) continue;
+          directValues[directValueCount] = ring.x; directValues[directValueCount + 1] = ring.y;
+          directValues[directValueCount + 2] = ring.R; directValues[directValueCount + 3] = ring.t;
+          directValues[directValueCount + 4] = ring.T; directValues[directValueCount + 5] = colors.indexOf(ring.c);
+          directValueCount += 6;
+        }
+        if (state.directReady && state.direct && state.direct.drawWorldRingInputs) {
+          try {
+            const drawn = withCanvasBypass(() => state.direct.drawWorldRingInputs(context, directValues.subarray(0, directValueCount), colors));
+            if (drawn === directValueCount / 6) {
+              state.worldRingCommands += drawn;
+              state.directWorldRingInputCalls = (state.directWorldRingInputCalls || 0) + drawn;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.drawInvasionZone = (context, x, y, nowMs) => {
+        if (!state.active || !Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(nowMs) || nowMs < 0) return false;
+        if (state.directReady && state.direct && state.direct.drawInvasionZoneInput) {
+          try {
+            const drawn = withCanvasBypass(() => state.direct.drawInvasionZoneInput(context, x, y, nowMs));
+            if (drawn === true) { state.directInvasionZoneInputCalls++; state.invasionZoneCommands++; return true; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.paintFloorGrain = (context, width, height, random) => {
+        if (!context) return false;
+        if (!state.active || !random || typeof random.getState !== 'function' || typeof random.setState !== 'function' ||
+            !Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0 || width > 1600 || height > 1200) return false;
+        let cached = floorGrainImageCache.get(context);
+        if (!cached || cached.width !== width || cached.height !== height) {
+          const image = state.createCanvasImageData(context, width, height);
+          if (!image) return false;
+          cached = { image, width, height };
+          floorGrainImageCache.set(context, cached);
+        }
+        if (!state.forceFloorGrainFallback && state.directReady && state.direct && state.direct.drawFloorGrainRgba) {
+          const seed = random.getState();
+          try {
+            const nextSeed = state.direct.drawFloorGrainRgba(cached.image.data, width, height, seed);
+            if (Number.isFinite(nextSeed)) {
+              withCanvasBypass(() => context.putImageData(cached.image, 0, 0));
+              random.setState(nextSeed);
+              const count = Math.floor((width * height / 160) + 0.5);
+              state.directFloorGrainCalls++;
+              state.floorRects += count;
+              state.floorFinishCommands += count;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.paintFloorTiles = (context, rooms, tileIndex, tileImage) => {
+        const canvas = context && context.canvas;
+        if (!state.active || !context || !canvas || !Array.isArray(rooms) || rooms.length > 8192 ||
+            !tileImage || !tileImage.complete || tileImage.naturalWidth !== 72 || tileImage.naturalHeight !== 24 || !Number.isInteger(tileIndex) || tileIndex < 0 || tileIndex > 2 ||
+            !Number.isInteger(canvas.width) || !Number.isInteger(canvas.height) || canvas.width <= 0 || canvas.width > 1600 || canvas.height <= 0 || canvas.height > 1200) return false;
+        if (floorTileInputBuffer.length < rooms.length * 4) floorTileInputBuffer = new Float64Array(Math.max(rooms.length * 4, floorTileInputBuffer.length * 2, 64));
+        for (let i = 0; i < rooms.length; i++) {
+          const room = rooms[i], offset = i * 4;
+          floorTileInputBuffer[offset] = room.x; floorTileInputBuffer[offset + 1] = room.y; floorTileInputBuffer[offset + 2] = room.w; floorTileInputBuffer[offset + 3] = room.h;
+        }
+        const hallIndex = rooms.hall ? rooms.indexOf(rooms.hall) : -1;
+        const directRooms = floorTileInputBuffer.subarray(0, rooms.length * 4);
+        if (!state.forceFloorTilesFallback && state.directReady && state.direct && state.direct.drawFloorTilesCanvas) {
+          try {
+            const drawnRooms = withCanvasBypass(() => state.direct.drawFloorTilesCanvas(context, tileImage, directRooms,
+              hallIndex, tileIndex, canvas.width, canvas.height));
+            const expectedRooms = rooms.length - (hallIndex >= 0 ? 1 : 0);
+            if (drawnRooms === expectedRooms) {
+              state.directFloorTileCalls++;
+              state.floorTextureCommands += drawnRooms;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.paintFloorFinish = (context, solids, width, height) => {
+        if (!state.active || !context || !Array.isArray(solids) || solids.length > 8192 || !Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || width > 1600 || height <= 0 || height > 1200) return false;
+        if (floorFinishInputBuffer.length < solids.length * 4) floorFinishInputBuffer = new Float64Array(Math.max(solids.length * 4, floorFinishInputBuffer.length * 2, 64));
+        for (let i = 0; i < solids.length; i++) {
+          const rect = solids[i], offset = i * 4;
+          floorFinishInputBuffer[offset] = rect[0]; floorFinishInputBuffer[offset + 1] = rect[1]; floorFinishInputBuffer[offset + 2] = rect[2]; floorFinishInputBuffer[offset + 3] = rect[3];
+        }
+        if (!state.forceFloorFinishFallback && state.directReady && state.direct && state.direct.paintFloorFinishCanvas) {
+          try {
+            const drawnRects = withCanvasBypass(() => state.direct.paintFloorFinishCanvas(context,
+              floorFinishInputBuffer.subarray(0, solids.length * 4), width, height));
+            if (Number.isInteger(drawnRects) && drawnRects >= 0) {
+              state.directFloorFinishCalls++;
+              state.floorFinishCommands += drawnRects;
+              state.floorRects += drawnRects;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.paintMapDetails = (context, rooms, width, height, random) => {
+        if (!state.active || !context || !Array.isArray(rooms) || rooms.length > 8192 || !random || typeof random.getState !== 'function' || typeof random.setState !== 'function') return false;
+        if (mapDetailsInputBuffer.length < rooms.length * 4) mapDetailsInputBuffer = new Float64Array(Math.max(rooms.length * 4, mapDetailsInputBuffer.length * 2, 64));
+        for (let i = 0; i < rooms.length; i++) {
+          const room = rooms[i];
+          mapDetailsInputBuffer[i * 4] = room.px !== undefined ? room.px : room.x;
+          mapDetailsInputBuffer[i * 4 + 1] = room.py !== undefined ? room.py : room.y;
+          mapDetailsInputBuffer[i * 4 + 2] = room.pw !== undefined ? room.pw : room.w;
+          mapDetailsInputBuffer[i * 4 + 3] = room.ph !== undefined ? room.ph : room.h;
+        }
+        const directRooms = mapDetailsInputBuffer.subarray(0, rooms.length * 4);
+        if (state.directReady && state.direct && state.direct.drawMapDetails) {
+          try {
+            const nextSeed = withCanvasBypass(() => state.direct.drawMapDetails(context, directRooms, width, height, random.getState()));
+            if (Number.isFinite(nextSeed)) { random.setState(nextSeed); state.directMapDetailsCalls++; return true; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.paintMapShadows = (context, walls, furniture) => {
+        const count = walls.length + furniture.length;
+        if (!state.active || !context || count > 8192) return false;
+        if (mapShadowInputBuffer.length < count * 5) mapShadowInputBuffer = new Float64Array(Math.max(count * 5, mapShadowInputBuffer.length * 2, 80));
+        for (let i = 0; i < walls.length + furniture.length; i++) {
+          const rect = i < walls.length ? walls[i] : furniture[i - walls.length];
+          const offset = i * 5;
+          mapShadowInputBuffer[offset] = Array.isArray(rect) ? rect[0] : rect.x;
+          mapShadowInputBuffer[offset + 1] = Array.isArray(rect) ? rect[1] : rect.y;
+          mapShadowInputBuffer[offset + 2] = Array.isArray(rect) ? rect[2] : rect.w;
+          mapShadowInputBuffer[offset + 3] = Array.isArray(rect) ? rect[3] : rect.h;
+          mapShadowInputBuffer[offset + 4] = i < walls.length ? 0 : 1;
+        }
+        if (state.directReady && state.direct && state.direct.drawMapShadows) {
+          try {
+            const drawn = withCanvasBypass(() => state.direct.drawMapShadows(context, mapShadowInputBuffer.subarray(0, count * 5)));
+            if (drawn === count) { state.directMapShadowCalls++; return true; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.paintMapStructure = (context, walls, posts) => {
+        const count = walls.length + posts.length;
+        if (!state.active || !context || count > 8192) return false;
+        if (mapStructureInputBuffer.length < count * 5) mapStructureInputBuffer = new Float64Array(Math.max(count * 5, mapStructureInputBuffer.length * 2, 80));
+        for (let i = 0; i < walls.length; i++) {
+          const wall = walls[i], offset = i * 5;
+          mapStructureInputBuffer[offset] = wall[0]; mapStructureInputBuffer[offset + 1] = wall[1]; mapStructureInputBuffer[offset + 2] = wall[2]; mapStructureInputBuffer[offset + 3] = wall[3]; mapStructureInputBuffer[offset + 4] = 0;
+        }
+        for (let i = 0; i < posts.length; i++) {
+          const post = posts[i], offset = (walls.length + i) * 5;
+          mapStructureInputBuffer[offset] = post[0]; mapStructureInputBuffer[offset + 1] = post[1]; mapStructureInputBuffer[offset + 2] = 0; mapStructureInputBuffer[offset + 3] = 0; mapStructureInputBuffer[offset + 4] = 1;
+        }
+        const expectedCommands = walls.length * 6 + posts.length * 4;
+        if (state.directReady && state.direct && state.direct.drawMapStructure) {
+          try {
+            const drawn = withCanvasBypass(() => state.direct.drawMapStructure(context, mapStructureInputBuffer.subarray(0, count * 5)));
+            if (drawn === expectedCommands) { state.directMapStructureCalls++; return true; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.paintTileWalls = (context, walls, wallColor, trimColor) => {
+        if (!state.active || !context || !Array.isArray(walls) || walls.length > 8192 ||
+            typeof wallColor !== 'string' || typeof trimColor !== 'string') return false;
+        if (tileWallInputBuffer.length < walls.length * 4) tileWallInputBuffer = new Float64Array(Math.max(walls.length * 4, tileWallInputBuffer.length * 2, 64));
+        for (let i = 0; i < walls.length; i++) {
+          const wall = walls[i], offset = i * 4;
+          if (!Array.isArray(wall) || wall.length < 4 || wall.slice(0, 4).some(value => !Number.isFinite(value))) return false;
+          tileWallInputBuffer[offset] = wall[0]; tileWallInputBuffer[offset + 1] = wall[1];
+          tileWallInputBuffer[offset + 2] = wall[2]; tileWallInputBuffer[offset + 3] = wall[3];
+        }
+        if (state.directReady && state.direct && state.direct.drawTileWalls) {
+          try {
+            const expectedCommands = walls.length * 3;
+            const drawn = withCanvasBypass(() => state.direct.drawTileWalls(context,
+              tileWallInputBuffer.subarray(0, walls.length * 4), wallColor, trimColor));
+            if (drawn === expectedCommands) { state.directTileWallCalls++; return true; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      const paintMapTexturesRgba = (context, solids, openings, mapTextures, across) => {
+        const canvas = context && context.canvas;
+        if (!context || !canvas || !mapTextures || !Number.isInteger(canvas.width) || !Number.isInteger(canvas.height) ||
+            !state.directReady || !state.direct || !state.direct.drawMapTexturesRgba ||
+            canvas.width <= 0 || canvas.height <= 0 || canvas.width > 1600 || canvas.height > 1200 ||
+            solids.length > 8192 || openings.length > 8192 || !Number.isFinite(across) || across <= 0) return null;
+        const wallSource = mapTextures.wallSheet || mapTextures.wallFace;
+        const furnitureSheet = mapTextures.furnitureSheet;
+        const furnitureReady = !!furnitureSheet || !!(mapTextures.furnitureFaces && mapTextures.furnitureFaces.length >= 6);
+        const furnitureSources = furnitureSheet ? null : (furnitureReady ? mapTextures.furnitureFaces.slice(0, 6) : [null, null, null, null, null, null]);
+        const doorSource = mapTextures.doorSheet || mapTextures.doorOpen;
+        const wallReady = !!wallSource, doorReady = !!doorSource;
+        const sourceReady = source => !source || (Number.isInteger(source.naturalWidth || source.width) && Number.isInteger(source.naturalHeight || source.height));
+        if (!sourceReady(wallSource) || !sourceReady(furnitureSheet) || !sourceReady(doorSource) || (furnitureSources && !furnitureSources.every(sourceReady))) return null;
+        const texturePixels = new Uint8Array(8 * 24 * 24 * 4);
+        try {
+          texturePixels.fill(0);
+          const readPixels = source => {
+            let cached = mapTextureSourcePixelCache.get(source);
+            if (cached) return cached;
+            const width = source.naturalWidth || source.width, height = source.naturalHeight || source.height;
+            if (width < 24 || width > 144 || height < 24 || height > 24) return null;
+            let sourceContext = typeof source.getContext === 'function' ? source.getContext('2d') : null;
+            const sourceHasContext = !!sourceContext;
+            if (!sourceContext) {
+              const scratch = document.createElement('canvas'); scratch.width = width; scratch.height = height;
+              sourceContext = scratch.getContext('2d');
+              if (!sourceContext) return null;
+            }
+            let data;
+            data = state.readCanvasSourcePixels(source, sourceContext, width, height);
+            if (!data) withCanvasBypass(() => {
+              if (!sourceHasContext) sourceContext.drawImage(source, 0, 0);
+              data = sourceContext.getImageData(0, 0, width, height).data;
+            });
+            cached = { width, height, data };
+            mapTextureSourcePixelCache.set(source, cached);
+            return cached;
+          };
+          const copySheetCrop = (source, slot, sourceX = 0, sourceY = 0) => {
+            if (!source) return true;
+            const pixels = readPixels(source);
+            if (!pixels) return false;
+            const isSheet = pixels.width !== 24 || pixels.height !== 24 || sourceX !== 0 || sourceY !== 0;
+            if (!isSheet) {
+              texturePixels.set(pixels.data, slot * 24 * 24 * 4);
+              return true;
+            }
+            if (sourceX < 0 || sourceY < 0 || sourceX + 24 > pixels.width || sourceY + 24 > pixels.height) return false;
+            const destination = slot * 24 * 24 * 4;
+            for (let row = 0; row < 24; row++) {
+              const start = ((sourceY + row) * pixels.width + sourceX) * 4;
+              texturePixels.set(pixels.data.subarray(start, start + 24 * 4), destination + row * 24 * 4);
+            }
+            return true;
+          };
+          if (!copySheetCrop(wallSource, 0)) return null;
+          if (furnitureSheet) {
+            for (let index = 0; index < 6; index++) if (!copySheetCrop(furnitureSheet, index + 1, index * 24, 0)) return null;
+          } else if (furnitureSources) {
+            for (let index = 0; index < 6; index++) if (!copySheetCrop(furnitureSources[index], index + 1)) return null;
+          }
+          if (!copySheetCrop(doorSource, 7, mapTextures.doorSheet ? 24 : 0, 0)) return null;
+        } catch (_) { return null; }
+        let layer = mapTextureImageCache.get(context);
+        if (!layer || layer.width !== canvas.width || layer.height !== canvas.height) {
+          try {
+            const image = state.createCanvasImageData(context, canvas.width, canvas.height);
+            if (!image) return null;
+            layer = { image, width: canvas.width, height: canvas.height };
+            mapTextureImageCache.set(context, layer);
+          } catch (_) { return null; }
+        }
+        const solidInput = new Float64Array(solids.length * 4);
+        for (let i = 0; i < solids.length; i++) {
+          const rect = solids[i], offset = i * 4;
+          solidInput[offset] = rect[0]; solidInput[offset + 1] = rect[1]; solidInput[offset + 2] = rect[2]; solidInput[offset + 3] = rect[3];
+        }
+        const openingInput = new Float64Array(openings.length * 5);
+        for (let i = 0; i < openings.length; i++) {
+          const rect = openings[i], offset = i * 5;
+          openingInput[offset] = rect[0]; openingInput[offset + 1] = rect[1]; openingInput[offset + 2] = rect[2]; openingInput[offset + 3] = rect[3]; openingInput[offset + 4] = 0;
+        }
+        if (state.directReady && state.direct && state.direct.drawMapTexturesRgba) {
+          try {
+            const directPlacements = withCanvasBypass(() => state.direct.drawMapTexturesRgba(context, layer.image,
+              solidInput, openingInput, texturePixels, wallReady, furnitureReady, doorReady, across, canvas.width, canvas.height));
+            state.directMapTextureLastResult = directPlacements;
+            if (Number.isInteger(directPlacements) && directPlacements >= 0) {
+              state.mapTextureCommands += directPlacements;
+              state.directMapTextureRasterCalls++;
+              return true;
+            }
+          } catch (error) {
+            state.directMapTextureError = String(error && error.message || error);
+            if (diagnosticsEnabled) console.warn('[Cappe WASM] texturas de mapa usaram o compositor de fallback.', error);
+          }
+        }
+        return false;
+      };
+      state.paintMapTextures = (context, solids, openings, mapTextures, across) => {
+        if (!state.active || solids.length > 8192 || openings.length > 8192) return false;
+        return paintMapTexturesRgba(context, solids, openings, mapTextures, across) === true;
+      };
+      state.drawFurniture = (context, furniture) => {
+        if (!state.active || !Array.isArray(furniture) || furniture.length > 8192) return false;
+        const kinds = { bed: 1, banco: 2, mesa: 3, balcao: 4, vaso: 5, pia: 6, banheira: 7, planta: 8, sofa: 9, mesaR: 10, felt: 11, arcade: 12, sinuca: 13, poltrona: 14, palco: 15, poco: 16, caixa: 17 };
+        if (!state.directReady || !state.direct || !state.direct.drawFurniture) return false;
+        const directItems = new Float64Array(furniture.length * 6);
+        for (let i = 0; i < furniture.length; i++) {
+          const item = furniture[i], offset = i * 6, kind = kinds[item && item.kind];
+          if (!item || !Number.isFinite(item.x) || !Number.isFinite(item.y) || !Number.isFinite(item.w) || item.w <= 0 || !Number.isFinite(item.h) || item.h <= 0 || !Number.isInteger(kind) || !Number.isFinite(item.c || 0)) return false;
+          directItems[offset] = item.x; directItems[offset + 1] = item.y;
+          directItems[offset + 2] = item.w; directItems[offset + 3] = item.h;
+          directItems[offset + 4] = kind; directItems[offset + 5] = item.c || 0;
+        }
+        try {
+          const drawn = withCanvasBypass(() => state.direct.drawFurniture(context, directItems, FURNITURE_COLORS));
+          if (drawn !== furniture.length) return false;
+          state.directFurnitureFrames++;
+          state.directFurnitureCalls = (state.directFurnitureCalls || 0) + furniture.length;
+          state.furnitureCommands += drawn;
+          return true;
+        } catch (error) { state.directError = String(error && error.message || error); return false; }
+      };
+      state.drawWorldBarrels = (context, barrels, nowMs) => {
+        if (!state.active || !Array.isArray(barrels) || barrels.length > 16 || !Number.isFinite(nowMs) || nowMs < 0) return false;
+        if (!barrels.length) return true;
+        const directInput = worldBarrelDirectInputBuffer.subarray(0, barrels.length * 4);
+        for (let i = 0; i < barrels.length; i++) {
+          const barrel = barrels[i], offset = i * 4;
+          if (!barrel || !Number.isFinite(barrel.x) || !Number.isFinite(barrel.y) || !Number.isFinite(barrel.r) || barrel.r <= 0 || !Number.isFinite(barrel.t)) return false;
+          directInput[offset] = barrel.x; directInput[offset + 1] = barrel.y;
+          directInput[offset + 2] = barrel.r; directInput[offset + 3] = barrel.t;
+        }
+        if (state.directReady && state.direct && state.direct.drawWorldBarrels) {
+          try {
+            const drawn = withCanvasBypass(() => state.direct.drawWorldBarrels(context, directInput, nowMs, FURNITURE_COLORS));
+            if (drawn === barrels.length) {
+              state.worldBarrelCommands += drawn;
+              state.directWorldBarrelCalls = (state.directWorldBarrelCalls || 0) + drawn;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.drawWorldCameras = (context, cameras, alarmActive) => {
+        if (!state.active || !Array.isArray(cameras) || cameras.length > 8) return false;
+        if (!cameras.length) return true;
+        const directInput = worldCameraDirectInputBuffer.subarray(0, cameras.length * 30);
+        for (let i = 0; i < cameras.length; i++) {
+          const camera = cameras[i], offset = i * 30;
+          if (!camera || !Number.isFinite(camera.x) || !Number.isFinite(camera.y) || !Number.isFinite(camera.a) || !camera.poly || camera.poly.length < 26) return false;
+          directInput[offset] = camera.x; directInput[offset + 1] = camera.y;
+          directInput[offset + 2] = camera.a; directInput[offset + 3] = camera.hot > 0 || alarmActive ? 1 : 0;
+          for (let point = 0; point < 26; point++) {
+            if (!Number.isFinite(camera.poly[point])) return false;
+            directInput[offset + 4 + point] = camera.poly[point];
+          }
+        }
+        if (state.directReady && state.direct && state.direct.drawWorldCameras) {
+          try {
+            const drawn = withCanvasBypass(() => state.direct.drawWorldCameras(context, directInput, FURNITURE_COLORS));
+            if (drawn === cameras.length) {
+              state.worldCameraCommands += drawn;
+              state.directWorldCameraCalls = (state.directWorldCameraCalls || 0) + drawn;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.drawWorldEnemyAccents = (context, enemies, nowMs, playerX, playerY, baseAlpha = 1) => {
+        if (!state.active || !Array.isArray(enemies) || enemies.length > 256 || !Number.isFinite(nowMs) || nowMs < 0 ||
+            !Number.isFinite(playerX) || !Number.isFinite(playerY) || !Number.isFinite(baseAlpha) || baseAlpha < 0 || baseAlpha > 1) return false;
+        worldEnemyColors.length = 2;
+        const paletteIndex = color => {
+          let index = worldEnemyColors.indexOf(color);
+          if (index < 0) { index = worldEnemyColors.length; worldEnemyColors.push(color); }
+          return index;
+        };
+        let count = 0;
+        const directValues = worldEnemyDirectInputBuffer;
+        for (const enemy of enemies) {
+          if (!enemy || !enemy.cls || enemy.ko > 0 || Math.abs(enemy.x - playerX) >= 900 || Math.abs(enemy.y - playerY) >= 700) continue;
+          const definition = window.EXP && window.EXP.CLS && window.EXP.CLS[enemy.cls];
+          if (!definition || !definition.col) continue;
+          if (!Number.isFinite(enemy.x) || !Number.isFinite(enemy.y) || !Number.isFinite(enemy.r) || enemy.r <= 0) return false;
+          const boss = enemy.cls === 'boss', color = paletteIndex(definition.col);
+          const bossColor = paletteIndex(boss && enemy.boss && enemy.boss.col || definition.col);
+          const kind = enemy.cls === 'blindado' ? 1 : enemy.cls === 'lider' ? 2 : boss ? 3 : 0;
+          const offset = count * 13;
+          directValues[offset] = enemy.x; directValues[offset + 1] = enemy.y; directValues[offset + 2] = enemy.r;
+          directValues[offset + 3] = kind; directValues[offset + 4] = Number.isFinite(enemy.hp) ? enemy.hp : 0;
+          directValues[offset + 5] = Number.isFinite(enemy.a) ? enemy.a : 0;
+          directValues[offset + 6] = Number.isFinite(enemy.tele) ? enemy.tele : 0;
+          directValues[offset + 7] = enemy.sniper ? 1 : 0; directValues[offset + 8] = enemy.chS === 1 ? 1 : 0;
+          directValues[offset + 9] = Number.isFinite(enemy.chA) ? enemy.chA : 0;
+          directValues[offset + 10] = color; directValues[offset + 11] = bossColor; directValues[offset + 12] = baseAlpha;
+          count++;
+        }
+        if (!count) return true;
+        if (state.directReady && state.direct && state.direct.drawWorldEnemyAccents) {
+          try {
+            const input = directValues.subarray(0, count * 13);
+            const drawn = withCanvasBypass(() => state.direct.drawWorldEnemyAccents(context, input, count, nowMs, worldEnemyColors));
+            if (drawn === count) {
+              state.worldEnemyAccentCommands += drawn;
+              state.directWorldEnemyAccentCalls = (state.directWorldEnemyAccentCalls || 0) + drawn;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.drawFrameTransforms = (context, stage, screenShake, screenPower, screenRx, screenRy, kickX, kickY, shake, shakeScale, shakeRx, shakeRy, width, height, zoom, cameraX, cameraY) => {
+        if (stage !== 0 && stage !== 1 && stage !== 2 && stage !== 3 && stage !== 4) return false;
+        if (!state.active) return false;
+        if ((stage === 0 || stage === 1) && (!Number.isFinite(screenShake) || screenShake < 0 || !Number.isFinite(screenPower) || screenPower < 0 ||
+            !Number.isFinite(screenRx) || screenRx < 0 || screenRx > 1 || !Number.isFinite(screenRy) || screenRy < 0 || screenRy > 1 ||
+            !Number.isFinite(kickX) || !Number.isFinite(kickY) || !Number.isFinite(shake) || shake < 0 ||
+            !Number.isFinite(shakeScale) || shakeScale < 0 || !Number.isFinite(shakeRx) || shakeRx < 0 || shakeRx > 1 ||
+            !Number.isFinite(shakeRy) || shakeRy < 0 || shakeRy > 1)) return false;
+        if (stage === 2 && (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0 ||
+            !Number.isFinite(zoom) || zoom <= 0 || !Number.isFinite(cameraX) || !Number.isFinite(cameraY))) return false;
+        frameTransformInput.set([
+          screenShake, screenPower, screenRx, screenRy, kickX, kickY, shake, shakeScale, shakeRx, shakeRy,
+          width || 0, height || 0, zoom || 0, cameraX || 0, cameraY || 0
+        ]);
+        if (!state.directReady || !state.direct || !state.direct.drawFrameTransforms) return false;
+        try {
+          const drawn = withCanvasBypass(() => state.direct.drawFrameTransforms(context, stage, frameTransformInput));
+          if (drawn === true) {
+            state.directFrameTransformCalls++;
+            state.frameTransformCommands += stage === 0 ? (screenShake > 0 ? 2 : 1) : stage === 1 ? (shake > 0 && shakeScale > 0 ? 3 : 2) : stage === 2 ? 4 : 1;
+            return true;
+          }
+        } catch (error) { state.directError = String(error && error.message || error); }
+        return false;
+      };
+      state.drawGlass = (context, panels, shards, nowMs, baseAlpha) => {
+        if (!state.active || !Array.isArray(panels) || !Array.isArray(shards) || panels.length > 96 || shards.length > 160 || !Number.isFinite(nowMs) || nowMs < 0 ||
+            !Number.isFinite(baseAlpha) || baseAlpha < 0 || baseAlpha > 1) return false;
+        if (!state.directReady || !state.direct || !state.direct.drawGlass) return false;
+        const directPanels = new Float64Array(panels.length * 4);
+        for (let i = 0; i < panels.length; i++) {
+          const p = panels[i], o = i * 4;
+          if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y) || !Number.isFinite(p.w) || p.w <= 0 || !Number.isFinite(p.h) || p.h <= 0) return false;
+          directPanels[o] = p.x; directPanels[o + 1] = p.y; directPanels[o + 2] = p.w; directPanels[o + 3] = p.h;
+        }
+        const directShardValues = [];
+        for (const p of shards) if (p && p.on) {
+          if (![p.x, p.y, p.rot, p.life, p.max, p.s, p.c].every(Number.isFinite)) return false;
+          directShardValues.push(p.x, p.y, p.rot, p.life, p.max, p.s, p.c);
+        }
+        const directShards = new Float64Array(directShardValues);
+        try {
+          const drawn = withCanvasBypass(() => state.direct.drawGlass(context, directPanels, directShards, nowMs, baseAlpha, FURNITURE_COLORS));
+          if (drawn !== panels.length + directShards.length / 7) return false;
+          state.glassCommands += drawn;
+          state.directGlassCalls = (state.directGlassCalls || 0) + drawn;
+          return true;
+        } catch (error) { state.directError = String(error && error.message || error); return false; }
+      };
+      state.drawWeapon = (context, weapon) => {
+        if (!state.active) return false;
+        const ids = { punho: 0, taco: 1, faca: 2, smg: 3, escopeta: 4, rifle: 5, pistola: 6, revolver: 7,
+          uzi: 8, cano: 9, pe_de_cabra: 10, martelo: 11, pistola_aut: 12, magnum: 13, pump: 14, dupla: 15,
+          carabina: 16, sniper: 17, lmg: 18, katana: 19, machado: 20, garrafa: 21, extintor: 22, lanca: 23 };
+        const weaponId = ids[weapon] ?? 24;
+        if (state.directReady && state.direct && state.direct.drawWeaponIcon && weaponId <= 23) {
+          try {
+            if (withCanvasBypass(() => state.direct.drawWeaponIcon(context, weaponId, FURNITURE_COLORS))) {
+              state.directWeaponIconCalls++;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.drawDoors = (context, doors, doorImage) => {
+        if (!state.active || !Array.isArray(doors) || doors.length > 8192) return false;
+        if (!state.directReady || !state.direct || !state.direct.drawDoors) return false;
+        const input = new Float64Array(doors.length * 6);
+        for (let i = 0; i < doors.length; i++) {
+          const door = doors[i], offset = i * 6;
+          if (!door || ![door.x, door.y, door.w, door.h].every(Number.isFinite) || door.w <= 0 || door.h <= 0 || !Number.isFinite(door.th || 0)) return false;
+          input[offset] = door.x; input[offset + 1] = door.y; input[offset + 2] = door.w; input[offset + 3] = door.h;
+          input[offset + 4] = door.th || 0; input[offset + 5] = door.vert ? 1 : 0;
+        }
+        try {
+          const drawn = withCanvasBypass(() => state.direct.drawDoors(context, input, doorImage || null, FURNITURE_COLORS));
+          if (drawn !== doors.length) return false;
+          state.directDoorCalls += drawn; state.doorCommands += drawn;
+          return true;
+        } catch (error) { state.directError = String(error && error.message || error); return false; }
+      };
+      state.drawNeonDoors = (context, doors) => {
+        if (!state.active || !Array.isArray(doors) || doors.length > 8192) return false;
+        if (!state.directReady || !state.direct || !state.direct.drawNeonDoors) return false;
+        const spriteImages = [], spriteIndices = new Map(), input = new Float64Array(doors.length * 6);
+        for (let i = 0; i < doors.length; i++) {
+          const door = doors[i], offset = i * 6;
+          if (!door || ![door.px, door.py, door.baseAngle, door.swingAngle, door.ox, door.oy].every(Number.isFinite) || !door.image) return false;
+          let spriteIndex = spriteIndices.get(door.spriteKey);
+          if (spriteIndex === undefined) {
+            spriteIndex = spriteImages.length;
+            spriteIndices.set(door.spriteKey, spriteIndex);
+            spriteImages.push(door.image);
+          }
+          input[offset] = door.px; input[offset + 1] = door.py; input[offset + 2] = door.baseAngle + door.swingAngle;
+          input[offset + 3] = door.ox; input[offset + 4] = door.oy; input[offset + 5] = spriteIndex;
+        }
+        try {
+          const drawn = withCanvasBypass(() => state.direct.drawNeonDoors(context, input, spriteImages));
+          if (drawn !== doors.length) return false;
+          state.directNeonDoorCalls += drawn; state.doorCommands += drawn * 5;
+          return true;
+        } catch (error) { state.directError = String(error && error.message || error); return false; }
+      };
+      state.drawPlayerAura = (context, isP2, shadowsEnabled, glowEnabled) => {
+        if (!state.active || !context) return false;
+        if (!state.directReady || !state.direct || !state.direct.drawPlayerAura) return false;
+        try {
+          const drawn = withCanvasBypass(() => state.direct.drawPlayerAura(context, !!isP2, !!shadowsEnabled, !!glowEnabled));
+          if (drawn === true) { state.directPlayerAuraCalls++; return true; }
+        } catch (error) { state.directError = String(error && error.message || error); return false; }
+        return false;
+      };
+      state.drawPlayers = (players, context, playerSheet) => {
+        if (!state.active || !Array.isArray(players) || players.length > 3 || !context) return false;
+        const states = { idle: 0, walk: 1, run: 2, attack: 3 };
+        const weapons = { punho: 0, taco: 1, faca: 2, smg: 3, escopeta: 4, rifle: 5, pistola: 6, revolver: 7,
+          uzi: 8, cano: 9, pe_de_cabra: 10, martelo: 11, pistola_aut: 12, magnum: 13, pump: 14, dupla: 15,
+          carabina: 16, sniper: 17, lmg: 18, katana: 19, machado: 20, garrafa: 21, extintor: 22, lanca: 23 };
+        const sheet = playerSheet && playerSheet.complete && playerSheet.naturalWidth > 0 ? playerSheet : null;
+        const skinColors = [], playerIsP2 = [];
+        const directItems = new Float64Array(players.length * 8);
+        for (let i = 0; i < players.length; i++) {
+          const player = players[i], offset = i * 8;
+          directItems[offset] = Number.isFinite(player.x) ? player.x : 0;
+          directItems[offset + 1] = Number.isFinite(player.y) ? player.y : 0;
+          directItems[offset + 2] = Number.isFinite(player.angle) ? player.angle : 0;
+          directItems[offset + 3] = Number.isFinite(player.animation) ? player.animation : 0;
+          directItems[offset + 4] = Number.isFinite(player.attack) ? player.attack : 0;
+          directItems[offset + 5] = states[player.state] ?? 0;
+          const flags = (player.isP2 ? 1 : 0) | (player.shadows ? 2 : 0) | (player.glow ? 4 : 0)
+            | (sheet && player.skin ? 8 : 0);
+          directItems[offset + 6] = flags;
+          directItems[offset + 7] = weapons[player.weapon] ?? (player.weapon === 'punho' ? 0 : 24);
+          skinColors.push(player.skin ? player.skin.color : '#000', player.skin ? player.skin.detail : '#000');
+          playerIsP2.push(!!player.isP2);
+        }
+        if (!players.length) return true;
+        if (state.directReady && state.direct && state.direct.drawPlayers) {
+          try {
+            const drawn = withCanvasBypass(() => state.direct.drawPlayers(context, directItems, sheet || null,
+              players.map(player => player.frame), skinColors, FURNITURE_COLORS, ACTOR_COLORS));
+            if (drawn === players.length) {
+              state.directActorFrames++;
+              state.directPlayerBatchCalls++;
+              state.playerBodyCommands += drawn;
+              state.playerAuraCommands += players.reduce((total, player) => total + (player.glow ? 10 : 6), 0);
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.drawGhosts = (ghosts, context, weaponName) => {
+        if (!state.active || !Array.isArray(ghosts) || ghosts.length > 5 || !context) return false;
+        if (!ghosts.length) return true;
+        const directItems = new Float64Array(ghosts.length * 4);
+        for (let i = 0; i < ghosts.length; i++) {
+          const ghost = ghosts[i], offset = i * 4;
+          directItems[offset] = ghost.x; directItems[offset + 1] = ghost.y;
+          directItems[offset + 2] = ghost.a; directItems[offset + 3] = 0.06 + i * 0.04;
+        }
+        const weapons = { punho: 0, taco: 1, faca: 2, smg: 3, escopeta: 4, rifle: 5, pistola: 6, revolver: 7,
+          uzi: 8, cano: 9, pe_de_cabra: 10, martelo: 11, pistola_aut: 12, magnum: 13, pump: 14, dupla: 15,
+          carabina: 16, sniper: 17, lmg: 18, katana: 19, machado: 20, garrafa: 21, extintor: 22, lanca: 23 };
+        const weapon = weapons[weaponName] ?? 24;
+        if (state.directReady && state.direct && state.direct.drawGhosts) {
+          try {
+            const drawn = withCanvasBypass(() => state.direct.drawGhosts(context, directItems, weapon,
+              FURNITURE_COLORS, ACTOR_COLORS));
+            if (drawn === ghosts.length) {
+              state.directActorFrames++;
+              state.directGhostFrames++;
+              state.ghostCommands += drawn;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.drawPlayerFrame = (canvas, drawState, phase, attackFrame, sine, palette) => {
+        if (!state.active || palette.length !== 12) return false;
+        const packed = new Uint32Array(12);
+        for (let i = 0; i < palette.length; i++) {
+          const match = /^#([\da-f]{3}|[\da-f]{6})$/i.exec(palette[i]);
+          if (!match) return false;
+          const hex = match[1].length === 3 ? [...match[1]].map(ch => ch + ch).join('') : match[1];
+          packed[i] = parseInt(hex.slice(0, 2), 16) | parseInt(hex.slice(2, 4), 16) << 8 | parseInt(hex.slice(4, 6), 16) << 16 | 0xff000000;
+        }
+        const states = { idle: 0, walk: 1, run: 2, attack: 3 };
+        const draw = canvas.getContext('2d'), image = state.createCanvasImageData(draw, 24, 24);
+        if (!image) return false;
+        if (!state.forcePlayerFrameFallback && state.directReady && state.direct && state.direct.drawPlayerFrameRgba) {
+          try {
+            const created = withCanvasBypass(() => state.direct.drawPlayerFrameRgba(image.data, packed, states[drawState], phase >>> 0, attackFrame >>> 0, sine));
+            if (created && state.putCanvasImageData(draw, image, image.data, 24, 24)) {
+              state.directPlayerFrameCalls++;
+              state.playerFrames++;
+              return true;
+            }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return false;
+      };
+      state.selectPlayerSprite = (drawState, animation, attackRemaining) => {
+        if (!state.active) return null;
+        const states = { idle: 0, walk: 1, run: 2, attack: 3 };
+        if (states[drawState] === undefined) return null;
+        if (state.directReady && state.direct && state.direct.selectPlayerSprite) {
+          try {
+            const packed = state.direct.selectPlayerSprite(states[drawState], animation, attackRemaining);
+            if (Number.isInteger(packed)) { state.directSpriteSelectionCalls = (state.directSpriteSelectionCalls || 0) + 1; return [packed & 0xff, (packed >>> 8) & 0xff]; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return null;
+      };
+      state.selectEnemySprite = (moving, nowMs) => {
+        if (!state.active) return null;
+        if (state.directReady && state.direct && state.direct.selectEnemySprite) {
+          try {
+            const packed = state.direct.selectEnemySprite(!!moving, nowMs);
+            if (Number.isInteger(packed)) { state.directSpriteSelectionCalls = (state.directSpriteSelectionCalls || 0) + 1; return [packed & 0xff, (packed >>> 8) & 0xff]; }
+          } catch (error) { state.directError = String(error && error.message || error); }
+        }
+        return null;
+      };
+      state.active = true;
+      state.status = 'ready';
+      if (typeof CustomEvent === 'function') window.dispatchEvent(new CustomEvent('hm-wasm-renderer-ready', { detail: { version: 'v288.0-pause-summary-rust' } }));
+      showStatus();
+      console.info('[Cappe WASM] piso, granulado, sombras, rejunte e FTILES usam o módulo Rust direto; sem ele, o Canvas original do jogo assume a camada. Outras partes do renderizador ainda estão em migração.');
+    } catch (error) {
+      state.status = 'fallback';
+      console.error('[Cappe WASM] módulo indisponível; usando o caminho Canvas original.', error);
+    }
+  })();
+})();
