@@ -10,7 +10,7 @@ Teste a compressão com `node tests/compression-regression.cjs`; a regressão pr
 
 Faíscas agora copiam os dados do TypedArray para um buffer Rust reutilizado, classificam cada partícula uma vez e reaproveitam seis grupos de opacidade por cor. O código não cria mais um segundo TypedArray de comandos a cada quadro nem lê cada elemento do TypedArray de origem repetidamente pela ponte JavaScript/WASM. O fallback Web também agrupa as faíscas em uma passagem.
 
-A regressão Chrome compara 506 faíscas no painter Rust e no Canvas: zero canais de pixel diferentes, com contagem e estado do contexto preservados. A suíte principal passou em 107/107. No GitHub Actions, três amostras com 120 inimigos e 500 faíscas reduziram o p90 mediano de update+draw de 10,4 ms para 9,4 ms no Rust/WASM (runner Ubuntu/Chrome). É um teste de estresse local do runner, não uma garantia em outros PCs.
+A regressão Chrome compara 506 faíscas no painter Rust e no Canvas: zero canais de pixel diferentes, com contagem e estado do contexto preservados. A suíte principal passou em 107/107. No GitHub Actions, três amostras com 120 inimigos e 500 faíscas mediram p90 de update+draw de 5,5 ms para 5,8 ms no Rust/WASM, uma pequena regressão neste cenário. A versão Web, no mesmo runner Ubuntu/Chrome, caiu de 5,1 para 4,3 ms. Build, paridade de pixels das 506 faíscas e 107/107 regressões passaram. O agrupamento reduz cópias e alocações na ponte, mas o perfil de tempo não mostra ganho no Rust neste teste; a otimização dessa rota deve continuar. Medições do runner não garantem FPS em outros PCs.
 
 ## Experimento local Rust/WASM
 
