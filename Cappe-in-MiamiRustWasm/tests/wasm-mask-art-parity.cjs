@@ -11,7 +11,9 @@ const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'cappe-wasm-mask-art-'));
 const server = createGameServer();
 const source = fs.readFileSync(path.join(process.cwd(), 'js/exp-content.js'), 'utf8');
 const start = source.indexOf('  function makeMaskArt(sp) {');
-const end = source.indexOf('\n\n  // fx novos reconhecidos pela expansão', start);
+// Aceita LF e CRLF: o teste compara o painter legado e não deve depender do
+// estilo de quebra de linha usado no checkout do projeto.
+const end = source.indexOf('  // fx novos reconhecidos pela expansão', start);
 if (start < 0 || end < 0) throw Error('makeMaskArt source range not found');
 const legacyFunction = source.slice(start, end).trim().replace(/^function /, 'function ');
 let chrome, ws;
