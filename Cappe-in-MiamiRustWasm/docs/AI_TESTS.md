@@ -1121,3 +1121,6 @@ Limitação: o teste automatizado não reproduz exatamente o hardware do usuári
 ## v318 / Web v102 — 10/11/2026
 Após a composição adaptativa, `node tests/regression.cjs` passou em **118/118**; os testes Web de compressão e partículas também passaram. Chromium em estresse com 120 inimigos e 500 partículas registrou tier 1, p95 de trabalho 2,0 ms e p95 de cadência 16,7 ms depois da adaptação.
 
+## v319 / Web v103 — 10/11/2026
+`node tests/regression.cjs`: **118/118 PASS** após a reescrita da campanha. A quantidade de capítulos e os IDs de mapa permanecem compatíveis; o primeiro capítulo usa o novo texto de Sinal de Maré.
+

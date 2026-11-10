@@ -204,7 +204,7 @@ button { touch-action: manipulation; }
     <canvas id="c" width="960" height="600" aria-label="Área do jogo"></canvas>
 
     <section id="menu" class="overlay">
-      <p class="tag">Miami, 1989 · v53</p>
+      <p class="tag">Miami, 1996 · v319</p>
       <h1>Cappe-in-Miami</h1>
       <p class="bemvindo">Seja bem-vindo!</p>
       <p class="credito">Feito por <strong>Victor Cappellesso</strong> e <strong>Davi Gehart</strong></p>
@@ -590,6 +590,35 @@ const STORY = [
   { t: 'Expansão 11 · Fliperama', m: null, neon: 'rmEurogamer', txt: 'Entre as máquinas de jogos, alguém vende informação. O preço é alto.' },
   { t: 'Expansão 12 · Restaurante', m: null, neon: 'rmNoodleShop', txt: 'Um restaurante vazio, mas a cozinha esconde gente armada. A pista do ouro termina aqui.' },
 ];
+const STORY_PLOT = [
+  ['Abertura · Porto de Biscayne · 1996', 'Cappe conserta equipamentos de transmissão e recebe um pedido de Iara Vale, engenheira de rádio. Um apagão sincronizado deixou bairros inteiros sem comunicação. No terminal abandonado, ele encontra o primeiro fragmento do projeto Sinal de Maré.'],
+  ['Capítulo 2 · Loja de componentes', 'O fragmento aponta para uma loja de peças eletrônicas fora do registro. O inventário marca frequências à mão, mas a equipe de segurança chega para apagar a pista.'],
+  ['Capítulo 3 · Estúdio de imagem', 'Antenas escondidas atrás dos cenários revelam sinais que imitam alertas públicos. A diretora Nara Salles explica que alguém está movendo pessoas e veículos por mensagens falsas.'],
+  ['Capítulo 4 · Academia sem luz', 'Sob a academia existe um retransmissor alimentado por baterias industriais. Recupere o módulo de controle antes que ele seja transferido para outro bairro.'],
+  ['Capítulo 5 · Hotel Coral', 'Os elevadores repetem uma mensagem falsa em andares diferentes. A planta da rede está no cofre da cobertura, protegido por técnicos armados.'],
+  ['Capítulo 6 · Linha cruzada', 'A central telefônica roteia chamadas para números inexistentes. Iara guia Cappe por uma linha de manutenção enquanto uma equipe tenta cortar o último cabo funcional.'],
+  ['Capítulo 7 · Frequência vermelha', 'A boate funciona como estação de escuta. A música cobre os transmissores do subsolo, onde uma gravação mostra que os apagões seguem o mapa das marés.'],
+  ['Capítulo 8 · Hospital de campanha', 'O hospital abandonado virou abrigo improvisado. Os responsáveis levaram o gerador e deixaram sensores ativos para detectar quem se aproxima.'],
+  ['Capítulo 9 · Garagem de serviço', 'Uma van carregada de baterias está prestes a sair. O registrador de rotas revela que os transmissores pertencem a uma empresa de segurança de infraestrutura.'],
+  ['Capítulo 10 · Estação noturna', 'O trem de manutenção transporta o relógio central que sincroniza os sinais. Chegue ao painel antes da próxima janela de transmissão.'],
+  ['Capítulo 11 · Arquivo municipal', 'Alertas falsos foram usados para desviar ambulâncias e equipes de reparo. A inspetora Lia Richter precisa recuperar o livro de autorizações guardado no prédio.'],
+  ['Capítulo 12 · Casa de controle', 'A antiga casa costeira pertence à empresa que administra as antenas. O diretor mantém ali a chave do projeto e ordena que os registros sejam destruídos.'],
+  ['Capítulo 13 · Fliperama de bairro', 'As máquinas viraram terminais de diagnóstico. Um cartucho escondido contém o mapa da rede e indica uma central subterrânea sob o distrito industrial.'],
+  ['Capítulo 14 · A central', 'A central quer desligar a cidade para vender um novo sistema de emergência. Cappe pode destruir o transmissor, preservar as provas ou transmitir tudo aos moradores.'],
+  ['Expansão 1 · Hospital · entrada', 'Um sensor voltou a emitir o sinal errado. Desative o repetidor sem interromper a energia dos abrigos.'],
+  ['Expansão 2 · Hospital · andar superior', 'Os monitores exibem bairros que ainda não sofreram apagão. Recupere os dados antes que a equipe de limpeza apague o diagnóstico.'],
+  ['Expansão 3 · Hotel · suíte técnica', 'A suíte abriga um servidor portátil com as credenciais usadas para falsificar avisos de evacuação.'],
+  ['Expansão 4 · Casa de controle · salão', 'O conselho decide qual bairro perderá energia primeiro. A planta de antenas está atrás de uma porta reforçada.'],
+  ['Expansão 5 · Arquivo · térreo', 'A equipe tenta retirar documentos do arquivo. Proteja o livro de autorizações e leve-o para Lia.'],
+  ['Expansão 6 · Arquivo · terceiro andar', 'Uma pasta com o nome de cada bairro foi preparada para o próximo apagão. O cronograma começa em menos de uma hora.'],
+  ['Expansão 7 · Clube · pista', 'As caixas de som escondem antenas direcionais. Localize o painel que mantém a cobertura clandestina.'],
+  ['Expansão 8 · Clube · cobertura', 'A diretora da operação tenta enviar o comando final. Interrompa a transmissão e preserve a gravação.'],
+  ['Expansão 9 · Unidade tática · térreo', 'Uma unidade recebeu coordenadas falsas. Mostre a rota correta e abra caminho até o rádio de comando.'],
+  ['Expansão 10 · Estação de trem', 'O último trem leva o relógio central. Recupere o sincronizador antes que ele seja conectado ao transmissor costeiro.'],
+  ['Expansão 11 · Fliperama', 'O cartucho original está prestes a ser sobrescrito. Salve o arquivo e descubra quem autorizou o projeto.'],
+  ['Expansão 12 · Restaurante', 'A cozinha esconde a última antena portátil. Quando ela cair, a cidade poderá ouvir a verdade sobre os apagões.'],
+];
+STORY.forEach((entry, i) => { entry.t = STORY_PLOT[i][0]; entry.txt = STORY_PLOT[i][1]; });
 
 
 </script>
@@ -1548,8 +1577,8 @@ function refreshLocks() { [...grade.children].forEach((b, i) => { const lk = MAS
 function endStory() {
   st = 'win'; [menu, masc, fim].forEach(e => e.classList.add('oculto'));
   if (dif === 'hardcore') { try { localStorage.setItem('hm_unlock', '1'); } catch (e) {} $('histTxt').textContent += ' Você desbloqueou as máscaras Capacete e Barbudo!'; }
-  $('histNum').textContent = 'FIM'; $('histT').textContent = 'Miami, 1989';
-  $('histTxt').textContent = 'A história de Cappe termina aqui. Madame Piranha perdeu o porto, e a cidade ainda não sabe quem ficou com o ouro.';
+  $('histNum').textContent = 'FIM'; $('histT').textContent = 'Sinal de Maré · transmissão final';
+  $('histTxt').textContent = 'A rede foi interrompida. Os registros foram preservados e os moradores finalmente puderam ouvir o que aconteceu com seus bairros.';
   $('histgo').textContent = 'Voltar ao lobby'; $('historia').classList.remove('oculto');
 }
 function toMenu() {
@@ -2003,7 +2032,7 @@ function drawStun(e) {
   tx('ATORDOADO', e.x, e.y - 34, '#ffd23f', 'bold 11px Impact, sans-serif', 'center');
 }
 
-// ============ MAPAS ORIGINAIS (maps.js do Hotline Neon) ============
+// ============ MAPAS NEON (catálogo de ambientes do jogo) ============
 // Allowlist explícita; dimensões internas continuam sendo usadas para renderização e colisões.
 const NEON_ALLOWED_MAP_NAMES = Object.freeze([
   'rmApartment1Upstairs', 'rmApartment2Entrance', 'rmApartment2Upstairs', 'rmArcadeDownstairs', 'rmArcadeUpstairs',

@@ -1058,3 +1058,9 @@ Riscos/limites: partidas e instalação real do SW ainda não validadas; leitura
 - Em Chromium com 120 inimigos, IA visível e 500 partículas, o p95 de trabalho caiu para 2,0 ms após adaptação e a cadência ficou em 16,7 ms.
 - Suíte Rust/WASM: 118/118; compressão e partículas Web passaram.
 
+## v319 / Web v103 — 10/11/2026 — narrativa original
+- A campanha foi reescrita como **Sinal de Maré**: Cappe investiga apagões coordenados, transmissores clandestinos e sabotagem de infraestrutura.
+- Personagens, conflito, objetivos, capítulos e final foram substituídos; os IDs e a ordem dos mapas foram preservados para manter a campanha e os saves compatíveis.
+- A interface e a documentação agora usam 1996 e a nova premissa. A alteração reduz semelhanças narrativas com referências externas, mas não constitui parecer jurídico.
+- Regressão Rust/WASM: 118/118; os testes Web de compressão e partículas permanecem aprovados.
+
