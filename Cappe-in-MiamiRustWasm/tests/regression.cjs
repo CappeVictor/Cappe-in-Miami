@@ -198,7 +198,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v316.0-neon-start-race-fix');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v317.0-performance-governor');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -931,13 +931,13 @@ async function run() {
     assert.match(html,/jogar.*EXP\.MULTI\.enabled = false/);assert.match(ui,/jogar.*EXP\.MULTI\.enabled = false/);
     assert.match(html,/EXP\.MULTI\.P2 = null/);assert.match(ui,/EXP\.MULTI\.P2 = null/);
   });
-  await test('Otimização não força escala 2x nem desenha partículas com saves separados', () => {
+  await test('Otimização limita escala automática e não desenha partículas com saves separados', () => {
     const ui=read('js/exp-ui.js'),html=read('index.html');
-    assert.match(ui,/Math\.min\(1\.5, Math\.max\(1\.1/);assert.match(html,/ctx\.fillStyle = '#c8b8ff'; ctx\.beginPath\(\)/);assert.match(html,/if \(shellParticles\.length\) \{/);
+    assert.match(ui,/Math\.min\(1\.25, Math\.max\(1/);assert.match(ui,/tier >= 2 \? \.64 : tier >= 1 \? \.82/);assert.match(html,/ctx\.fillStyle = '#c8b8ff'; ctx\.beginPath\(\)/);assert.match(html,/if \(shellParticles\.length\) \{/);
   });
   await test('Governador de desempenho usa tempo de quadro real e reduz efeitos sem trocar preferências', () => {
     const html=read('index.html'),fx=read('js/exp-fx.js');
-    assert.match(html,/const rawDt = Math\.max/);assert.match(html,/perfSamples\.push\(\{ work: performance\.now\(\) - frameStart, gap: frameGap \}\)/);assert.doesNotMatch(html,/perfSamples\.push\(rawDt\)/);assert.match(html,/window\.EXP\.perfTier = tier/);assert.match(html,/function perfTierFor\(p90WorkMs, p90FrameMs, fpsLimit\)/);assert.match(html,/const p90 = values => values\.sort\(\(a, b\) => a - b\)\[Math\.floor\(\(values\.length - 1\) \* \.9\)\]/);
+    assert.match(html,/const rawDt = Math\.max/);assert.match(html,/perfSamples\.push\(\{ work: performance\.now\(\) - frameStart, gap: frameGap \}\)/);assert.doesNotMatch(html,/perfSamples\.push\(rawDt\)/);assert.match(html,/window\.EXP\.perfTier = tier/);assert.match(html,/function perfTierFor\(p90WorkMs, p90FrameMs, fpsLimit\)/);assert.match(html,/perfSamples\.length >= 90/);assert.match(html,/const currentTier = Math\.max\(0, Math\.min\(2/);assert.match(html,/const p90 = values => values\.sort\(\(a, b\) => a - b\)\[Math\.floor\(\(values\.length - 1\) \* \.9\)\]/);
     const tierFn=html.match(/function perfTierFor\(p90WorkMs, p90FrameMs, fpsLimit\) \{[\s\S]*?\n\}/)?.[0];assert.ok(tierFn);const tier=Function(tierFn+';return perfTierFor')();
     assert.equal(tier(1,16.7,60),0);assert.equal(tier(1,33.3,30),0);assert.equal(tier(1,33.3,60),1);assert.equal(tier(40,16,30),2);
     assert.match(html,/tier >= 1 \? \.55/);assert.match(fx,/EXP\.perfTier >= 1 \? 2 : 1/);assert.match(fx,/EXP\.perfTier < 2/);
@@ -1223,7 +1223,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v316.0-neon-start-race-fix');
+    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v317.0-performance-governor');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));

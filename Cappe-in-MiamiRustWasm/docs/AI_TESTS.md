@@ -1111,3 +1111,10 @@ As rotas foram testadas sem socket por causa da política que bloqueia loopback 
 - `node tests/wasm-renderer-residual-audit.cjs`: menu, gameplay, pausa, morte, resumo, resultado, vitória, briefing, dificuldade, seleção de máscara, opções e expansão UI não registraram chamadas Canvas host. A amostra não cobre todos os eventos ou modos.
 - `node tests/wasm-renderer.cjs` e `node tests/wasm-renderer-browser.cjs`: passaram. Sem benchmark FPS, sessão longa ou revisão visual ampla.
 
+## v317 / Web v101 — 10/11/2026
+`node tests/regression.cjs`: **118/118 PASS**. `node ../Cappe-in-MiamiWeb/tests/compression-regression.cjs` e `particles-regression.cjs` passaram.
+
+O teste de navegador foi executado nas duas versões com Chromium. A Web terminou com tier 1, canvas 984×615, p90 de trabalho 0,8 ms e p90 de cadência 16,7 ms. Rust/WASM terminou com tier 2, canvas 768×480, p90 de trabalho 1,9 ms e p90 de cadência 16,7 ms. Em estresse com 80 inimigos, IA visível e 400 partículas, Rust/WASM ficou em p95 de trabalho de 2,2 ms após adaptação.
+
+Limitação: o teste automatizado não reproduz exatamente o hardware do usuário, não mede consumo de GPU do notebook e não substitui uma sessão manual longa.
+

@@ -1046,3 +1046,10 @@ Riscos/limites: partidas e instalação real do SW ainda não validadas; leitura
 - Build passou; regressões 105/105, ABI (114 exports/107 imports), browser bridge, paridade direta e auditoria Chrome passaram. 23 cenas/estados amostrados não registraram chamadas Canvas do host. Paredes da Campanha e pisos/tile em canvases de 1440×900 e 1456×1148 tiveram paridade pixel a pixel exata.
 - Não houve benchmark FPS nem revisão visual ampla; o fallback continua para falhas e situações não exercitadas. Não publicado no GitHub.
 
+## v317 / Web v101 — 10/11/2026 — desempenho adaptativo
+- O modo automático limita a escala interna do Canvas a 1,25×; antes podia chegar a 1,5× em telas de alta densidade.
+- A escala adaptativa usa 0,82× no primeiro nível e 0,64× no segundo. O governador mede 90 quadros e pode fazer uma segunda avaliação quando o nível 1 não resolve a queda.
+- A escolha manual de resolução e o preset `max` continuam sendo respeitados.
+- Chromium local: Web chegou a p90 de 16,7 ms após adaptação; Rust/WASM chegou a p90 de 16,7 ms e 768×480 no nível 2. Cena pesada com 80 inimigos e 400 partículas ficou em p95 de trabalho de 2,2 ms após adaptação.
+- Suíte Rust/WASM: 118/118; compressão e partículas Web passaram. A medição depende do navegador e do hardware e não garante FPS fixo no notebook.
+

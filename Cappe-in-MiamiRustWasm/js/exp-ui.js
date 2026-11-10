@@ -195,8 +195,10 @@
     const forced = (typeof CFG !== 'undefined' && CFG.res && CFG.res !== 'auto') ? +CFG.res : 0;
     // Escala automática limitada: 2x quadruplica pixels em telas de alta densidade e causa quedas de FPS.
     const tier = Math.max(0, Math.min(2, Number(EXP.perfTier) || 0));
-    const baseK = forced || (CFG.gfx === 'max' ? 1 : Math.min(1.5, Math.max(1.1, (r.width * dpr) / W)));
-    const k = forced ? baseK : baseK * (tier >= 2 ? .72 : tier >= 1 ? .88 : 1);
+    // O modo automático prioriza frame time: em telas HiDPI, 1.5x multiplica
+    // o custo de todos os layers Canvas/WASM sem melhorar a leitura durante o combate.
+    const baseK = forced || (CFG.gfx === 'max' ? 1 : Math.min(1.25, Math.max(1, (r.width * dpr) / W)));
+    const k = forced ? baseK : baseK * (tier >= 2 ? .64 : tier >= 1 ? .82 : 1);
     const nw = Math.round(W * k), nh = Math.round(H * k);
     if (cv.width !== nw || cv.height !== nh) { cv.width = nw; cv.height = nh; }
     cv.style.imageRendering = 'auto';

@@ -568,3 +568,8 @@ O agrupamento Canvas de faíscas usa índices encadeados em um buffer `Int32Arra
 
 Corrigido um erro de inicialização: exp-world.js podia executar antes de TILE_LEVELS estar disponível porque o catálogo Neon é carregado de forma lazy. As fases em tiles agora ficam em js/tile-levels.js, carregado antes dos modos; js/maps.js continua lazy para preservar o carregamento inicial dos mapas Neon. Regressões Rust/WASM: 118/118; auditoria de cenas WASM passou. Não é uma medição de FPS.
 
+## v317 / Web v101 — 10/11/2026
+O gargalo foi medido no Chromium com a ferramenta `tests/browser-performance.cjs`. A escala automática anterior permitia 1,5× e o governador tomava uma única decisão após 120 quadros. Agora o limite é 1,25×, com níveis 0,82× e 0,64×; a janela é de 90 quadros e permite uma segunda redução se a primeira continuar insuficiente.
+
+Resultados locais após a alteração: Web, p90 de intervalo RAF 16,7 ms e p90 de trabalho 0,8 ms; Rust/WASM, p90 de intervalo RAF 16,7 ms e p90 de trabalho 1,9 ms, com canvas final 768×480 no nível 2. Em cena pesada Rust/WASM com 80 inimigos, IA visível e 400 faíscas, p95 de trabalho após adaptação foi 2,2 ms. O Chrome headless usado pelo teste tem cadência própria; esses números servem para comparar a mudança e não representam o notebook do usuário.
+
