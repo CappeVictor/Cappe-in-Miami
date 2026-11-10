@@ -19,8 +19,8 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
-- **Web — HTML, CSS e JavaScript v97:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — v313:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v313-preview.zip)
+- **Web — HTML, CSS e JavaScript v98:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
+- **Rust/WASM — v314:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v314-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
@@ -28,6 +28,6 @@ Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. 
 
 A prévia v313 mantém painters Rust/WebSys diretos para as camadas amostradas de gameplay, incluindo Campanha, Horda e Invasão. O antigo trampoline Canvas deixou de ser compilado, servido e pré-cacheado. A auditoria instrumentada não encontrou chamadas Canvas do host em 23 cenas/estados amostrados. Os painters Canvas permanecem como fallback; lógica, simulação, aleatoriedade e seleção/cache de assets seguem em JavaScript. O pool de pontos de rota da IA reduz objetos temporários em um microbenchmark sintético; não há ganho de frame time medido.
 
-## Última atualização — 9 de novembro de 2026 · Web v97 e Rust/WASM v313
+## Última atualização — 9 de novembro de 2026 · Web v98 e Rust/WASM v314
 
-Os ícones de armas receberam acabamento procedural: ranhuras e brilhos no metal, veios na madeira, detalhes da mira e reflexos em vidro. A mesma composição visual está implementada em Canvas e no painter Rust/WASM. A estrutura mantém as edições Web e Rust/WASM em pastas próprias.
+Correção de bug: os dados das fases em tiles agora carregam antes dos modos de campanha nas duas versões. A progressão não inicia mais com TILE_LEVELS ausente. Regressões Rust/WASM: 118/118; auditoria de cenas WASM, partículas Web e compressão passaram.
