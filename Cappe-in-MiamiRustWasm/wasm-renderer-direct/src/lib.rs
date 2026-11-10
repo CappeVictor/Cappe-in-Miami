@@ -3807,6 +3807,180 @@ pub fn draw_glass_direct(
     )
 }
 
+fn weapon_texture(context: &CanvasRenderingContext2d, id: u32) -> Result<(), JsValue> {
+    context.save();
+    let painted = (|| -> Result<(), JsValue> {
+        context.set_shadow_blur(0.0);
+        context.set_shadow_offset_x(0.0);
+        context.set_shadow_offset_y(0.0);
+        context.set_line_width(0.8);
+        context.set_line_cap("round");
+        if matches!(id, 6 | 7 | 12 | 13) {
+            context.set_stroke_style_str("rgba(255,255,255,.72)");
+            context.begin_path();
+            context.move_to(8.0, -2.2);
+            context.line_to(20.0, -2.2);
+            context.stroke();
+            context.set_stroke_style_str("rgba(5,8,13,.72)");
+            context.begin_path();
+            context.move_to(20.0, -0.7);
+            context.line_to(25.0, -0.7);
+            context.stroke();
+            context.set_fill_style_str("rgba(8,11,17,.78)");
+            context.begin_path();
+            context.arc(11.0, 1.0, 0.8, 0.0, 6.28)?;
+            context.fill();
+            context.set_fill_style_str("rgba(255,255,255,.72)");
+            context.begin_path();
+            context.arc(11.0, 0.7, 0.32, 0.0, 6.28)?;
+            context.fill();
+            context.set_stroke_style_str("rgba(5,8,13,.8)");
+            context.begin_path();
+            context.move_to(15.0, 5.0);
+            context.line_to(16.0, 8.0);
+            context.move_to(18.0, 5.0);
+            context.line_to(19.0, 8.0);
+            context.stroke();
+        }
+        if matches!(id, 3 | 8 | 18) {
+            context.set_stroke_style_str("rgba(255,255,255,.62)");
+            context.begin_path();
+            context.move_to(8.0, -2.4);
+            context.line_to(25.0, -2.4);
+            context.stroke();
+            context.set_stroke_style_str("rgba(5,8,13,.8)");
+            context.begin_path();
+            context.move_to(25.0, -1.0);
+            context.line_to(31.0, -1.0);
+            context.move_to(27.0, 0.0);
+            context.line_to(27.0, 1.0);
+            context.move_to(30.0, 0.0);
+            context.line_to(30.0, 1.0);
+            context.stroke();
+            context.set_fill_style_str("rgba(8,11,17,.78)");
+            context.begin_path();
+            context.arc(8.0, 0.0, 0.8, 0.0, 6.28)?;
+            context.fill();
+            context.begin_path();
+            context.arc(23.0, 1.0, 0.8, 0.0, 6.28)?;
+            context.fill();
+            context.set_stroke_style_str("rgba(255,255,255,.34)");
+            context.begin_path();
+            context.move_to(13.0, 5.0);
+            context.line_to(14.0, 9.0);
+            context.move_to(16.0, 5.0);
+            context.line_to(17.0, 9.0);
+            context.stroke();
+        }
+        if matches!(id, 4 | 5 | 14 | 15 | 16 | 17 | 18) {
+            context.set_stroke_style_str("rgba(255,255,255,.58)");
+            context.begin_path();
+            context.move_to(22.0, -1.7);
+            context.line_to(if id == 17 { 53.0 } else { 45.0 }, -1.7);
+            context.stroke();
+            context.set_stroke_style_str("rgba(4,7,12,.64)");
+            context.begin_path();
+            context.move_to(24.0, 1.3);
+            context.line_to(if id == 17 { 54.0 } else { 46.0 }, 1.3);
+            context.stroke();
+        }
+        if matches!(id, 1 | 4 | 5 | 11 | 14 | 15 | 17 | 20) {
+            context.set_stroke_style_str("rgba(255,218,153,.58)");
+            context.begin_path();
+            context.move_to(7.0, -1.0);
+            context.line_to(13.0, -1.0);
+            context.move_to(9.0, 1.0);
+            context.line_to(16.0, 1.0);
+            context.stroke();
+            context.set_stroke_style_str("rgba(48,27,11,.54)");
+            context.begin_path();
+            context.move_to(11.0, 2.0);
+            context.line_to(17.0, 2.0);
+            context.stroke();
+        }
+        if id == 17 {
+            context.set_stroke_style_str("rgba(255,255,255,.68)");
+            context.begin_path();
+            context.move_to(17.0, -7.0);
+            context.line_to(27.0, -7.0);
+            context.move_to(21.0, -8.0);
+            context.line_to(21.0, -5.0);
+            context.stroke();
+            context.set_fill_style_str("rgba(8,11,17,.88)");
+            context.begin_path();
+            context.arc(17.0, -6.0, 1.0, 0.0, 6.28)?;
+            context.fill();
+            context.begin_path();
+            context.arc(27.0, -6.0, 1.0, 0.0, 6.28)?;
+            context.fill();
+        }
+        if matches!(id, 2 | 10 | 19) {
+            context.set_stroke_style_str("rgba(255,255,255,.82)");
+            context.begin_path();
+            context.move_to(12.0, -1.5);
+            context.line_to(if id == 19 { 49.0 } else { 31.0 }, -0.5);
+            context.stroke();
+            context.set_stroke_style_str("rgba(38,48,60,.55)");
+            context.begin_path();
+            context.move_to(15.0, 1.5);
+            context.line_to(if id == 19 { 48.0 } else { 29.0 }, 1.0);
+            context.stroke();
+        }
+        if matches!(id, 9 | 22 | 23) {
+            context.set_stroke_style_str("rgba(255,255,255,.72)");
+            context.begin_path();
+            context.move_to(12.0, -2.0);
+            context.line_to(34.0, -2.0);
+            context.stroke();
+            context.set_stroke_style_str("rgba(4,7,12,.68)");
+            context.begin_path();
+            context.move_to(35.0, -2.0);
+            context.line_to(35.0, 2.0);
+            context.move_to(38.0, -2.0);
+            context.line_to(38.0, 2.0);
+            context.stroke();
+        }
+        if id == 21 {
+            context.set_stroke_style_str("rgba(228,255,235,.86)");
+            context.begin_path();
+            context.move_to(8.0, -1.5);
+            context.line_to(13.0, -1.5);
+            context.move_to(24.0, -1.0);
+            context.line_to(30.0, -1.0);
+            context.stroke();
+            context.set_fill_style_str("rgba(255,255,255,.62)");
+            context.fill_rect(17.0, -2.0, 1.0, 4.0);
+        }
+        if id == 22 {
+            context.set_stroke_style_str("rgba(255,255,255,.78)");
+            context.begin_path();
+            context.move_to(12.0, -4.0);
+            context.line_to(24.0, -4.0);
+            context.move_to(12.0, 4.0);
+            context.line_to(24.0, 4.0);
+            context.stroke();
+            context.set_fill_style_str("rgba(255,224,170,.95)");
+            context.fill_rect(17.0, -2.0, 5.0, 4.0);
+        }
+        if id == 23 {
+            context.set_stroke_style_str("rgba(255,255,255,.6)");
+            context.begin_path();
+            context.move_to(8.0, -2.0);
+            context.line_to(19.0, -2.0);
+            context.move_to(8.0, 2.0);
+            context.line_to(19.0, 2.0);
+            context.stroke();
+            context.set_fill_style_str("rgba(6,9,14,.8)");
+            context.begin_path();
+            context.arc(22.0, 0.0, 1.0, 0.0, 6.28)?;
+            context.fill();
+        }
+        Ok(())
+    })();
+    context.restore();
+    painted
+}
+
 fn finish_weapon_icon(
     context: &CanvasRenderingContext2d,
     colors: &Array,
@@ -3853,6 +4027,7 @@ fn finish_weapon_icon(
             context.arc(cx, 0.0, 1.2, 0.0, 6.28)?;
             context.stroke();
         }
+        weapon_texture(context, id)?;
         Ok(())
     })();
     context.restore();
@@ -4088,9 +4263,6 @@ pub fn draw_weapon_icon_direct(
             }
         }
         finish_weapon_icon(context, colors, id)?;
-        if id == 23 {
-            finish_weapon_icon(context, colors, id)?;
-        }
         Ok(())
     })();
     context.restore();

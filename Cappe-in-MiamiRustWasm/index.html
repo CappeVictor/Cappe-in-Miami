@@ -2662,6 +2662,56 @@ function weaponFinish(g, w) {
     g.fillStyle = '#171b22'; g.beginPath(); g.arc(w === 'dupla' ? 40 : 48, 0, 2.2, 0, 6.28); g.fill();
     g.strokeStyle = 'rgba(230,240,250,.7)'; g.beginPath(); g.arc(w === 'dupla' ? 40 : 48, 0, 1.2, 0, 6.28); g.stroke();
   }
+  weaponTexture(g, w);
+  g.restore();
+}
+function weaponTexture(g, w) {
+  g.save(); g.shadowBlur = 0; g.shadowOffsetX = 0; g.shadowOffsetY = 0; g.lineWidth = .8; g.lineCap = 'round';
+  if (w === 'pistola' || w === 'pistola_aut' || w === 'revolver' || w === 'magnum') {
+    g.strokeStyle = 'rgba(255,255,255,.72)'; g.beginPath(); g.moveTo(8, -2.2); g.lineTo(20, -2.2); g.stroke();
+    g.strokeStyle = 'rgba(5,8,13,.72)'; g.beginPath(); g.moveTo(20, -.7); g.lineTo(25, -.7); g.stroke();
+    g.fillStyle = 'rgba(8,11,17,.78)'; g.beginPath(); g.arc(11, 1, .8, 0, 6.28); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.72)'; g.beginPath(); g.arc(11, .7, .32, 0, 6.28); g.fill();
+    g.strokeStyle = 'rgba(5,8,13,.8)'; g.beginPath(); g.moveTo(15, 5); g.lineTo(16, 8); g.moveTo(18, 5); g.lineTo(19, 8); g.stroke();
+  }
+  if (w === 'smg' || w === 'uzi' || w === 'lmg') {
+    g.strokeStyle = 'rgba(255,255,255,.62)'; g.beginPath(); g.moveTo(8, -2.4); g.lineTo(25, -2.4); g.stroke();
+    g.strokeStyle = 'rgba(5,8,13,.8)'; g.beginPath(); g.moveTo(25, -1); g.lineTo(31, -1); g.moveTo(27, 0); g.lineTo(27, 1); g.moveTo(30, 0); g.lineTo(30, 1); g.stroke();
+    g.fillStyle = 'rgba(8,11,17,.78)'; g.beginPath(); g.arc(8, 0, .8, 0, 6.28); g.fill(); g.beginPath(); g.arc(23, 1, .8, 0, 6.28); g.fill();
+    g.strokeStyle = 'rgba(255,255,255,.34)'; g.beginPath(); g.moveTo(13, 5); g.lineTo(14, 9); g.moveTo(16, 5); g.lineTo(17, 9); g.stroke();
+  }
+  if (w === 'escopeta' || w === 'pump' || w === 'dupla' || w === 'rifle' || w === 'carabina' || w === 'sniper' || w === 'lmg') {
+    g.strokeStyle = 'rgba(255,255,255,.58)'; g.beginPath(); g.moveTo(22, -1.7); g.lineTo(w === 'sniper' ? 53 : 45, -1.7); g.stroke();
+    g.strokeStyle = 'rgba(4,7,12,.64)'; g.beginPath(); g.moveTo(24, 1.3); g.lineTo(w === 'sniper' ? 54 : 46, 1.3); g.stroke();
+  }
+  if (w === 'taco' || w === 'escopeta' || w === 'rifle' || w === 'martelo' || w === 'pump' || w === 'dupla' || w === 'sniper' || w === 'machado') {
+    g.strokeStyle = 'rgba(255,218,153,.58)'; g.beginPath(); g.moveTo(7, -1); g.lineTo(13, -1); g.moveTo(9, 1); g.lineTo(16, 1); g.stroke();
+    g.strokeStyle = 'rgba(48,27,11,.54)'; g.beginPath(); g.moveTo(11, 2); g.lineTo(17, 2); g.stroke();
+  }
+  if (w === 'sniper') {
+    g.strokeStyle = 'rgba(255,255,255,.68)'; g.beginPath(); g.moveTo(17, -7); g.lineTo(27, -7); g.moveTo(21, -8); g.lineTo(21, -5); g.stroke();
+    g.fillStyle = 'rgba(8,11,17,.88)'; g.beginPath(); g.arc(17, -6, 1, 0, 6.28); g.fill(); g.beginPath(); g.arc(27, -6, 1, 0, 6.28); g.fill();
+  }
+  if (w === 'faca' || w === 'katana' || w === 'pe_de_cabra') {
+    g.strokeStyle = 'rgba(255,255,255,.82)'; g.beginPath(); g.moveTo(12, -1.5); g.lineTo(w === 'katana' ? 49 : 31, -.5); g.stroke();
+    g.strokeStyle = 'rgba(38,48,60,.55)'; g.beginPath(); g.moveTo(15, 1.5); g.lineTo(w === 'katana' ? 48 : 29, 1); g.stroke();
+  }
+  if (w === 'cano' || w === 'extintor' || w === 'lanca') {
+    g.strokeStyle = 'rgba(255,255,255,.72)'; g.beginPath(); g.moveTo(12, -2); g.lineTo(34, -2); g.stroke();
+    g.strokeStyle = 'rgba(4,7,12,.68)'; g.beginPath(); g.moveTo(35, -2); g.lineTo(35, 2); g.moveTo(38, -2); g.lineTo(38, 2); g.stroke();
+  }
+  if (w === 'garrafa') {
+    g.strokeStyle = 'rgba(228,255,235,.86)'; g.beginPath(); g.moveTo(8, -1.5); g.lineTo(13, -1.5); g.moveTo(24, -1); g.lineTo(30, -1); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.62)'; g.fillRect(17, -2, 1, 4);
+  }
+  if (w === 'extintor') {
+    g.strokeStyle = 'rgba(255,255,255,.78)'; g.beginPath(); g.moveTo(12, -4); g.lineTo(24, -4); g.moveTo(12, 4); g.lineTo(24, 4); g.stroke();
+    g.fillStyle = 'rgba(255,224,170,.95)'; g.fillRect(17, -2, 5, 4);
+  }
+  if (w === 'lanca') {
+    g.strokeStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.moveTo(8, -2); g.lineTo(19, -2); g.moveTo(8, 2); g.lineTo(19, 2); g.stroke();
+    g.fillStyle = 'rgba(6,9,14,.8)'; g.beginPath(); g.arc(22, 0, 1, 0, 6.28); g.fill();
+  }
   g.restore();
 }
 function drawWeaponIcon(g, weapon) {

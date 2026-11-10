@@ -1,9 +1,15 @@
-# Cappe-in-Miami — preview Rust/WASM v312.0
+# Cappe-in-Miami — Rust/WASM v313
 
-## Otimização v312 — buffers de vidro e vetor de movimento reutilizados
+## Acabamento visual das armas
 
-O caminho Rust/WASM reutiliza buffers tipados para os painéis de vidro e estilhaços na pausa. O input do jogador também reutiliza o vetor de direção e o zera ao morrer. As regressões verificam identidade, valores e integração sem alterar o desenho. Não foi medido ganho de FPS nesta versão.
+Os ícones ganharam ranhuras metálicas, parafusos, veios de madeira, linhas de mira e reflexos. O painter Canvas da Web e o painter Rust/WebSys do WASM usam a mesma composição e posições.
 
-## Pacote de jogo v312
+## Estrutura desta edição
 
-O ZIP inclui HTML, recursos, scripts, servidor Node e renderer Rust/WASM compilado necessários para jogar. Fontes de compilação, relatórios e testes ficam fora do pacote. Execute INICIAR_EXPERIMENTO_WASM.bat; Node.js 18 ou superior é necessário.
+- wasm-renderer-direct/src/lib.rs contém o renderer Rust.
+- wasm-renderer/pkg/direct/ contém o glue JavaScript e o módulo WebAssembly compilado.
+- js/wasm-renderer.js integra o renderer com o jogo.
+- js/ reúne os sistemas de gameplay que ainda executam em JavaScript.
+- cappe-in-miamiRustWasm-v313-preview.zip é o pacote para jogar.
+
+Para jogar, execute INICIAR_EXPERIMENTO_WASM.bat com Node.js 18 ou superior.

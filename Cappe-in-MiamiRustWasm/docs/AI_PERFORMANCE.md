@@ -1,3 +1,6 @@
+## v97/v313 — acabamento procedural dos ícones de armas
+
+Os ícones Canvas e Rust/WebSys receberam detalhes compatíveis de superfície: realces e ranhuras metálicas, parafusos, textura de madeira, mira e reflexos de vidro. O desenho continua gerado em código, sem carregar sprites extras. É uma alteração visual; não há medição de desempenho nesta rodada.
 ## v96/v312 — buffers de entrada reutilizados, sem medição de FPS
 
 Web e Rust/WASM agora reutilizam o vetor de direção do jogador em vez de alocar um par de coordenadas por chamada; o caminho Rust/WASM também reutiliza buffers tipados dos painéis de vidro e estilhaços da pausa. A regressão valida valores, identidade do vetor e estabilidade do desenho. Regressões cruzadas: 118/118; partículas Web e compressão passaram. Não houve benchmark de frame time/FPS nesta rodada.
