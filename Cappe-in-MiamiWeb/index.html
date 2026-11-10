@@ -654,7 +654,8 @@ function applyCfg() {
   // brilho + leve contraste/saturate em presets altos
   let filt = [];
   if (CFG.bright !== 100) filt.push('brightness(' + (CFG.bright / 100) + ')');
-  if (CFG.grade && (CFG.gfx === 'ultra' || CFG.gfx === 'alto')) filt.push('contrast(1.06)', 'saturate(1.08)');
+  const perfTier = window.EXP && Number(EXP.perfTier) || 0;
+  if (perfTier < 1 && CFG.grade && (CFG.gfx === 'ultra' || CFG.gfx === 'alto')) filt.push('contrast(1.06)', 'saturate(1.08)');
   cv.style.filter = filt.length ? filt.join(' ') : '';
   b.toggle('a11y-hc', !!CFG.hc); b.toggle('a11y-rmotion', !!CFG.rmotion); b.toggle('a11y-dys', !!CFG.dyslex);
   b.remove('a11y-txt-g', 'a11y-txt-m'); if (CFG.txt === 'grande') b.add('a11y-txt-g'); if (CFG.txt === 'muito') b.add('a11y-txt-m');

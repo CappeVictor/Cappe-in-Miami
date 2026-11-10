@@ -573,3 +573,8 @@ O gargalo foi medido no Chromium com a ferramenta `tests/browser-performance.cjs
 
 Resultados locais após a alteração: Web, p90 de intervalo RAF 16,7 ms e p90 de trabalho 0,8 ms; Rust/WASM, p90 de intervalo RAF 16,7 ms e p90 de trabalho 1,9 ms, com canvas final 768×480 no nível 2. Em cena pesada Rust/WASM com 80 inimigos, IA visível e 400 faíscas, p95 de trabalho após adaptação foi 2,2 ms. O Chrome headless usado pelo teste tem cadência própria; esses números servem para comparar a mudança e não representam o notebook do usuário.
 
+## v318 / Web v102 — 10/11/2026
+Além da escala interna adaptativa, os tiers 1 e 2 removem o filtro CSS do canvas e desligam `imageSmoothingEnabled`. O custo de composição é assim reduzido junto com o número de pixels; no tier 0 o visual configurado permanece.
+
+No cenário pesado do Chromium com 120 inimigos, IA visível e 500 partículas, o p95 de trabalho após adaptação foi 2,0 ms, contra 10,6 ms no cenário anterior equivalente com fallback Canvas de partículas. A comparação é local e depende do renderer, navegador e hardware.
+

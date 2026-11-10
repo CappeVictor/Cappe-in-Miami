@@ -198,7 +198,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v317.0-performance-governor');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v318.0-adaptive-effects');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -933,7 +933,7 @@ async function run() {
   });
   await test('Otimização limita escala automática e não desenha partículas com saves separados', () => {
     const ui=read('js/exp-ui.js'),html=read('index.html');
-    assert.match(ui,/Math\.min\(1\.25, Math\.max\(1/);assert.match(ui,/tier >= 2 \? \.64 : tier >= 1 \? \.82/);assert.match(html,/ctx\.fillStyle = '#c8b8ff'; ctx\.beginPath\(\)/);assert.match(html,/if \(shellParticles\.length\) \{/);
+    assert.match(ui,/Math\.min\(1\.25, Math\.max\(1/);assert.match(ui,/tier >= 2 \? \.64 : tier >= 1 \? \.82/);assert.match(ui,/const smooth = !!CFG\.aa && tier === 0/);assert.match(html,/perfTier < 1 && CFG\.grade/);assert.match(html,/ctx\.fillStyle = '#c8b8ff'; ctx\.beginPath\(\)/);assert.match(html,/if \(shellParticles\.length\) \{/);
   });
   await test('Governador de desempenho usa tempo de quadro real e reduz efeitos sem trocar preferências', () => {
     const html=read('index.html'),fx=read('js/exp-fx.js');
@@ -1223,7 +1223,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v317.0-performance-governor');
+    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v318.0-adaptive-effects');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));

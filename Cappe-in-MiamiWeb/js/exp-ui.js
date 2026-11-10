@@ -204,11 +204,12 @@
     const nw = Math.round(W * k), nh = Math.round(H * k);
     if (cv.width !== nw || cv.height !== nh) { cv.width = nw; cv.height = nh; }
     cv.style.imageRendering = 'auto';
+    if (tier >= 1) cv.style.filter = '';
     hiK = k;
     appliedPerfTier = tier;
   }
   const _draw = draw;
-  draw = function () { const tier = Math.max(0, Math.min(2, Number(EXP.perfTier) || 0)); if (tier !== appliedPerfTier) applyResolution(); ctx.setTransform(hiK, 0, 0, hiK, 0, 0); ctx.imageSmoothingEnabled = !!CFG.aa; ctx.imageSmoothingQuality = CFG.aa ? (CFG.gfx === 'ultra' ? 'high' : 'medium') : 'low'; _draw(); if (EXP.overlay) EXP.overlay(ctx); };
+  draw = function () { const tier = Math.max(0, Math.min(2, Number(EXP.perfTier) || 0)); if (tier !== appliedPerfTier) applyResolution(); const smooth = !!CFG.aa && tier === 0; ctx.setTransform(hiK, 0, 0, hiK, 0, 0); ctx.imageSmoothingEnabled = smooth; ctx.imageSmoothingQuality = smooth ? (CFG.gfx === 'ultra' ? 'high' : 'medium') : 'low'; _draw(); if (EXP.overlay) EXP.overlay(ctx); };
 
   // ---------- 2) tamanho da tela ----------
   const SIZES = {

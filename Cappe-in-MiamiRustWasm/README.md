@@ -1,6 +1,8 @@
-# Cappe-in-Miami — Rust/WASM v317
+# Cappe-in-Miami — Rust/WASM v318
 
 O modo automático de vídeo agora limita a resolução interna a 1,25× e reduz progressivamente para 0,82× ou 0,64× quando o frame time continua alto. A escolha manual de resolução permanece respeitada.
+
+Nos níveis adaptativos, filtros CSS e suavização do Canvas são desligados para evitar custo extra de composição.
 
 ## Correção de campanha
 

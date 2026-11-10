@@ -202,9 +202,10 @@
     const nw = Math.round(W * k), nh = Math.round(H * k);
     if (cv.width !== nw || cv.height !== nh) { cv.width = nw; cv.height = nh; }
     cv.style.imageRendering = 'auto';
+    if (tier >= 1) cv.style.filter = '';
     hiK = k;
     appliedPerfTier = tier;
-    const smooth = !!CFG.aa, quality = smooth ? (CFG.gfx === 'ultra' ? 2 : 1) : 0;
+    const smooth = !!CFG.aa && tier === 0, quality = smooth ? (CFG.gfx === 'ultra' ? 2 : 1) : 0;
     const renderer = window.HM_WASM_RENDERER;
     if (!(renderer && renderer.setupCanvas && renderer.setupCanvas(ctx, hiK, smooth, quality, true))) {
       ctx.setTransform(hiK, 0, 0, hiK, 0, 0);
@@ -216,7 +217,7 @@
   draw = function () {
     const tier = Math.max(0, Math.min(2, Number(EXP.perfTier) || 0));
     if (tier !== appliedPerfTier) applyResolution();
-    const smooth = !!CFG.aa, quality = smooth ? (CFG.gfx === 'ultra' ? 2 : 1) : 0;
+    const smooth = !!CFG.aa && tier === 0, quality = smooth ? (CFG.gfx === 'ultra' ? 2 : 1) : 0;
     const renderer = window.HM_WASM_RENDERER;
     if (!(renderer && renderer.setupCanvas && renderer.setupCanvas(ctx, hiK, smooth, quality))) {
       ctx.setTransform(hiK, 0, 0, hiK, 0, 0);

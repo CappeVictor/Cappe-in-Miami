@@ -1053,3 +1053,8 @@ Riscos/limites: partidas e instalação real do SW ainda não validadas; leitura
 - Chromium local: Web chegou a p90 de 16,7 ms após adaptação; Rust/WASM chegou a p90 de 16,7 ms e 768×480 no nível 2. Cena pesada com 80 inimigos e 400 partículas ficou em p95 de trabalho de 2,2 ms após adaptação.
 - Suíte Rust/WASM: 118/118; compressão e partículas Web passaram. A medição depende do navegador e do hardware e não garante FPS fixo no notebook.
 
+## v318 / Web v102 — 10/11/2026 — composição adaptativa
+- Quando o governador entra nos tiers 1 ou 2, remove o filtro CSS de contraste/saturação e desliga a suavização do Canvas; essas opções continuam ativas no tier 0.
+- Em Chromium com 120 inimigos, IA visível e 500 partículas, o p95 de trabalho caiu para 2,0 ms após adaptação e a cadência ficou em 16,7 ms.
+- Suíte Rust/WASM: 118/118; compressão e partículas Web passaram.
+
