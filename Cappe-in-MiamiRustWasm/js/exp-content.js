@@ -183,7 +183,7 @@
     }
     _wicon(g, w); };
     g.save(); g.shadowColor = 'rgba(0,0,0,.62)'; g.shadowBlur = 2; g.shadowOffsetX = 1; g.shadowOffsetY = 2;
-    draw(); if (EXP.newWeapons.includes(w)) weaponFinish(g, w); g.restore();
+    draw(); if (EXP.newWeapons.includes(w) && w !== 'lanca') weaponFinish(g, w); g.restore();
   };
 
   // ================= CHEFES (dados) =================

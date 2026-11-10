@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v98.0-campaign-fix';
+const CACHE = 'cappe-v99.0-weapon-parity-fix';
 const ASSETS = ["js/tile-levels.js",
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",

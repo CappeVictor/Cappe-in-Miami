@@ -1,4 +1,6 @@
-# Cappe in Miami Web — v98
+# Cappe in Miami Web — v99
+
+Correção de paridade visual: o acabamento da arma `lanca` agora é aplicado uma única vez.
 
 ## Correção de campanha
 

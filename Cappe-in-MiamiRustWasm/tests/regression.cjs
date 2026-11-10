@@ -198,7 +198,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v314.0-campaign-fix');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v315.0-weapon-parity-fix');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -350,7 +350,7 @@ async function run() {
     assert.equal(bodyCalls[0][4],true,'o corpo do inimigo omite a sombra original quando o batch WASM já a submeteu');
     assert.equal(bodyCalls[1][4],false,'o fallback continua desenhando a própria sombra');
     assert.match(html,/function weaponFinish\(g, w\)/);
-    assert.match(content,/draw\(\); if \(EXP\.newWeapons\.includes\(w\)\) weaponFinish\(g, w\)/);
+    assert.match(content,/draw\(\); if \(EXP\.newWeapons\.includes\(w\)(?: && w !== 'lanca')?\) weaponFinish\(g, w\)/);
     assert.match(html,/g\.shadowColor = 'rgba\(0,0,0,\.62\)'/);assert.match(content,/g\.shadowColor = 'rgba\(0,0,0,\.62\)'/);
     assert.match(core,/EXP\.SKINS = SKINS/);assert.match(core,/settings\.skin = id/);
   });
@@ -1222,7 +1222,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v314.0-campaign-fix');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v315.0-weapon-parity-fix');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));
