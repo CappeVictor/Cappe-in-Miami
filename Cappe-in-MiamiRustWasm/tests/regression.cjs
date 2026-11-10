@@ -198,7 +198,7 @@ async function run() {
     assert.equal(listRooms().length,0);
 
     const server=createGameServer({root});
-    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v315.0-weapon-parity-fix');assert.equal(health.headers['cache-control'],'no-store');
+    const health=await apiRequest(server,'GET','/api/health');assert.equal(health.status,200);assert.equal(JSON.parse(health.body).version,'v316.0-neon-start-race-fix');assert.equal(health.headers['cache-control'],'no-store');
     const page=await apiRequest(server,'GET','/');assert.equal(page.status,200);assert.match(page.body,/Cappe-in-Miami/);assert.equal(page.headers['x-content-type-options'],'nosniff');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/pkg/renderer.wasm')).status,404,'the retired Canvas trampoline must not be served');
     assert.equal((await apiRequest(server,'GET','/wasm-renderer/src/lib.rs')).status,404);
@@ -1103,6 +1103,7 @@ async function run() {
     assert.doesNotMatch(html,/<script src="js\/maps\.js"><\/script>/,'maps.js não entra no carregamento inicial');
     assert.match(html,/const initialNeonName = historia \? STORY\[capIdx\]\?\.neon : mapSel\.startsWith\('neon:'\)/);
     assert.match(html,/if \(initialNeonName && !Array\.isArray\(window\.HM_NEON_MAPS\)\)[\s\S]*?neonGameStartPending[\s\S]*?ensureNeonDefinitions\(\)\.then\(\(\) => \{ neonGameStartPending = false; newGame\(\); \}\)/);
+    assert.match(html,/if \(NM && !NM\._ready\)[\s\S]*?if \(neonGameStartPending\) return;[\s\S]*?neonPrepare\(NM\)\.then\(\(\) => \{ neonGameStartPending = false; newGame\(\); \}, error =>/,'preparação Neon impede inicializações concorrentes');
     assert.match(html,/function advance\(\)[\s\S]*?STORY\[capIdx \+ 1\]\?\.neon[\s\S]*?neonAdvancePending[\s\S]*?ensureNeonDefinitions\(\)\.then\(\(\) => \{ neonAdvancePending = false; advance\(\); \}\)/);
     assert.doesNotMatch(read('sw.js'),/"js\/maps\.js"/,'maps.js fica fora do pré-cache inicial');
     assert.doesNotMatch(html,/NEON_PLAYABLE\.map\(m => \['neon:' \+ m\.name, .*m\.w.*m\.h/);
@@ -1222,7 +1223,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v315.0-weapon-parity-fix');
+assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v316.0-neon-start-race-fix');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));

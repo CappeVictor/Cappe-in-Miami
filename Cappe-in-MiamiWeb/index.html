@@ -2163,7 +2163,16 @@ function newGame() {
     return;
   }
   const NM = neonFor(historia ? capIdx + 1 : 1);
-  if (NM && !NM._ready) { banner = { txt: 'CARREGANDO', sub: NM.name, t: 2 }; neonPrepare(NM).then(() => newGame()); return; }
+  if (NM && !NM._ready) {
+    if (neonGameStartPending) return;
+    neonGameStartPending = true;
+    banner = { txt: 'CARREGANDO', sub: NM.name, t: 2 };
+    neonPrepare(NM).then(() => { neonGameStartPending = false; newGame(); }, error => {
+      neonGameStartPending = false;
+      if (window.EXP && EXP.toast) EXP.toast('MAPAS INDISPONÍVEIS', error.message, '#ff2e93');
+    });
+    return;
+  }
   musStop(0); musStart(1.5);
   HI.start = HI.best; HI.beaten = false;
   cw = 'pistola'; ammo = 0;

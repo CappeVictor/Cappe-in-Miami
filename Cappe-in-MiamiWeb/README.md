@@ -1,6 +1,8 @@
-# Cappe in Miami Web — v99
+# Cappe in Miami Web — v100
 
 Correção de paridade visual: o acabamento da arma `lanca` agora é aplicado uma única vez.
+
+Correção de concorrência: cliques repetidos durante o carregamento de um mapa Neon são ignorados até a preparação terminar.
 
 ## Correção de campanha
 

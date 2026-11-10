@@ -19,8 +19,8 @@ A campanha segue os capítulos e mapas que já existem no jogo, incluindo as exp
 
 Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
 
-- **Web — HTML, CSS e JavaScript v99:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — v315:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v315-preview.zip)
+- **Web — HTML, CSS e JavaScript v100:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
+- **Rust/WASM — v316:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v316-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
@@ -28,6 +28,6 @@ Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. 
 
 A prévia v313 mantém painters Rust/WebSys diretos para as camadas amostradas de gameplay, incluindo Campanha, Horda e Invasão. O antigo trampoline Canvas deixou de ser compilado, servido e pré-cacheado. A auditoria instrumentada não encontrou chamadas Canvas do host em 23 cenas/estados amostrados. Os painters Canvas permanecem como fallback; lógica, simulação, aleatoriedade e seleção/cache de assets seguem em JavaScript. O pool de pontos de rota da IA reduz objetos temporários em um microbenchmark sintético; não há ganho de frame time medido.
 
-## Última atualização — 9 de novembro de 2026 · Web v99 e Rust/WASM v315
+## Última atualização — 9 de novembro de 2026 · Web v100 e Rust/WASM v316
 
-Correção de bugs: os dados das fases em tiles agora carregam antes dos modos de campanha nas duas versões, e o acabamento visual da arma `lanca` não é aplicado duas vezes na Web. A paridade de pixels Web/Rust para os 12 ícones de armas passou. Regressões Rust/WASM: 118/118.
+Correção de bugs: os dados das fases em tiles agora carregam antes dos modos de campanha, o acabamento da arma `lanca` não duplica e cliques repetidos durante o carregamento Neon não iniciam a fase várias vezes. Regressões Rust/WASM: 118/118.

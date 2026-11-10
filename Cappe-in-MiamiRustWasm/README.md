@@ -1,4 +1,4 @@
-# Cappe-in-Miami — Rust/WASM v315
+# Cappe-in-Miami — Rust/WASM v316
 
 ## Correção de campanha
 
@@ -7,3 +7,5 @@ O arquivo de fases em tiles é carregado antes dos modos Rust/WASM. A campanha d
 Para jogar, execute INICIAR_EXPERIMENTO_WASM.bat com Node.js 18 ou superior.
 
 Correção de paridade: o ícone da arma `lanca` é renderizado uma única vez.
+
+Correção de concorrência: cliques repetidos durante o carregamento de um mapa Neon são ignorados até a preparação terminar.
