@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const { spawn } = require('node:child_process');
 const { createGameServer } = require(path.join(process.cwd(), 'server/server.js'));
 
-const chromePath = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const chromePath = process.env.CHROME_PATH || (process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : 'google-chrome');
 const port = 8789, debugPort = 9242;
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'cappe-wasm-shadow-'));
 const server = createGameServer();
@@ -23,6 +23,7 @@ async function until(fn, ms = 20000) {
     await new Promise((resolve, reject) => { server.once('error', reject); server.listen(port, '127.0.0.1', resolve); });
     process.stdout.write('[parity] server ready\n');
     chrome = spawn(chromePath, ['--headless=new', '--no-sandbox', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--remote-allow-origins=*', '--remote-debugging-port=' + debugPort, '--user-data-dir=' + profile, '--window-size=1280,720', 'http://127.0.0.1:' + port + '/?renderer=wasm&wasmDiagnostics=1&dev=1'], { stdio: 'ignore', windowsHide: true });
+    chrome.on('error', error => console.error('[parity] falha ao iniciar navegador:', error.message));
     await until(async () => { const response = await fetch('http://127.0.0.1:' + debugPort + '/json/version'); return response.ok ? response.json() : null; });
     const targets = await (await fetch('http://127.0.0.1:' + debugPort + '/json/list')).json();
     const page = targets.find(target => target.type === 'page' && target.webSocketDebuggerUrl);
