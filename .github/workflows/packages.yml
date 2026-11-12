@@ -39,7 +39,19 @@ jobs:
           node /tmp/cappe-package-test/tests/server-smoke.cjs
       - uses: actions/upload-artifact@v4
         with:
-          name: Cappe-in-Miami-pacotes
-          path: dist/*
+          name: Cappe-in-MiamiWeb
+          path: dist/Cappe-in-MiamiWeb.zip
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Cappe-in-MiamiRustWasm
+          path: dist/Cappe-in-MiamiRustWasm.zip
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Cappe-in-Miami-checksums
+          path: dist/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 14
