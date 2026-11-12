@@ -29,6 +29,20 @@ async function checkEdition(edition) {
     assert.match(index.headers.get('content-type') || '', /text\/html/);
     assert.ok((await index.text()).includes('<canvas'), `${edition}: index content`);
 
+    for (const asset of ['/js/tile-levels.js', '/js/exp-core.js']) {
+      const response = await fetch(`${base}${asset}`);
+      assert.equal(response.status, 200, `${edition}: ${asset}`);
+      assert.match(response.headers.get('content-type') || '', /javascript/);
+      assert.ok((await response.text()).length > 0, `${edition}: ${asset} vazio`);
+    }
+    if (edition === 'Cappe-in-MiamiRustWasm') {
+      const response = await fetch(`${base}/wasm-renderer/pkg/direct/direct_renderer_bg.wasm`);
+      assert.equal(response.status, 200, `${edition}: módulo WASM`);
+      assert.match(response.headers.get('content-type') || '', /application\/wasm/);
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      assert.deepEqual(Array.from(bytes.slice(0, 4)), [0, 97, 115, 109], 'assinatura WASM');
+    }
+
     const traversal = await fetch(`${base}/%2e%2e/README.md`);
     assert.equal(traversal.status, 404, `${edition}: traversal guard`);
   } finally {
