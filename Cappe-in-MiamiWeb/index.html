@@ -2559,7 +2559,7 @@ function update(dt) {
     cleared = true; addScore(200 + 50 * lvl); popup(P.x, P.y - 30, 'BÔNUS +' + (200 + 50 * lvl), '#ffd23f');
     const sp = predio[0].startPos, zone = [sp[0] - 45, sp[1] - 45, 90, 90];
     if (!curGrid && !(curNeon && neonCar)) { predio[0].exitR = zone; if (andar === 0) exitR = zone; }   // a saída vira a área de volta ao início
-    flash = 1; retorno = !curGrid; banner = { txt: 'GO TO CAR', sub: curGrid ? 'siga até o carro ' + exitArrow() : 'volte ao início ' + exitArrow(), t: 2.8 }; freeze = Math.max(freeze, .12); triggerScreenShake(6, .2);
+    flash = 1; retorno = !curGrid; banner = { txt: curGrid ? 'VÁ ATÉ O CARRO' : 'VOLTE AO INÍCIO', sub: exitArrow(), t: 2.8 }; freeze = Math.max(freeze, .12); triggerScreenShake(6, .2);
   }
   // mapa sem carro: a área de volta ao início só conta depois que o jogador sai dela (não avança na hora)
   const exitPlayer = P.dead && window.EXP && EXP.MULTI && EXP.MULTI.P2 && !EXP.MULTI.P2.dead ? EXP.MULTI.P2 : P;
@@ -3052,7 +3052,7 @@ function draw() {
   if (cleared && st === 'play') { tx('SALA LIMPA!  RANK ' + rankForStats() + '  ·  ' + (retorno ? 'VOLTE AO INÍCIO ' : 'VÁ ATÉ A SAÍDA ') + exitArrow(), W / 2, H - 62, '#ffd23f', '34px Impact, sans-serif', 'center'); tx('TEMPO ' + levelStats.time.toFixed(1) + 's  ·  COMBO MÁX ' + levelStats.maxCombo + '  ·  PRECISÃO ' + Math.round((levelStats.shots ? levelStats.hits / levelStats.shots : 1) * 100) + '%', W / 2, H - 92, '#fff', '16px Impact, sans-serif', 'center'); }
   if (cleared && st === 'play' && curGrid && Math.floor(performance.now() / 350) % 2 === 0) {   // GO TO CAR piscando em neon
     ctx.save();
-    tx('GO TO CAR ' + exitArrow(), W / 2, 150, '#19f0e6', 'bold 46px Impact, sans-serif', 'center'); ctx.restore();
+    tx('VÁ ATÉ O CARRO ' + exitArrow(), W / 2, 150, '#19f0e6', 'bold 46px Impact, sans-serif', 'center'); ctx.restore();
   }
   if (banner.t > 0 && st === 'play') { ctx.globalAlpha = Math.min(1, banner.t * 1.5); tx(banner.txt, W / 2, H / 2 + 20, '#ff2e93', '72px Impact, sans-serif', 'center'); if (banner.sub) tx(banner.sub.toUpperCase(), W / 2, H / 2 + 64, '#19f0e6', '30px Impact, sans-serif', 'center'); ctx.globalAlpha = 1; }
   if (st === 'paused') { ctx.fillStyle = 'rgba(5,0,18,.78)'; ctx.fillRect(0,0,W,H); tx('PAUSADO', W/2, H/2-30, '#ff2e93', '64px Impact, sans-serif', 'center'); tx('ESC · CONTINUAR', W/2, H/2+28, '#fff', '24px Impact, sans-serif', 'center'); }

@@ -2612,7 +2612,7 @@ function update(dt) {
     cleared = true; addScore(200 + 50 * lvl); popup(P.x, P.y - 30, 'BÔNUS +' + (200 + 50 * lvl), '#ffd23f');
     const sp = predio[0].startPos, zone = [sp[0] - 45, sp[1] - 45, 90, 90];
     if (!curGrid && !(curNeon && neonCar)) { predio[0].exitR = zone; if (andar === 0) exitR = zone; }   // a saída vira a área de volta ao início
-    flash = 1; retorno = !curGrid; banner = { txt: 'GO TO CAR', sub: curGrid ? 'siga até o carro ' + exitArrow() : 'volte ao início ' + exitArrow(), t: 2.8 }; freeze = Math.max(freeze, .12); triggerScreenShake(6, .2);
+    flash = 1; retorno = !curGrid; banner = { txt: curGrid ? 'VÁ ATÉ O CARRO' : 'VOLTE AO INÍCIO', sub: exitArrow(), t: 2.8 }; freeze = Math.max(freeze, .12); triggerScreenShake(6, .2);
   }
   // mapa sem carro: a área de volta ao início só conta depois que o jogador sai dela (não avança na hora)
   const exitPlayer = P.dead && window.EXP && EXP.MULTI && EXP.MULTI.P2 && !EXP.MULTI.P2.dead ? EXP.MULTI.P2 : P;
@@ -3247,7 +3247,7 @@ function draw() {
     clearedTexts.push({ text: 'SALA LIMPA!  RANK ' + rankForStats() + '  ·  ' + (retorno ? 'VOLTE AO INÍCIO ' : 'VÁ ATÉ A SAÍDA ') + exitArrow(), x: W / 2, y: H - 62, color: '#ffd23f', font: '34px Impact, sans-serif', align: 'center' });
     clearedTexts.push({ text: 'TEMPO ' + levelStats.time.toFixed(1) + 's  ·  COMBO MÁX ' + levelStats.maxCombo + '  ·  PRECISÃO ' + Math.round((levelStats.shots ? levelStats.hits / levelStats.shots : 1) * 100) + '%', x: W / 2, y: H - 92, color: '#fff', font: '16px Impact, sans-serif', align: 'center' });
   }
-  if (cleared && st === 'play' && curGrid && Math.floor(performance.now() / 350) % 2 === 0) clearedTexts.push({ text: 'GO TO CAR ' + exitArrow(), x: W / 2, y: 150, color: '#19f0e6', font: 'bold 46px Impact, sans-serif', align: 'center' });
+  if (cleared && st === 'play' && curGrid && Math.floor(performance.now() / 350) % 2 === 0) clearedTexts.push({ text: 'VÁ ATÉ O CARRO ' + exitArrow(), x: W / 2, y: 150, color: '#19f0e6', font: 'bold 46px Impact, sans-serif', align: 'center' });
   if (clearedTexts.length) drawHudTextBatch(clearedTexts);
   if (banner.t > 0 && st === 'play') {
     const alpha = Math.min(1, banner.t * 1.5), bannerTexts = [{ text: banner.txt, x: W / 2, y: H / 2 + 20, color: '#ff2e93', font: '72px Impact, sans-serif', align: 'center', alpha }];

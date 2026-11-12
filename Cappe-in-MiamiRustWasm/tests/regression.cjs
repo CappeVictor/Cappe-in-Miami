@@ -1230,7 +1230,7 @@ async function run() {
   });
   await test('Manifesto offline contém apenas arquivos existentes e todos os scripts/CSS', async () => {
     const w=worker();let pending;w.handlers.install({waitUntil:p=>pending=p});await pending;
-    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v319.0-original-story-save-confirm-backup-dica-municao-pausa-recarga-r-tecla-ajuda-retry-controle-edicao-movimento');
+    assert.equal(vm.runInContext('CACHE',w.ctx),'cappe-v319.0-original-story-save-confirm-backup-dica-municao-pausa-recarga-r-tecla-ajuda-retry-controle-edicao-movimento-saida');
     const list=vm.runInContext('ASSETS',w.ctx);
     for(const m of read('index.html').matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)(?:\?[^\"]*)?"/g)) assert.ok(list.includes(m[1]),m[1]);
     assert.ok(!list.includes('wasm-renderer/pkg/renderer.wasm'));

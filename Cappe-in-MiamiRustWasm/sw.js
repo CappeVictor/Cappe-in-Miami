@@ -1,5 +1,5 @@
 // Cache offline limitado a esta instalação do jogo.
-const CACHE = 'cappe-v319.0-original-story-save-confirm-backup-dica-municao-pausa-recarga-r-tecla-ajuda-retry-controle-edicao-movimento';
+const CACHE = 'cappe-v319.0-original-story-save-confirm-backup-dica-municao-pausa-recarga-r-tecla-ajuda-retry-controle-edicao-movimento-saida';
 const ASSETS = ["js/tile-levels.js",
   "assets/background/images/tlCorners1.png",
   "assets/background/images/tlFloorTiles.png",
