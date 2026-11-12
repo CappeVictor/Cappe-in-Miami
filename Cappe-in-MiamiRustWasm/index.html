@@ -282,6 +282,7 @@ button { touch-action: manipulation; }
           <label>Teclas de movimento <select id="o-keys"><option value="wasd">WASD + setas</option><option value="setas">Somente setas</option></select></label>
           <label>Pegar/arremessar arma <select id="o-pick"><option value="e">E</option><option value="g">G</option><option value="t">T</option></select></label>
           <label>Recarregar <select id="o-reload"><option value="r">R</option><option value="c">C</option></select></label>
+          <button type="button" id="o-controls-reset" class="sec">Restaurar controles padrão</button>
         </fieldset>
         <fieldset><legend>ÁUDIO &amp; DADOS</legend>
           <label>Volume da música <input type="range" id="o-musVol" min="0" max="1" step=".05"></label>
@@ -3411,6 +3412,7 @@ $('o-zoom').onchange = e => setCfg({ zoom: +e.target.value });
 $('o-keys').onchange = e => setCfg({ keys: e.target.value });
 $('o-pick').onchange = e => setCfg({ pick: e.target.value });
 $('o-reload').onchange = e => setCfg({ reloadKey: e.target.value });
+$('o-controls-reset').onclick = () => { setCfg({ keys: CFG_DEF.keys, pick: CFG_DEF.pick, reloadKey: CFG_DEF.reloadKey }); syncOpts(); };
 $('o-crt').onchange = e => { setCfg({ crt: e.target.checked, gfx: 'personalizado' }); syncOpts(); };
 $('o-ghost').onchange = e => { setCfg({ ghost: e.target.checked, gfx: 'personalizado' }); syncOpts(); };
 const qToggle = (id, key) => { const el = $(id); if (el) el.onchange = e => { setCfg({ [key]: e.target.checked, gfx: 'personalizado' }); syncOpts(); }; };
