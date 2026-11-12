@@ -55,6 +55,7 @@ jobs:
         with:
           node-version: 22
       - run: node tests/release-layout.cjs
+      - run: node tests/server-smoke.cjs
 
   rust-check:
     name: Rust checks
