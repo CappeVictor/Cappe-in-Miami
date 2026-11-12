@@ -37,3 +37,10 @@ O governador de desempenho agora mede janelas menores e pode avançar do nível 
 Nos níveis adaptativos, filtros CSS e suavização do Canvas são desligados para reduzir o custo de composição; a aparência normal permanece nos níveis sem redução.
 
 A campanha agora se chama **Sinal de Maré**: Cappe investiga apagões coordenados e uma rede de transmissores usada para falsificar alertas públicos. Personagens, conflito, objetivos e final foram reescritos; a estrutura dos mapas foi preservada.
+
+## Infraestrutura e validação — 12 de novembro de 2026
+
+- O GitHub Actions agora executa regressões JavaScript, verificação de sintaxe, `cargo check`, validação do layout dos ZIPs e smoke test dos servidores Web/Rust/WASM.
+- O servidor reduz uma resolução de caminho do sistema de arquivos por requisição estática, mantendo a mesma proteção contra traversal.
+- O smoke test confirma saúde da API, carregamento do `index.html` e bloqueio de caminhos fora da raiz.
+- A execução remota do CI passou após a correção de portabilidade: os testes que dependem do executável Chrome local continuam sendo executados no ambiente apropriado, enquanto o CI Linux usa regressões sem esse caminho específico.
