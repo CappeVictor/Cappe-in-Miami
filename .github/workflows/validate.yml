@@ -1,0 +1,64 @@
+name: Validate Cappe in Miami
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  javascript-regressions:
+    name: JavaScript regressions
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        edition: [Cappe-in-MiamiWeb, Cappe-in-MiamiRustWasm]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        working-directory: ${{ matrix.edition }}
+        shell: bash
+        run: |
+          find js server tests -type f -name '*.js' -o -name '*.cjs' | sort | xargs -r -n1 node --check
+      - name: Run core regressions
+        working-directory: ${{ matrix.edition }}
+        shell: bash
+        run: |
+          if [ "${{ matrix.edition }}" = "Cappe-in-MiamiWeb" ]; then
+            node tests/particles-regression.cjs
+            node tests/compression-regression.cjs
+          else
+            node tests/regression.cjs
+            node tests/wasm-direct-draw-parity.cjs
+            node tests/compression-regression.cjs
+          fi
+      - name: Verify release layout
+        working-directory: ${{ matrix.edition }}
+        shell: bash
+        run: |
+          test -f README.md
+          test -f index.html
+          test -f sw.js
+          count=$(find . -maxdepth 1 -type f -iname '*.zip' | wc -l)
+          test "$count" -eq 1
+
+  rust-check:
+    name: Rust checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Cappe-in-MiamiRustWasm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check direct renderer
+        run: cargo check --locked --manifest-path wasm-renderer-direct/Cargo.toml
+      - name: Check legacy renderer
+        run: cargo check --locked --manifest-path wasm-renderer/Cargo.toml
