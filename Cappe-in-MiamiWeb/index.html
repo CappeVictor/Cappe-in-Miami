@@ -2049,7 +2049,7 @@ function ensureNeonDefinitions() {
       NEON_PLAYABLE = maps.filter(neonMapIsAllowed); NEON_BY = new Map(NEON_PLAYABLE.map(m => [m.name, m]));
       resolve(NEON_PLAYABLE);
     };
-    script.onerror = () => { neonDefinitionsPromise = null; reject(new Error('Não foi possível carregar os mapas.')); };
+    script.onerror = () => { script.remove(); neonDefinitionsPromise = null; reject(new Error('Não foi possível carregar os mapas. Tente iniciar novamente.')); };
     document.head.appendChild(script);
   });
   return neonDefinitionsPromise;
