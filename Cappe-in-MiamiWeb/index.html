@@ -3021,7 +3021,7 @@ function draw() {
     ctx.restore();
   }
   tx('SALA ' + lvl + '  ·  ANDAR ' + (andar + 1), 34, 80, '#19f0e6', 'bold 22px Impact, sans-serif');
-  tx('ARMA ' + WP[cw].nome.toUpperCase() + (WP[cw].gun ? '   MUNIÇÃO ' + ammo : ''), 34, 108, '#fff', 'bold 20px Impact, sans-serif');
+  tx('ARMA ' + WP[cw].nome.toUpperCase() + (WP[cw].gun ? '   MUNIÇÃO ' + ammo + (ammo <= 3 && !EXP.infAmmo ? ' · BAIXA' : '') : ''), 34, 108, '#fff', 'bold 20px Impact, sans-serif');
   tx('E pegar/trocar  ·  Q largar  ·  BOTÃO DIR. arremessar  ·  ESPAÇO soco/finalizar  ·  ESC pausar', 34, H - 26, 'rgba(255,255,255,.75)', '15px Impact, sans-serif');
   tx('ABATES ' + levelStats.kills + ' / ' + levelStats.total, W - 34, 128, '#ffd23f', 'bold 20px Impact, sans-serif', 'right');
   tx('RECORDE ' + HI.best, W - 34, 152, '#ff2e93', 'bold 18px Impact, sans-serif', 'right');

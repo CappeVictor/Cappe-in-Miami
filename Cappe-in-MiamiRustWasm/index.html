@@ -3198,7 +3198,7 @@ function draw() {
   }
   drawHudTextBatch([
     { text: 'SALA ' + lvl + '  ·  ANDAR ' + (andar + 1), x: 34, y: 80, color: '#19f0e6', font: 'bold 22px Impact, sans-serif' },
-    { text: 'ARMA ' + WP[cw].nome.toUpperCase() + (WP[cw].gun ? '   MUNIÇÃO ' + ammo : ''), x: 34, y: 108, color: '#fff', font: 'bold 20px Impact, sans-serif' },
+    { text: 'ARMA ' + WP[cw].nome.toUpperCase() + (WP[cw].gun ? '   MUNIÇÃO ' + ammo + (ammo <= 3 && !EXP.infAmmo ? ' · BAIXA' : '') : ''), x: 34, y: 108, color: '#fff', font: 'bold 20px Impact, sans-serif' },
     { text: 'E pegar/trocar  ·  Q largar  ·  BOTÃO DIR. arremessar  ·  ESPAÇO soco/finalizar  ·  ESC pausar', x: 34, y: H - 26, color: 'rgba(255,255,255,.75)', font: '15px Impact, sans-serif' },
     { text: 'ABATES ' + levelStats.kills + ' / ' + levelStats.total, x: W - 34, y: 128, color: '#ffd23f', font: 'bold 20px Impact, sans-serif', align: 'right' },
     { text: 'RECORDE ' + HI.best, x: W - 34, y: 152, color: '#ff2e93', font: 'bold 18px Impact, sans-serif', align: 'right' },
