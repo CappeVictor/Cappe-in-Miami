@@ -1114,6 +1114,13 @@ async function run() {
       if(stage.m)assert.ok(fixedIds.has(stage.m),`fase ${i+1}: mapa fixo ${stage.m}`);
       if(stage.neon)assert.ok(neonIds.has(stage.neon),`fase ${i+1}: mapa Neon ${stage.neon}`);
     }
+    const webHtml = read('../Cappe-in-MiamiWeb/index.html');
+    const webStoryLiteral = webHtml.match(/const STORY = (\[[\s\S]*?\n\]);/)?.[1];
+    assert.ok(webStoryLiteral, 'história Web disponível');
+    const webStory = vm.runInNewContext(webStoryLiteral);
+    assert.deepEqual(JSON.parse(JSON.stringify(webStory.map(s => ({ m: s.m, neon: s.neon })))),
+      JSON.parse(JSON.stringify(c.story.map(s => ({ m: s.m, neon: s.neon })))),
+      'Web e Rust/WASM seguem os mesmos mapas em cada capítulo');
     assert.equal(c.story[0].m,'metro');assert.ok(c.story.every(s=>s.m||s.neon),'sem fases vazias');
     const chapters=c.story.slice(0,14).map(s=>s.t.match(/Capítulo (\d+)/)?.[1]).filter(Boolean).map(Number);
     assert.deepEqual(Array.from(chapters),[2,3,4,6,7,8,9,10,11,13,14,16,19]);
