@@ -17,12 +17,16 @@ A campanha mantém os mapas e expansões existentes, mas sua narrativa, personag
 - Este README reúne a história, as instruções e os downloads. Cada edição mantém seus arquivos junto às referências usadas pelo jogo.
 ## Escolha uma versão
 
-Baixe o ZIP da versão que deseja jogar. Não é necessário baixar as duas.
+Para baixar a versão mais recente, abra [Gerar pacotes para teste](https://github.com/CappeVictor/Cappe-in-Miami/actions/workflows/packages.yml), selecione a execução mais recente concluída com sucesso e, em **Artifacts**, baixe apenas `Cappe-in-MiamiWeb` ou `Cappe-in-MiamiRustWasm`. Os artefatos expiram após 14 dias e o GitHub pode exigir login. Extraia o artefato e depois o ZIP do jogo dentro dele. O artefato de checksums permite conferir a integridade dos arquivos.
+
+Os ZIPs guardados nas pastas abaixo são versões anteriores e podem não conter as alterações mais recentes.
 
 - **Web — HTML, CSS e JavaScript v103:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
 - **Rust/WASM — v319:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v319-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
+
+Ambas as versões precisam de Node.js 18 ou superior para os inicializadores fornecidos.
 
 ### Sobre a prévia Rust/WASM
 
