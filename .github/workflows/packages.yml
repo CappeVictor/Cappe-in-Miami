@@ -24,6 +24,19 @@ jobs:
           sha256sum Cappe-in-MiamiWeb.zip Cappe-in-MiamiRustWasm.zip > SHA256SUMS.txt
           unzip -t Cappe-in-MiamiWeb.zip
           unzip -t Cappe-in-MiamiRustWasm.zip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Testar os pacotes extraidos
+        shell: bash
+        run: |
+          mkdir -p /tmp/cappe-package-test/tests
+          cp tests/server-smoke.cjs /tmp/cappe-package-test/tests/
+          for edition in Cappe-in-MiamiWeb Cappe-in-MiamiRustWasm; do
+            mkdir -p "/tmp/cappe-package-test/$edition"
+            unzip -q "dist/$edition.zip" -d "/tmp/cappe-package-test/$edition"
+          done
+          node /tmp/cappe-package-test/tests/server-smoke.cjs
       - uses: actions/upload-artifact@v4
         with:
           name: Cappe-in-Miami-pacotes
