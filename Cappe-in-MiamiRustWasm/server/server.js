@@ -117,7 +117,7 @@ async function body(req) {
   catch{throw httpError(400,'JSON inválido.');}
 }
 function createGameServer(options={}) {
-  const root=path.resolve(options.root||GAME_ROOT);
+  const root=path.resolve(options.root||GAME_ROOT),base=fs.realpathSync(root);
   const server=http.createServer(async(req,res)=>{
     try {
       const url=new URL(req.url,'http://localhost');
@@ -160,7 +160,7 @@ if(req.method==='GET'&&url.pathname==='/api/health')return json(res,200,{ok:true
       const file=path.resolve(root,'.'+rel);if(!file.startsWith(root+path.sep))return json(res,404,{error:'Arquivo não encontrado.'});
       const ext=path.extname(file).toLowerCase();if(!mime[ext])return json(res,404,{error:'Arquivo não encontrado.'});
       let stat,real;
-      try{real=await fs.promises.realpath(file);const base=await fs.promises.realpath(root);if(!real.startsWith(base+path.sep))throw Error();stat=await fs.promises.stat(real);if(!stat.isFile())throw Error();}
+      try{real=await fs.promises.realpath(file);if(!real.startsWith(base+path.sep))throw Error();stat=await fs.promises.stat(real);if(!stat.isFile())throw Error();}
       catch{return json(res,404,{error:'Arquivo não encontrado.'});}
       const compressible=['.html','.js','.css','.json','.svg'];
       const acceptsGzip=String(req.headers['accept-encoding']||'').split(',').some(value=>{
