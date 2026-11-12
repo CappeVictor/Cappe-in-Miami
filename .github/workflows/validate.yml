@@ -37,9 +37,17 @@ jobs:
           else
             node tests/regression.cjs
             node tests/wasm-direct-draw-parity.cjs
-            node tests/browser-performance.cjs
+            node tests/browser-performance.cjs | tee performance-results.json
             node tests/compression-regression.cjs
           fi
+      - name: Guardar medição de desempenho
+        if: matrix.edition == 'Cappe-in-MiamiRustWasm'
+        uses: actions/upload-artifact@v4
+        with:
+          name: comparacao-desempenho-web-wasm
+          path: Cappe-in-MiamiRustWasm/performance-results.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Verify edition files
         working-directory: ${{ matrix.edition }}
         shell: bash
