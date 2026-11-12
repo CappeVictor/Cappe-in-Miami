@@ -11,7 +11,7 @@
   // ---------- modificadores de partida ----------
   EXP.MODS = {
     infammo: { nome: 'Munição infinita', desc: 'Atire à vontade (recarga continua).', score: .7 },
-    reload:  { nome: 'Recarga realista', desc: 'Todas as armas usam pente e recarga (tecla R).', score: 1.1 },
+    reload:  { nome: 'Recarga realista', desc: 'Todas as armas usam pente e recarga (tecla configurada).', score: 1.1 },
     fastfoe: { nome: 'Inimigos furiosos', desc: 'Inimigos 30% mais rápidos.', score: 1.25 },
     noshield:{ nome: 'Sem colete', desc: 'Remove coletes da máscara e dos perks.', score: 1.2 },
     dark:    { nome: 'Escuridão', desc: 'Só enxerga ao redor do jogador e das armas.', score: 1.3 },
@@ -503,7 +503,7 @@
           if (!reloadDrawn) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(34, 146, 160, 8); g.fillStyle = '#ff9ac8'; g.fillRect(34, 146, 160 * (1 - M.rt / M.rtMax), 8); }
           drawModeHudText(g, { text: 'RECARREGANDO', x: 34 + 170, y: 154, color: '#ff9ac8', font: 'bold 14px Impact, sans-serif' });
         }
-        else if (M.left <= Math.ceil(M.max * .25) && ammo > M.left) drawModeHudText(g, { text: 'R · RECARREGAR', x: 34 + 150, y: 138, color: '#fff', font: '13px Impact, sans-serif' });
+        else if (M.left <= Math.ceil(M.max * .25) && ammo > M.left) drawModeHudText(g, { text: CFG.reloadKey.toUpperCase() + ' · RECARREGAR', x: 34 + 150, y: 138, color: '#fff', font: '13px Impact, sans-serif' });
       }
       if (r && !r.done) {
         let top = m.nome.toUpperCase();

@@ -214,7 +214,7 @@ button { touch-action: manipulation; }
           <li><b>W A S D</b> ou setas: mover</li>
           <li><b>Mouse</b>: mirar · <b>Clique</b>: atirar</li>
           <li><b>Espaço</b>: soco / finalizar · <b>Shift</b>: dash (Coelho)</li>
-          <li><b>E</b>: pegar/trocar · <b>Q</b>: largar · <b>F</b>: arremessar · <b>R</b>: recarregar</li>
+          <li><b>E</b>: pegar/trocar · <b>Q</b>: largar · <b>F</b>: arremessar · <b>R</b>: recarregar (padrão)</li>
           <li><b>ESC</b>: pausar · <b>B</b> (pausa): lobby · <b>R</b>: recomeçar</li>
         </ul>
         <p class="menu-section-title">Multiplayer Local (2 Jogadores)</p>
@@ -281,6 +281,7 @@ button { touch-action: manipulation; }
           <label>Amortecimento do tremor <select id="o-decay"><option value="rapido">Rápido</option><option value="padrao">Padrão</option><option value="suave">Suave</option></select></label>
           <label>Teclas de movimento <select id="o-keys"><option value="wasd">WASD + setas</option><option value="setas">Somente setas</option></select></label>
           <label>Pegar/arremessar arma <select id="o-pick"><option value="e">E</option><option value="g">G</option><option value="t">T</option></select></label>
+          <label>Recarregar <select id="o-reload"><option value="r">R</option><option value="c">C</option></select></label>
         </fieldset>
         <fieldset><legend>ÁUDIO &amp; DADOS</legend>
           <label>Volume da música <input type="range" id="o-musVol" min="0" max="1" step=".05"></label>
@@ -628,7 +629,7 @@ STORY.forEach((entry, i) => { entry.t = STORY_PLOT[i][0]; entry.txt = STORY_PLOT
   <script src="js/collision_sizes.js"></script>
   <script>
 // Cappe in Miami - feito por Victor Cappellesso e Davi Gehart
-const CFG_DEF = { gfx: 'alto', blood: 'alta', bloodRed: 100, crt: true, ghost: false, shake: true, shakeAmt: 100, fps: 0, sens: 1, zoom: .9, keys: 'wasd', pick: 'e', bright: 100, decay: 'padrao', combo: 2.5, dead: 1,
+const CFG_DEF = { gfx: 'alto', blood: 'alta', bloodRed: 100, crt: true, ghost: false, shake: true, shakeAmt: 100, fps: 0, sens: 1, zoom: .9, keys: 'wasd', pick: 'e', reloadKey: 'r', bright: 100, decay: 'padrao', combo: 2.5, dead: 1,
   res: 'auto', txt: 'normal', hc: false, cb: 'none', rmotion: matchMedia('(prefers-reduced-motion: reduce)').matches, noflash: false, dyslex: false,
   // qualidade visual avançada
   aa: true,          // antialiasing (suavização)
@@ -640,7 +641,7 @@ const CFG_DEF = { gfx: 'alto', blood: 'alta', bloodRed: 100, crt: true, ghost: f
   dust: true         // partículas de poeira ambiente
 };
 const DECAY = { rapido: .75, padrao: .85, suave: .93 };
-const CFG_ENUMS = { gfx:['ultra','alto','medio','baixo','max','personalizado'], blood:['ultra','alta','media','baixa','off'], keys:['wasd','setas'], pick:['e','g','t'], decay:['rapido','padrao','suave'], res:['auto','1','1.5','2'], txt:['normal','grande','muito'], cb:['none','prot','deut','trit'], particles:['off','baixa','media','alta'] };
+const CFG_ENUMS = { gfx:['ultra','alto','medio','baixo','max','personalizado'], blood:['ultra','alta','media','baixa','off'], keys:['wasd','setas'], pick:['e','g','t'], reloadKey:['r','c'], decay:['rapido','padrao','suave'], res:['auto','1','1.5','2'], txt:['normal','grande','muito'], cb:['none','prot','deut','trit'], particles:['off','baixa','media','alta'] };
 const CFG_RANGES = { bloodRed:[0,100], shakeAmt:[0,100], sens:[.5,3], zoom:[.75,1.25], bright:[50,150], combo:[2,6], dead:[0,2] };
 const CFG_VALUES = { fps:[0,30,60,120] };
 function loadSavedCfg(saved) {
@@ -3163,7 +3164,7 @@ const OPT_IDS = { 'o-gfx': 'gfx', 'o-blood': 'blood', 'o-fps': 'fps', 'o-zoom': 
 function syncOpts() {
   $('o-gfx').value = CFG.gfx; $('o-blood').value = CFG.blood; $('o-fps').value = String(CFG.fps);
   $('o-bloodRed').value = CFG.bloodRed; $('o-bloodRedV').textContent = CFG.bloodRed + '%';
-  $('o-zoom').value = String(CFG.zoom); $('o-keys').value = CFG.keys; $('o-pick').value = CFG.pick;
+  $('o-zoom').value = String(CFG.zoom); $('o-keys').value = CFG.keys; $('o-pick').value = CFG.pick; $('o-reload').value = CFG.reloadKey;
   $('o-crt').checked = CFG.crt; $('o-ghost').checked = CFG.ghost; $('o-shake').checked = CFG.shake;
   if ($('o-shakeAmt')) { $('o-shakeAmt').value = CFG.shakeAmt; $('o-shakeAmtV').textContent = CFG.shakeAmt + '%'; }
   $('o-sens').value = CFG.sens; $('o-sensV').textContent = CFG.sens.toFixed(1) + 'x';
@@ -3193,6 +3194,7 @@ $('o-fps').onchange = e => { setCfg({ fps: +e.target.value, gfx: 'personalizado'
 $('o-zoom').onchange = e => setCfg({ zoom: +e.target.value });
 $('o-keys').onchange = e => setCfg({ keys: e.target.value });
 $('o-pick').onchange = e => setCfg({ pick: e.target.value });
+$('o-reload').onchange = e => setCfg({ reloadKey: e.target.value });
 $('o-crt').onchange = e => { setCfg({ crt: e.target.checked, gfx: 'personalizado' }); syncOpts(); };
 $('o-ghost').onchange = e => { setCfg({ ghost: e.target.checked, gfx: 'personalizado' }); syncOpts(); };
 const qToggle = (id, key) => { const el = $(id); if (el) el.onchange = e => { setCfg({ [key]: e.target.checked, gfx: 'personalizado' }); syncOpts(); }; };
