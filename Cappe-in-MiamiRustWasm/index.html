@@ -211,7 +211,7 @@ button { touch-action: manipulation; }
       <div class="menu-controls-box">
         <p class="menu-section-title">Controles (1 Jogador)</p>
         <ul class="controles">
-          <li><b>W A S D</b> ou setas: mover</li>
+          <li><b id="control-move">W A S D ou setas</b>: mover</li>
           <li><b>Mouse</b>: mirar · <b>Clique</b>: atirar</li>
           <li><b>Espaço</b>: soco / finalizar · <b>Shift</b>: dash (Coelho)</li>
           <li><b id="control-pick">E</b>: pegar/trocar · <b>Q</b>: largar · <b>F</b>: arremessar · <b id="control-reload">R</b>: recarregar</li>
@@ -3399,7 +3399,7 @@ function syncOpts() {
   if ($('o-dust')) $('o-dust').checked = CFG.dust !== false;
   if ($('o-particles')) $('o-particles').value = CFG.particles || 'media';
 }
-function updateControlHelp() { $('control-pick').textContent = CFG.pick.toUpperCase(); $('control-reload').textContent = CFG.reloadKey.toUpperCase(); }
+function updateControlHelp() { $('control-move').textContent = CFG.keys === 'setas' ? 'Setas' : 'W A S D ou setas'; $('control-pick').textContent = CFG.pick.toUpperCase(); $('control-reload').textContent = CFG.reloadKey.toUpperCase(); }
 function setCfg(patch) { Object.assign(CFG, patch); saveCfg(); applyCfg(); updateControlHelp(); }
 updateControlHelp();
 $('optBtn').onclick = () => { syncOpts(); st = 'opt'; menu.classList.add('oculto'); $('opcoes').classList.remove('oculto'); };
