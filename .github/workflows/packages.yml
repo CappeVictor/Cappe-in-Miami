@@ -1,0 +1,30 @@
+name: Gerar pacotes para teste
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gerar ZIPs separados e checksums
+        shell: bash
+        run: |
+          mkdir -p dist
+          for edition in Cappe-in-MiamiWeb Cappe-in-MiamiRustWasm; do
+            (cd "$edition" && zip -qr "../dist/${edition}.zip" . -x '*.zip' '*/target/*' '*/node_modules/*' '.git/*')
+          done
+          cd dist
+          sha256sum Cappe-in-MiamiWeb.zip Cappe-in-MiamiRustWasm.zip > SHA256SUMS.txt
+          unzip -t Cappe-in-MiamiWeb.zip
+          unzip -t Cappe-in-MiamiRustWasm.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Cappe-in-Miami-pacotes
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
