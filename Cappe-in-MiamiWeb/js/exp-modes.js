@@ -11,7 +11,7 @@
   // ---------- modificadores de partida ----------
   EXP.MODS = {
     infammo: { nome: 'Munição infinita', desc: 'Atire à vontade (recarga continua).', score: .7 },
-    reload:  { nome: 'Recarga realista', desc: 'Todas as armas usam pente e recarga (tecla C).', score: 1.1 },
+    reload:  { nome: 'Recarga realista', desc: 'Todas as armas usam pente e recarga (tecla R).', score: 1.1 },
     fastfoe: { nome: 'Inimigos furiosos', desc: 'Inimigos 30% mais rápidos.', score: 1.25 },
     noshield:{ nome: 'Sem colete', desc: 'Remove coletes da máscara e dos perks.', score: 1.2 },
     dark:    { nome: 'Escuridão', desc: 'Só enxerga ao redor do jogador e das armas.', score: 1.3 },
@@ -467,7 +467,7 @@
       if (M.max) {
         T('PENTE ' + M.left + ' / ' + Math.max(0, ammo - M.left), 34, 138, M.rt > 0 ? '#ff9ac8' : '#ffd23f', 'bold 18px Impact, sans-serif');
         if (M.rt > 0) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(34, 146, 160, 8); g.fillStyle = '#ff9ac8'; g.fillRect(34, 146, 160 * (1 - M.rt / M.rtMax), 8); T('RECARREGANDO', 34 + 170, 154, '#ff9ac8', 'bold 14px Impact, sans-serif'); }
-        else if (M.left <= Math.ceil(M.max * .25) && ammo > M.left) T('C · RECARREGAR', 34 + 150, 138, '#fff', '13px Impact, sans-serif');
+        else if (M.left <= Math.ceil(M.max * .25) && ammo > M.left) T('R · RECARREGAR', 34 + 150, 138, '#fff', '13px Impact, sans-serif');
       }
       if (r && !r.done) {
         let top = m.nome.toUpperCase();

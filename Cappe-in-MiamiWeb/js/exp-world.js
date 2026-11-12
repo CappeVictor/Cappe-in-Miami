@@ -317,7 +317,7 @@
   EXP.spd = wd => wd.spd * (S.reach > 1 ? 1 + (S.reach - 1) * .4 : 1);
   const _emit = emitNoise;
   emitNoise = function (x, y, radius, kind) { if (S && S.quiet && kind === 'gunshot') radius *= S.quiet; _emit(x, y, radius, kind); };
-  addEventListener('keydown', e => { if (e.key.toLowerCase() === 'c' && st === 'play') reloadStart(); });
+  addEventListener('keydown', e => { if (e.key.toLowerCase() === 'r' && st === 'play') reloadStart(); });
 
   // melee: durabilidade (garrafa), barris e câmeras ao alcance
   const _melee = melee;
