@@ -94,7 +94,7 @@
     p.querySelectorAll('[data-perk]').forEach(b => b.onclick = () => { if (EXP.buyPerk(b.dataset.perk)) { showTab('perfil'); refreshTag(); } });
     if (id === 'dados') {
       $('dExp').onclick = () => EXP.exportSave();
-      $('dImp').onchange = e => { const f = e.target.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { const m = EXP.importSave(String(rd.result)); $('dMsg').textContent = m || 'Save importado com sucesso!'; refreshTag(); }; rd.readAsText(f); };
+      $('dImp').onchange = e => { const f = e.target.files[0]; if (!f) return; e.target.value = ''; if (!window.confirm('Importar este save substituirá o progresso atual. Deseja continuar?')) { $('dMsg').textContent = 'Importação cancelada.'; return; } const rd = new FileReader(); rd.onload = () => { const m = EXP.importSave(String(rd.result)); $('dMsg').textContent = m || 'Save importado com sucesso!'; refreshTag(); }; rd.readAsText(f); };
       $('dRes').onclick = () => { const error = EXP.restoreBackup(); $('dMsg').textContent = error || 'Backup restaurado.'; if (!error) refreshTag(); };
     }
   }
