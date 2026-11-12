@@ -2,6 +2,8 @@ name: Gerar pacotes para teste
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 permissions:
   contents: read
