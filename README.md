@@ -21,8 +21,8 @@ Para baixar a versão mais recente, abra [Gerar pacotes para teste](https://gith
 
 Os ZIPs guardados nas pastas abaixo são versões anteriores e podem não conter as alterações mais recentes.
 
-- **Web — HTML, CSS e JavaScript v103:** [abrir a pasta](Cappe-in-MiamiWeb/) · [baixar ZIP](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
-- **Rust/WASM — v319:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [baixar ZIP](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v319-preview.zip)
+- **Web — HTML, CSS e JavaScript v103:** [abrir a pasta](Cappe-in-MiamiWeb/) · [ZIP anterior](Cappe-in-MiamiWeb/cappe-in-miamiWeb.zip)
+- **Rust/WASM — v319:** [abrir a pasta](Cappe-in-MiamiRustWasm/) · [ZIP anterior](Cappe-in-MiamiRustWasm/cappe-in-miamiRustWasm-v319-preview.zip)
 
 Depois de extrair o ZIP, execute o arquivo `.bat` que está na pasta extraída. A versão Web usa `INICIAR_WEB.bat`. A prévia Rust/WASM usa `INICIAR_EXPERIMENTO_WASM.bat` e requer Node.js 18 ou superior.
 
@@ -48,3 +48,7 @@ A campanha agora se chama **Sinal de Maré**: Cappe investiga apagões coordenad
 - O servidor reduz uma resolução de caminho do sistema de arquivos por requisição estática, mantendo a mesma proteção contra traversal.
 - O smoke test confirma saúde da API, carregamento do `index.html` e bloqueio de caminhos fora da raiz.
 - A execução remota do CI passou após a correção de portabilidade: os testes que dependem do executável Chrome local continuam sendo executados no ambiente apropriado, enquanto o CI Linux usa regressões sem esse caminho específico.
+
+## Verificação da campanha
+
+A regressão automatizada verifica a primeira fase, a lista de mapas permitidos, referências da história e a ausência de fases vazias. Ela não substitui uma partida manual completa até todos os finais.
