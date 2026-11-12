@@ -36,6 +36,7 @@ jobs:
             node tests/compression-regression.cjs
           else
             node tests/regression.cjs
+            node tests/wasm-direct-draw-parity.cjs
             node tests/compression-regression.cjs
           fi
       - name: Verify edition files
